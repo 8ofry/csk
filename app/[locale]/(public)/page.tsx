@@ -1,7 +1,63 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ChevronRight, Trophy, Users, Star, ArrowRight, Activity, Shield } from "lucide-react";
 import Image from "next/image";
+import {
+  ChevronRight, Trophy, Users, Star, ArrowRight,
+  Activity, Shield, MapPin, Phone, Mail, CheckCircle,
+} from "lucide-react";
+import { listPublicLocations, publicPricing } from "@/application/public/service";
+import { AnimatedSection, AnimatedItem } from "@/components/public/animated-section";
+import { GoldParticles } from "@/components/public/gold-particles";
+
+const COACHES = [
+  {
+    id: "seed-user-admin",
+    nameEn: "Cap. Saied Ibrahim",
+    nameAr: "كابتن سعيد ابراهيم",
+    role: "Head Coach",
+    roleAr: "المدرب الرئيسي",
+    photo: "/images/Saied Ibrahim.jpeg",
+  },
+  {
+    id: "seed-user-head-coach",
+    nameEn: "Cap. Mariam Amr",
+    nameAr: "كابتن مريم عمرو",
+    role: "Managing Coach",
+    roleAr: "مدربة إدارية",
+    photo: "/images/Maryem Amr.jpeg",
+  },
+  {
+    id: "seed-user-coach",
+    nameEn: "Cap. Ahmed Khallaf",
+    nameAr: "كابتن أحمد خلاف",
+    role: "Coach",
+    roleAr: "مدرب",
+    photo: "/images/Ahmed Khallaf.jpeg",
+  },
+  {
+    id: "seed-user-coach-tarek",
+    nameEn: "Cap. Nada",
+    nameAr: "كابتن ندى",
+    role: "Coach",
+    roleAr: "مدربة",
+    photo: "/images/Nada.jpeg",
+  },
+];
+
+const DISCIPLINES = [
+  { name: "Boxing", nameAr: "الملاكمة", icon: Trophy, desc: "Master the sweet science" },
+  { name: "Kickboxing", nameAr: "الكيك بوكسينغ", icon: Activity, desc: "Stand-up striking art" },
+  { name: "MMA", nameAr: "فنون قتالية مختلطة", icon: Shield, desc: "Complete combat system" },
+  { name: "Karate", nameAr: "الكاراتيه", icon: Star, desc: "Discipline & precision" },
+  { name: "Fitness", nameAr: "اللياقة البدنية", icon: Users, desc: "Warrior conditioning" },
+];
+
+const STATS = [
+  { value: "5+", label: "Locations" },
+  { value: "200+", label: "Athletes" },
+  { value: "50+", label: "Championships" },
+  { value: "10+", label: "Years Legacy" },
+];
 
 export default async function HomePage({
   params,
@@ -10,147 +66,460 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("home");
-  const tBrand = await getTranslations("brand");
+
+  const [locations, pricing] = await Promise.all([
+    listPublicLocations(),
+    publicPricing(),
+  ]);
 
   return (
-    <div className="bg-csk-black text-white selection:bg-csk-gold/30">
-      {/* Hero Section */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-20">
-        {/* Background Image with Overlay */}
+    <div className="bg-[#050505] text-white selection:bg-csk-gold/30 overflow-x-hidden">
+
+      {/* ── HERO ── */}
+      <section
+        id="home"
+        className="relative flex min-h-screen items-center justify-center overflow-hidden pt-20"
+      >
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero-bg.png"
             alt="CSK Academy Gym"
             fill
-            className="object-cover object-center opacity-40"
+            className="object-cover object-center opacity-20"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-csk-black via-csk-black/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-csk-black via-transparent to-csk-black" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/50 to-[#050505]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505]" />
+          {/* Gold radial glow center */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_45%,_rgba(212,175,55,0.12)_0%,_transparent_70%)]" />
         </div>
-        
-        <div className="container relative z-10 mx-auto px-4 text-center animate-fade-in-up">
-          <div className="mx-auto mb-8 inline-flex items-center rounded-full border border-csk-gold/30 bg-csk-gold/10 px-6 py-2 text-sm font-semibold tracking-widest text-csk-gold backdrop-blur-md uppercase">
-            <Star className="mr-2 h-4 w-4 fill-csk-gold" />
-            <span>{tBrand("tagline")}</span>
-            <Star className="ml-2 h-4 w-4 fill-csk-gold" />
-          </div>
-          
-          <h1 className="mb-6 text-5xl font-black uppercase tracking-tighter sm:text-7xl md:text-8xl lg:text-[8rem] leading-[0.9]">
-            <span className="block text-white drop-shadow-2xl">Unleash Your</span>
-            <span className="block text-gradient-gold">Inner Champion</span>
-          </h1>
-          
-          <p className="mx-auto mb-12 max-w-2xl text-lg font-medium text-white/80 sm:text-2xl drop-shadow-lg">
-            {t("heroSubtitle")}
-          </p>
-          
-          <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
-            <Link
-              href="/register"
-              className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-csk-gold px-10 py-5 text-lg font-bold uppercase tracking-wider text-csk-black transition-all hover:scale-105 hover:bg-csk-goldLight hover:shadow-[0_0_50px_-10px_rgba(212,175,55,0.7)]"
-            >
-              <span>{t("ctaJoin")}</span>
-              <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
-            </Link>
-            
-            <Link
-              href="/disciplines"
-              className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/20 bg-white/5 px-10 py-5 text-lg font-bold uppercase tracking-wider text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-csk-gold hover:text-csk-gold"
-            >
-              <span>{t("ctaExplore")}</span>
-            </Link>
+
+        {/* ✨ Gold Particle Canvas */}
+        <GoldParticles />
+
+        <div className="container relative z-10 mx-auto px-4 text-center">
+          <AnimatedItem>
+            <div className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full border border-csk-gold/30 bg-csk-gold/10 px-6 py-2 text-xs font-bold tracking-widest text-csk-gold backdrop-blur-md uppercase">
+              <Star className="h-3 w-3 fill-csk-gold" />
+              <span>CSK Academy — Benha, Egypt</span>
+              <Star className="h-3 w-3 fill-csk-gold" />
+            </div>
+          </AnimatedItem>
+
+          <AnimatedItem delay={0.1}>
+            <h1 className="mb-6 text-5xl font-black uppercase tracking-tighter sm:text-7xl md:text-8xl leading-[0.9]">
+              <span className="block text-white drop-shadow-2xl">Unleash Your</span>
+              <span className="shimmer-text block">Inner Champion</span>
+            </h1>
+          </AnimatedItem>
+
+          <AnimatedItem delay={0.2}>
+            <p className="mx-auto mb-12 max-w-2xl text-lg font-light text-white/60 sm:text-xl leading-relaxed">
+              Elite combat sports training under world-class coaches. Boxing, Kickboxing, MMA, Karate & Fitness — all in one academy.
+            </p>
+          </AnimatedItem>
+
+          <AnimatedItem delay={0.3}>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                href="/register"
+                className="group inline-flex items-center gap-2 rounded-full bg-csk-gold px-10 py-4 text-base font-bold uppercase tracking-wider text-csk-black transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_-5px_rgba(212,175,55,0.6)] hover:bg-csk-goldLight"
+              >
+                <span>Start Training</span>
+                <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <a
+                href="#disciplines"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-10 py-4 text-base font-bold uppercase tracking-wider text-white backdrop-blur-md transition-all duration-300 hover:border-csk-gold/50 hover:text-csk-gold"
+              >
+                Explore Disciplines
+              </a>
+            </div>
+          </AnimatedItem>
+
+          {/* Stats bar */}
+          <AnimatedItem delay={0.5}>
+            <div className="mx-auto mt-20 grid max-w-3xl grid-cols-2 gap-px rounded-2xl border border-white/10 bg-white/10 overflow-hidden sm:grid-cols-4">
+              {STATS.map((s) => (
+                <div key={s.label} className="bg-[#050505] px-6 py-5 text-center">
+                  <div className="text-3xl font-black text-csk-gold">{s.value}</div>
+                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-white/40">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </AnimatedItem>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="h-10 w-6 rounded-full border-2 border-white/20 flex items-start justify-center pt-2">
+            <div className="h-2 w-1 rounded-full bg-csk-gold animate-pulse-gold" />
           </div>
         </div>
       </section>
 
-      {/* Disciplines Section */}
-      <section className="relative z-20 -mt-20 pb-32">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5 md:gap-6">
-            {[
-              { name: "Boxing", icon: Trophy },
-              { name: "Kickboxing", icon: Activity },
-              { name: "MMA", icon: Shield },
-              { name: "Karate", icon: Star },
-              { name: "Fitness", icon: Users },
-            ].map((d, i) => (
-              <div
-                key={d.name}
-                className="glass-card group flex cursor-pointer flex-col items-center justify-center gap-4 p-8 transition-all duration-500 hover:-translate-y-4 hover:border-csk-gold/60 hover:bg-white/10 hover:shadow-[0_20px_40px_-15px_rgba(212,175,55,0.4)] animate-fade-in-up"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <div className="rounded-2xl bg-white/5 p-5 text-white transition-all duration-300 group-hover:bg-csk-gold group-hover:text-csk-black group-hover:scale-110">
-                  <d.icon className="h-10 w-10" strokeWidth={1.5} />
+      {/* ── DISCIPLINES ── */}
+      <AnimatedSection
+        id="disciplines"
+        className="py-28 relative"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.05)_0%,_transparent_60%)]" />
+        <div className="container mx-auto px-4 relative">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-csk-gold">What We Teach</p>
+            <h2 className="text-4xl font-black uppercase tracking-tighter sm:text-5xl">
+              Our <span className="text-gradient-gold">Disciplines</span>
+            </h2>
+            <div className="section-divider" />
+            <p className="mx-auto max-w-xl text-base text-white/50">
+              Five elite combat arts. One academy. Choose your path to greatness.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {DISCIPLINES.map((d, i) => (
+              <AnimatedItem key={d.name} delay={i * 0.08}>
+                <div className="glass-card group flex cursor-pointer flex-col items-center justify-center gap-5 p-8 text-center transition-all duration-500 hover:-translate-y-3 hover:border-csk-gold/60 hover:gold-glow h-full">
+                  <div className="rounded-2xl bg-white/5 p-5 transition-all duration-300 group-hover:bg-csk-gold group-hover:scale-110">
+                    <d.icon className="h-9 w-9 transition-colors duration-300 group-hover:text-csk-black" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black uppercase tracking-wider text-white group-hover:text-csk-gold transition-colors">{d.name}</h3>
+                    <p className="text-xs text-white/40 mt-1">{d.nameAr}</p>
+                    <p className="mt-2 text-xs text-white/50">{d.desc}</p>
+                  </div>
                 </div>
-                <span className="text-lg font-bold tracking-widest text-white/80 group-hover:text-csk-gold uppercase">{d.name}</span>
-              </div>
+              </AnimatedItem>
             ))}
           </div>
         </div>
-      </section>
-      
-      {/* Champion Feature Section */}
-      <section className="relative overflow-hidden py-32 bg-[#080808]">
-        <div className="container mx-auto px-4">
+      </AnimatedSection>
+
+      {/* ── ABOUT / CHAMPION FEATURE ── */}
+      <AnimatedSection
+        id="about"
+        className="py-28 bg-[#080808] relative overflow-hidden"
+      >
+        <div className="absolute -left-40 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-csk-gold/5 blur-3xl" />
+        <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-csk-gold/5 blur-3xl" />
+
+        <div className="container mx-auto px-4 relative">
           <div className="grid items-center gap-16 lg:grid-cols-2">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-              <Image 
-                src="/images/champion.png"
-                alt="CSK Champion"
-                fill
-                className="object-cover transition-transform duration-1000 hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-csk-black/90 via-transparent to-transparent" />
-              <div className="absolute bottom-8 left-8 right-8">
-                <div className="inline-block rounded-full bg-csk-gold px-4 py-1 text-xs font-bold uppercase tracking-wider text-csk-black mb-3">
-                  Hall of Fame
+            <AnimatedItem>
+              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-2xl animate-float">
+                <Image
+                  src="/images/champion.png"
+                  alt="CSK Champion"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8">
+                  <div className="mb-3 inline-block rounded-full bg-csk-gold px-4 py-1 text-xs font-bold uppercase tracking-wider text-csk-black">
+                    Hall of Fame
+                  </div>
+                  <h3 className="text-2xl font-black uppercase text-white">Meet Our Champions</h3>
                 </div>
-                <h3 className="text-3xl font-black uppercase text-white">Meet Our Champions</h3>
+                {/* Gold shimmer border */}
+                <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-csk-gold/20" />
               </div>
-            </div>
-            
-            <div className="flex flex-col justify-center">
-              <h2 className="mb-6 text-4xl font-black uppercase tracking-tighter md:text-6xl text-white">
-                Train With <br/> <span className="text-gradient-gold">The Best</span>
+            </AnimatedItem>
+
+            <AnimatedItem delay={0.2}>
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-csk-gold">About CSK Academy</p>
+              <h2 className="mb-6 text-4xl font-black uppercase tracking-tighter md:text-5xl">
+                Train With <br />
+                <span className="text-gradient-gold">The Best</span>
               </h2>
-              <p className="mb-8 text-xl font-light text-white/60 leading-relaxed">
-                At Team Cap Saied, we don't just teach techniques; we forge champions. Our facility is home to national titleholders and professional fighters who push the limits of human potential every single day.
+              <p className="mb-8 text-lg text-white/50 leading-relaxed">
+                At CSK Academy, we don&apos;t just teach techniques — we forge champions. Founded by Captain Saied Ibrahim, our academy is home to national titleholders and professional fighters who push the limits of human potential every single day.
               </p>
-              
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="rounded-full bg-csk-gold/10 p-3 mt-1">
-                    <Trophy className="h-6 w-6 text-csk-gold" />
+
+              <div className="space-y-5">
+                {[
+                  { icon: Trophy, title: "Proven Methodology", body: "Our structured curriculum is designed to take athletes from beginner to professional competitor." },
+                  { icon: Users, title: "Elite Coaching Team", body: "Learn from Captain Saied Ibrahim and our seasoned combat sports veterans, each a champion in their discipline." },
+                  { icon: Shield, title: "Competitive Track Record", body: "Dozens of titles across Egyptian and international championships in Boxing, MMA, and Karate." },
+                ].map((feat) => (
+                  <div key={feat.title} className="flex items-start gap-4">
+                    <div className="mt-1 shrink-0 rounded-xl bg-csk-gold/10 p-3">
+                      <feat.icon className="h-5 w-5 text-csk-gold" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold uppercase tracking-wider text-white">{feat.title}</h4>
+                      <p className="mt-1 text-sm text-white/40">{feat.body}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white uppercase tracking-wider">Proven Methodology</h4>
-                    <p className="text-white/50">Our structured curriculum is designed to take you from beginner to professional competitor.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="rounded-full bg-csk-gold/10 p-3 mt-1">
-                    <Users className="h-6 w-6 text-csk-gold" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold text-white uppercase tracking-wider">Elite Coaching</h4>
-                    <p className="text-white/50">Learn directly from Captain Saied and a team of seasoned combat sports veterans.</p>
-                  </div>
-                </div>
+                ))}
               </div>
-              
-              <div className="mt-12">
-                <Link href="/coaches" className="group inline-flex items-center font-bold text-csk-gold uppercase tracking-wider hover:text-csk-goldLight transition-colors text-lg">
-                  Meet the Coaching Team 
-                  <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2" />
-                </Link>
+
+              <div className="mt-10">
+                <a
+                  href="#coaches"
+                  className="group inline-flex items-center gap-2 font-bold uppercase tracking-wider text-csk-gold transition-colors hover:text-csk-goldLight"
+                >
+                  Meet the Coaching Team
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
+                </a>
               </div>
-            </div>
+            </AnimatedItem>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
+
+      {/* ── COACHES ── */}
+      <AnimatedSection
+        id="coaches"
+        className="py-28 relative"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(212,175,55,0.05)_0%,_transparent_60%)]" />
+        <div className="container mx-auto px-4 relative">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-csk-gold">Your Coaches</p>
+            <h2 className="text-4xl font-black uppercase tracking-tighter sm:text-5xl">
+              The <span className="text-gradient-gold">Coaching Team</span>
+            </h2>
+            <div className="section-divider" />
+            <p className="mx-auto max-w-xl text-base text-white/50">
+              World-class fighters and educators dedicated to bringing out the champion in you.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {COACHES.map((coach, i) => (
+              <AnimatedItem key={coach.id} delay={i * 0.1}>
+                <div className="glass-card group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-csk-gold/50 hover:gold-glow">
+                  {/* Photo area */}
+                  <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-white/5 to-white/0">
+                    <Image
+                      src={coach.photo}
+                      alt={coach.nameEn}
+                      fill
+                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
+                    {/* Gold shimmer on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-csk-gold/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  </div>
+                  {/* Info */}
+                  <div className="p-5">
+                    <div className="mb-1 text-xs font-bold uppercase tracking-widest text-csk-gold">
+                      {locale === "ar" ? coach.roleAr : coach.role}
+                    </div>
+                    <h3 className="text-lg font-black uppercase text-white leading-tight">
+                      {locale === "ar" ? coach.nameAr : coach.nameEn}
+                    </h3>
+                  </div>
+                </div>
+              </AnimatedItem>
+            ))}
+          </div>
+
+        </div>
+      </AnimatedSection>
+
+      {/* ── LOCATIONS ── */}
+      <AnimatedSection
+        id="locations"
+        className="py-28 bg-[#080808] relative"
+      >
+        <div className="container mx-auto px-4">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-csk-gold">Where We Train</p>
+            <h2 className="text-4xl font-black uppercase tracking-tighter sm:text-5xl">
+              Our <span className="text-gradient-gold">Locations</span>
+            </h2>
+            <div className="section-divider" />
+            <p className="mx-auto max-w-xl text-base text-white/50">
+              5 premier training venues across Benha, Egypt — each equipped for elite combat sports.
+            </p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {locations.map((loc, i) => (
+              <AnimatedItem key={loc.id} delay={i * 0.08}>
+                <div className="glass-card group p-6 transition-all duration-400 hover:-translate-y-2 hover:border-csk-gold/40">
+                  <div className="mb-3 flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-black uppercase tracking-wide text-white group-hover:text-csk-gold transition-colors">{loc.nameEn}</h3>
+                      <p className="text-sm text-white/40">{loc.nameAr}</p>
+                    </div>
+                    {loc.ownership === "CSK_OWNED" && (
+                      <span className="shrink-0 rounded-full bg-csk-gold/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-csk-gold border border-csk-gold/30">
+                        HQ
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-white/40">
+                    <MapPin className="h-4 w-4 text-csk-gold/60" />
+                    <span>{loc.district}</span>
+                  </div>
+                  {loc.contactPhone && (
+                    <a
+                      href={`tel:${loc.contactPhone}`}
+                      className="mt-3 flex items-center gap-2 text-sm text-csk-gold hover:text-csk-goldLight transition-colors"
+                    >
+                      <Phone className="h-4 w-4" />
+                      {loc.contactPhone}
+                    </a>
+                  )}
+                </div>
+              </AnimatedItem>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+
+      {/* ── PRICING ── */}
+      <AnimatedSection
+        id="pricing"
+        className="py-28 relative"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(212,175,55,0.07)_0%,_transparent_60%)]" />
+        <div className="container mx-auto px-4 relative">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-csk-gold">Invest In Yourself</p>
+            <h2 className="text-4xl font-black uppercase tracking-tighter sm:text-5xl">
+              Training <span className="text-gradient-gold">Packages</span>
+            </h2>
+            <div className="section-divider" />
+            <p className="mx-auto max-w-xl text-base text-white/50">
+              Flexible plans for every level. Contact us for exact pricing tailored to your location and discipline.
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-4xl">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Group Subscription */}
+              <AnimatedItem>
+                <div className="glass-card p-8 transition-all duration-500 hover:border-csk-gold/50 hover:gold-glow relative overflow-hidden">
+                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-csk-gold/5 blur-2xl" />
+                  <div className="mb-2 text-xs font-bold uppercase tracking-widest text-csk-gold">Group Training</div>
+                  <h3 className="mb-4 text-2xl font-black uppercase text-white">Monthly Subscription</h3>
+                  <ul className="mb-6 space-y-3">
+                    {[
+                      `${pricing.defaults.sessionsPerMonth} sessions per month`,
+                      "Access to certified coaches",
+                      "Progress tracking & evaluations",
+                      "Belt exam eligibility",
+                      "Monthly performance report",
+                    ].map((item) => (
+                      <li key={item} className="flex items-center gap-3 text-sm text-white/60">
+                        <CheckCircle className="h-4 w-4 shrink-0 text-csk-gold" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/contact"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-csk-gold/50 bg-csk-gold/10 px-6 py-3 text-sm font-bold uppercase tracking-wider text-csk-gold transition-all hover:bg-csk-gold hover:text-csk-black"
+                  >
+                    Get Pricing <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </AnimatedItem>
+
+              {/* Private sessions */}
+              <AnimatedItem delay={0.1}>
+                <div className="glass-card p-8 transition-all duration-500 hover:border-csk-gold/50 hover:gold-glow relative overflow-hidden border-csk-gold/20">
+                  <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-csk-gold/5 blur-2xl" />
+                  <div className="mb-2 text-xs font-bold uppercase tracking-widest text-csk-gold">1-on-1 Training</div>
+                  <h3 className="mb-4 text-2xl font-black uppercase text-white">Private Sessions</h3>
+                  <ul className="mb-6 space-y-3">
+                    {[
+                      "Personal coach attention",
+                      "Custom training plan",
+                      "Flexible scheduling",
+                      "Accelerated progress",
+                      "Competition preparation",
+                    ].map((item) => (
+                      <li key={item} className="flex items-center gap-3 text-sm text-white/60">
+                        <CheckCircle className="h-4 w-4 shrink-0 text-csk-gold" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/contact"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-csk-gold px-6 py-3 text-sm font-bold uppercase tracking-wider text-csk-black transition-all hover:bg-csk-goldLight hover:shadow-[0_0_30px_-5px_rgba(212,175,55,0.5)]"
+                  >
+                    Book a Session <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </AnimatedItem>
+            </div>
+
+            {/* Disciplines chips */}
+            <AnimatedItem delay={0.2}>
+              <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+                <p className="mb-4 text-sm text-white/50">Available across all disciplines</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {pricing.disciplines.map((d) => (
+                    <span key={d.id} className="rounded-full border border-csk-gold/30 bg-csk-gold/10 px-4 py-1 text-xs font-bold uppercase tracking-wider text-csk-gold">
+                      {d.nameEn}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </AnimatedItem>
+          </div>
+        </div>
+      </AnimatedSection>
+
+      {/* ── CONTACT CTA ── */}
+      <AnimatedSection
+        id="contact"
+        className="py-28 bg-[#080808] relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.08)_0%,_transparent_70%)]" />
+        <div className="container mx-auto px-4 relative text-center">
+          <AnimatedItem>
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-csk-gold">Ready to Begin?</p>
+            <h2 className="mb-6 text-4xl font-black uppercase tracking-tighter sm:text-6xl">
+              Join the <span className="text-gradient-gold">CSK Family</span>
+            </h2>
+            <p className="mx-auto mb-12 max-w-xl text-lg text-white/50 leading-relaxed">
+              Your journey to becoming a champion starts with one decision. Reach out to us today and we&apos;ll guide you every step of the way.
+            </p>
+          </AnimatedItem>
+
+          <AnimatedItem delay={0.2}>
+            <div className="mx-auto mb-10 flex max-w-sm flex-col gap-4 sm:flex-row sm:max-w-xl justify-center">
+              <a
+                href="mailto:captain@csk.local"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm text-white/60 hover:border-csk-gold/40 hover:text-csk-gold transition-all"
+              >
+                <Mail className="h-4 w-4" /> captain@csk.local
+              </a>
+              <a
+                href="tel:+201000000001"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm text-white/60 hover:border-csk-gold/40 hover:text-csk-gold transition-all"
+              >
+                <Phone className="h-4 w-4" /> +20 100 000 0001
+              </a>
+            </div>
+          </AnimatedItem>
+
+          <AnimatedItem delay={0.3}>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                href="/register"
+                className="group inline-flex items-center gap-2 rounded-full bg-csk-gold px-12 py-5 text-lg font-black uppercase tracking-wider text-csk-black transition-all duration-300 hover:scale-105 hover:bg-csk-goldLight hover:shadow-[0_0_60px_-10px_rgba(212,175,55,0.7)]"
+              >
+                Register Now
+                <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-10 py-5 text-base font-bold uppercase tracking-wider text-white/70 transition-all hover:border-csk-gold/40 hover:text-csk-gold"
+              >
+                Member Login
+              </Link>
+            </div>
+          </AnimatedItem>
+        </div>
+      </AnimatedSection>
     </div>
   );
 }
