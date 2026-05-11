@@ -59,10 +59,11 @@ class ResendEmailAdapter implements ChannelAdapter {
         const errorText = await res.text();
         return { delivered: false, error: `Resend error: ${res.status} ${errorText}` };
       }
-      const data = await res.json();
+      const data = await res.json() as { id: string };
       return { delivered: true, providerRef: data.id };
-    } catch (e: any) {
-      return { delivered: false, error: e.message };
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : "Unknown error occurred";
+      return { delivered: false, error: errorMsg };
     }
   }
 }
@@ -90,10 +91,11 @@ class UltraMsgWhatsAppAdapter implements ChannelAdapter {
         const errorText = await res.text();
         return { delivered: false, error: `UltraMsg error: ${res.status} ${errorText}` };
       }
-      const data = await res.json();
+      const data = await res.json() as { id: string };
       return { delivered: true, providerRef: data.id };
-    } catch (e: any) {
-      return { delivered: false, error: e.message };
+    } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : "Unknown error occurred";
+      return { delivered: false, error: errorMsg };
     }
   }
 }
