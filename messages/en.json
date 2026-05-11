@@ -1,0 +1,1412 @@
+{
+  "brand": {
+    "name": "CSK Academy",
+    "tagline": "Team Cap Saied — Boxing • Kickboxing • MMA • Karate • Fitness"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "locations": "Locations",
+    "disciplines": "Disciplines",
+    "coaches": "Coaches",
+    "schedule": "Schedule",
+    "pricing": "Pricing",
+    "register": "Register",
+    "contact": "Contact",
+    "champions": "Champions",
+    "merchandise": "Merchandise",
+    "blog": "Blog",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to CSK",
+      "emailOrPhone": "Email or phone",
+      "password": "Password",
+      "submit": "Sign in",
+      "forgot": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "register": {
+      "title": "Create your CSK account",
+      "role": "I am a",
+      "trainee": "Trainee",
+      "coach": "Coach",
+      "intern": "Intern",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "fields": {
+        "fullNameAr": "Full name (Arabic)",
+        "fullNameEn": "Full name (English)",
+        "email": "Email",
+        "phone": "Phone",
+        "passwordHint": "Password (min 8, letters + digits)"
+      },
+      "successTitle": "Account created.",
+      "successBody": "Check your email to verify, then wait for Head Coach approval."
+    }
+  },
+  "roles": {
+    "admin": "System Admin",
+    "head_coach": "Head Coach",
+    "coach": "Coach",
+    "intern": "Intern",
+    "trainee": "Trainee"
+  },
+  "home": {
+    "heroTitle": "Train. Compete. Conquer.",
+    "heroSubtitle": "Egypt's premier combat sports academy.",
+    "ctaJoin": "Join CSK",
+    "ctaExplore": "Explore disciplines"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "search": "Search",
+    "open": "Open",
+    "close": "Close",
+    "viewAll": "View all",
+    "comingSoon": "Coming soon",
+    "noResults": "No results",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Active",
+    "archived": "Archived",
+    "expired": "Expired",
+    "expiring": "Expiring soon",
+    "paid": "Paid",
+    "due": "Due",
+    "partial": "Partial",
+    "overdue": "Overdue",
+    "saved": "Saved",
+    "perMonth": "/month",
+    "all": "All",
+    "apply": "Apply",
+    "back": "Back",
+    "next": "Next",
+    "today": "Today",
+    "name": "Name",
+    "date": "Date",
+    "status": "Status",
+    "actions": "Actions",
+    "amount": "Amount",
+    "method": "Method",
+    "notes": "Notes",
+    "approve": "Approve",
+    "reject": "Reject",
+    "review": "Review",
+    "empty": "Nothing here yet."
+  },
+  "badges": {
+    "draft": "Draft",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "delivered": "Delivered",
+    "scheduled": "Scheduled",
+    "inProgress": "Live",
+    "completed": "Done",
+    "cancelled": "Cancelled",
+    "present": "Present",
+    "late": "Late",
+    "absent": "Absent",
+    "excused": "Excused",
+    "pending_lower": "pending",
+    "overdue": "Overdue",
+    "empty": "Empty",
+    "official": "Official",
+    "newSubmission": "New",
+    "withdrew": "Withdrew",
+    "passed": "Passed",
+    "failed": "Failed",
+    "paid": "Paid",
+    "partial": "Partial",
+    "due": "Due",
+    "published": "Published",
+    "closed": "Closed",
+    "submitted": "Submitted",
+    "saved": "Saved"
+  },
+  "dashboards": {
+    "admin": {
+      "title": "System Admin Dashboard",
+      "subtitle": "Global KPIs, financial overview, user management, audit log.",
+      "kpi": {
+        "activeTrainees": "Active trainees",
+        "mtdRevenue": "MTD revenue (EGP)",
+        "mtdCsk": "MTD CSK share",
+        "overdue": "Overdue payments",
+        "expiringMedical": "Expiring medical docs",
+        "pendingApprovals": "Pending approvals"
+      }
+    },
+    "headCoach": {
+      "title": "Head Coach Dashboard",
+      "subtitle": "Today's sessions, pending approvals, expiring medical docs, upcoming championships.",
+      "panels": {
+        "pendingPlans": "Pending session-plan approvals",
+        "pendingReports": "Pending daily reports",
+        "expiringDocs": "Expiring medical documents",
+        "todaysSessions": "Today's sessions"
+      },
+      "noData": "No data yet."
+    },
+    "coach": {
+      "title": "Coach Dashboard",
+      "subtitle": "Today's sessions, alerts, MTD earnings.",
+      "panels": {
+        "todaysSessions": "Today's sessions",
+        "mtdEarnings": "MTD earnings",
+        "rejectedPlans": "Pending session plans (rejected)",
+        "privateRequests": "Private session requests"
+      },
+      "noData": "No data yet."
+    },
+    "intern": {
+      "title": "Intern Dashboard",
+      "subtitle": "Assigned coach and shadowed sessions for today.",
+      "panels": {
+        "assignedCoach": "Assigned coach",
+        "shadowedToday": "Today's shadowed sessions",
+        "selfEvalStatus": "My self-evaluation status"
+      },
+      "noData": "No data yet."
+    }
+  },
+  "approvals": {
+    "title": "Approvals inbox",
+    "subtitle": "Session plans (FR-SES-03) and daily reports (FR-DR-03) awaiting your review.",
+    "pendingUsersTitle": "Pending account approvals",
+    "sessionPlansTitle": "Session plans",
+    "dailyReportsTitle": "Daily reports",
+    "overdueTag": "{count} overdue",
+    "table": {
+      "submittedAt": "Submitted",
+      "sessionDate": "Session date",
+      "group": "Group",
+      "coach": "Coach",
+      "units": "Units",
+      "role": "Role",
+      "emailPhone": "Email / phone",
+      "submittedHeader": "Submitted"
+    },
+    "approveAndWelcome": "Approve & welcome",
+    "noPendingUsers": "no pending signups.",
+    "noPendingPlans": "no pending session plans.",
+    "noPendingReports": "no pending daily reports."
+  },
+  "coachToday": {
+    "title": "Today",
+    "noSessions": "No sessions scheduled for today.",
+    "openSession": "Open session",
+    "startSession": "Start session"
+  },
+  "coachEarnings": {
+    "title": "My earnings",
+    "subtitle": "Real-time, broken down by revenue stream (FR-FIN-10).",
+    "kpi": {
+      "mtd": "Month-to-date",
+      "lastMonth": "Last month",
+      "ytd": "Year-to-date"
+    },
+    "byStreamTitle": "This month — by revenue stream",
+    "byStreamEmpty": "No earnings recorded this month yet.",
+    "table": {
+      "stream": "Stream",
+      "count": "Count",
+      "net": "Net (EGP)",
+      "myPercent": "My %",
+      "myShare": "My share"
+    },
+    "txTitle": "Recent transactions ({count})",
+    "txEmpty": "No transactions yet."
+  },
+  "adminFinancial": {
+    "title": "Financial — Owner dashboard",
+    "subtitle": "FR-FIN-11 · {from} – {to}",
+    "allPayments": "All payments",
+    "exportCsv": "Export CSV",
+    "from": "From",
+    "to": "To",
+    "kpi": {
+      "totalRevenue": "Total revenue",
+      "cskShare": "CSK net share",
+      "venuePayouts": "Venue payouts",
+      "coachPayouts": "Coach payouts"
+    },
+    "byStreamTitle": "By revenue stream",
+    "byStreamEmpty": "No payments in window.",
+    "byLocationTitle": "By location (P&L)",
+    "byLocationEmpty": "No location-attributable revenue in window.",
+    "outstandingTitle": "Outstanding receivables",
+    "outstandingSubsLabel": "subscriptions due / overdue",
+    "outstandingFaceLabel": "EGP face value",
+    "table": {
+      "stream": "Stream",
+      "count": "Count",
+      "net": "Net (EGP)",
+      "location": "Location",
+      "gross": "Gross",
+      "csk": "CSK share"
+    }
+  },
+  "appNav": {
+    "dashboard": "Dashboard",
+    "locations": "Locations",
+    "disciplines": "Disciplines",
+    "users": "Users",
+    "contracts": "Coach contracts",
+    "financial": "Financial",
+    "audit": "Audit log",
+    "settings": "Settings",
+    "approvals": "Approvals",
+    "trainees": "Trainees",
+    "coaches": "Coaches",
+    "groups": "Groups",
+    "trainingUnits": "Training units",
+    "championships": "Championships",
+    "medical": "Medical",
+    "today": "Today's session",
+    "myGroups": "My groups",
+    "sessionPlans": "Session plans",
+    "privateSessions": "Private sessions",
+    "earnings": "Earnings",
+    "shadowedSessions": "Shadowed sessions",
+    "selfEvaluation": "Self-evaluation",
+    "schedule": "Schedule",
+    "evaluations": "Evaluations",
+    "reports": "Reports",
+    "payments": "Payments"
+  },
+  "publicSite": {
+    "footer": {
+      "train": "Train",
+      "compete": "Compete",
+      "shop": "Shop",
+      "csk": "CSK",
+      "rights": "© 2026 CSK — Team Cap Saied. All rights reserved."
+    },
+    "about": {
+      "title": "About CSK",
+      "established": "Team Cap Saied — Established 2022",
+      "storyTitle": "Our story",
+      "storyP1": "CSK — Team Cap Saied — is a combat-sports academy operating across five locations in Benha, Egypt. Founded by Captain Saied in 2022, the academy focuses on competitive Boxing, Kickboxing, MMA, Karate, and combat-specific fitness training.",
+      "storyP2": "From Fight Club (our home gym in El Vellal District) to partner venues at Benha Sports Club, Monster GYM, AddFit GYM, and Benha University's Faculty of Sports Science — every session is built on the same foundation: structured session plans, head-coach-approved drills, and individualized evaluation.",
+      "differentiatorsTitle": "What sets us apart",
+      "diff1": "Curated training units library — every drill is reviewed by the head coach and cataloged by skill, body part, and difficulty.",
+      "diff2": "Body-map evaluations — coaches score 20 body parts and every technical skill, giving a precise picture of progress.",
+      "diff3": "Daily + monthly reports — parents and trainees get a daily summary and a CSK-branded monthly performance PDF.",
+      "diff4": "Compliant championships — medical clearance verified before every confirmation, and full fight-record tracking after.",
+      "disciplinesTitle": "Disciplines",
+      "disciplinesBody": "Boxing · Kickboxing · MMA · Karate · Fitness — for trainees from beginner (level N) through competition-ready (level C), across all age bands."
+    },
+    "locations": {
+      "title": "Our locations",
+      "subtitle": "Five training homes across Benha. Drop in to any of them.",
+      "empty": "Locations are being set up.",
+      "districtLabel": "District",
+      "addressLabel": "Address",
+      "contactLabel": "Contact",
+      "openMaps": "Open in Google Maps →",
+      "cskHome": "CSK home"
+    },
+    "disciplines": {
+      "title": "Disciplines",
+      "subtitle": "Combat sports trained at CSK — pick the one that's calling you.",
+      "groupCount_one": "{count} active group",
+      "groupCount_other": "{count} active groups",
+      "summaries": {
+        "BOXING": "The sweet science. Footwork, timing, head movement, jab-cross precision — built on every ring drill.",
+        "KICKBOXING": "Punches and kicks. Front kicks, roundhouses, knee strikes — fluid, ranged, devastating.",
+        "MMA": "Mixed Martial Arts. Striking, takedowns, ground control, and submissions — the complete fight game.",
+        "KARATE": "Tradition + discipline. Kata, kihon, kumite — technique-first martial mastery.",
+        "FITNESS": "Pure conditioning. Cardio, strength, mobility — the engine that powers every fighter.",
+        "OTHER": "Specialty programs negotiated with discipline owners."
+      }
+    },
+    "coaches": {
+      "title": "Our coaches",
+      "subtitle": "The team behind CSK — fighters and educators.",
+      "empty": "The coaching roster is being assembled.",
+      "trainsAt": "Trains at:"
+    },
+    "schedule": {
+      "title": "Schedule",
+      "subtitle": "Weekly recurring sessions per location. Drop in or join a permanent group.",
+      "empty": "No public schedule yet. Check back soon.",
+      "withCoach": "with",
+      "tbd": "TBD"
+    },
+    "pricing": {
+      "title": "Plans & pricing",
+      "noteContact": "Contact your nearest CSK location for current monthly subscription rates.",
+      "includedTitle": "What's included",
+      "include1Strong": "{count} sessions / month",
+      "include1Suffix": "per group subscription",
+      "include2": "Body-map evaluations + monthly performance reports",
+      "include3": "Daily session reports for parents (WhatsApp + Email)",
+      "include4": "Championship registration support",
+      "include5Strong": "Private sessions",
+      "include5Suffix": "available — booked through your coach",
+      "availableDisciplinesTitle": "Available disciplines",
+      "ctaInfo": "Final monthly fees vary by location and discipline. Contact us or visit your preferred CSK location for the current rate sheet.",
+      "getPricing": "Get pricing",
+      "startTrial": "Start free trial"
+    },
+    "champions": {
+      "title": "Champions",
+      "subtitle": "The CSK fighters who have stepped into the ring and delivered.",
+      "empty": "Fight records will appear here once championship results are recorded.",
+      "fights_one": "{count} fight",
+      "fights_other": "{count} fights"
+    },
+    "fighter": {
+      "back": "← All champions",
+      "homeLabel": "Home:",
+      "wld": "W-L-D",
+      "methodTitle": "Method breakdown",
+      "beltsTitle": "Belt levels",
+      "fightsTitle": "Fight history",
+      "fightsEmpty": "No recorded fights yet.",
+      "championshipsTitle": "Championships",
+      "championshipsEmpty": "No championship registrations yet.",
+      "table": {
+        "date": "Date",
+        "event": "Event",
+        "opponent": "Opponent",
+        "result": "Result",
+        "method": "Method",
+        "round": "Round / time",
+        "video": "Video",
+        "watch": "Watch",
+        "status": "Status",
+        "weight": "Weight",
+        "level": "Level",
+        "fightsCol": "Fights"
+      },
+      "official": "official"
+    },
+    "merchandise": {
+      "title": "CSK Merchandise",
+      "subtitle": "Pro-grade combat sports gear, branded by CSK.",
+      "subtitleContact": "Contact us",
+      "subtitleTrailing": "to purchase — online checkout coming in v2.",
+      "empty": "The catalog is being updated. Check back soon."
+    },
+    "contact": {
+      "title": "Contact CSK",
+      "subtitle": "Questions about training, pricing, championship support? Send us a note.",
+      "formTitle": "Send a message",
+      "form": {
+        "name": "Your name",
+        "email": "Email",
+        "phoneOptional": "Phone (optional)",
+        "subjectOptional": "Subject (optional)",
+        "message": "Message",
+        "messagePlaceholder": "Tell us how we can help...",
+        "send": "Send message",
+        "sending": "Sending..."
+      },
+      "submitted": "Thanks — message received.",
+      "submittedSub": "A CSK head coach will follow up shortly via email or WhatsApp."
+    },
+    "blog": {
+      "title": "Blog & news",
+      "subtitle": "Stories from inside CSK.",
+      "comingSoon": "Coming soon",
+      "comingBody": "We're putting together training journals, fight night recaps, and coach interviews. Want to be notified when the first post drops?",
+      "notify": "Notify me"
+    }
+  },
+  "trainee": {
+    "dashboard": {
+      "title": "My Dashboard",
+      "subtitle": "Next session, recent reports, payment status, alerts.",
+      "panels": {
+        "nextSession": "Next session",
+        "latestReport": "Latest monthly report",
+        "subscription": "Subscription status",
+        "medical": "Medical document status"
+      }
+    },
+    "medical": {
+      "title": "Medical",
+      "subtitle": "Annual renewal required. Expired documents block championship registration.",
+      "eligibility": "Championship eligibility:",
+      "cleared": "Cleared",
+      "notCleared": "Not cleared",
+      "recordTitle": "Medical record",
+      "documentsTitle": "Documents",
+      "documentTable": {
+        "type": "Type",
+        "issueDate": "Issue date",
+        "expiry": "Expiry",
+        "doctor": "Doctor",
+        "status": "Status",
+        "file": "File"
+      },
+      "uploadEmpty": "No documents uploaded yet."
+    },
+    "payments": {
+      "title": "Subscriptions & payments",
+      "subtitle": "Track your CSK subscriptions, payment history, and receipts.",
+      "intentBanner": "We've received your payment attempt. Confirmation arrives via email and WhatsApp once the gateway settles — usually within a minute.",
+      "subscriptionsHeader": "Active subscriptions",
+      "historyHeader": "Payment history",
+      "payInPersonHint": "Pay in person — online payments coming soon",
+      "noSubs": "No subscriptions yet.",
+      "noPayments": "No payments recorded yet."
+    },
+    "championships": {
+      "title": "Championships",
+      "subtitle": "Browse open events, opt in, and follow your fight record.",
+      "myRecord": "My fight record:",
+      "blockedNotice": "Medical clearance is missing or expired. Confirmations will be blocked. Update your medical documents on the Medical page.",
+      "openHeader": "Open events ({count})",
+      "myRegsHeader": "My registrations ({count})",
+      "noOpen": "No open events you haven't opted into.",
+      "noRegs": "You haven't registered for anything yet.",
+      "fightsCol": "Fights",
+      "tableEvent": "Event",
+      "tableDates": "Dates",
+      "tableDeadline": "Reg. deadline",
+      "tableFee": "Fee",
+      "actionOptIn": "Opt in"
+    },
+    "certificates": {
+      "title": "My certificates",
+      "subtitle": "Awards and recognitions earned at CSK.",
+      "empty": "No certificates yet — keep training, keep earning."
+    },
+    "paymentsTable": {
+      "group": "Group",
+      "period": "Period",
+      "fee": "Fee (EGP)",
+      "type": "Type",
+      "receipt": "Receipt",
+      "amount": "Amount (EGP)",
+      "action": "Action"
+    }
+  },
+  "session": {
+    "title": "Session",
+    "attendanceTitle": "Attendance ({count} trainees)",
+    "quickEvalTitle": "Quick evaluations (FR-EVAL-01 — under 1 min per trainee)",
+    "approvedPlanTitle": "Approved session plan",
+    "endSession": "End session",
+    "backToToday": "Back to today",
+    "openDailyReport": "Open daily report ({status})",
+    "composeReport": "Compose daily report",
+    "unitRemoved": "(unit removed)",
+    "rounds": "{rounds} rounds"
+  },
+  "sessionPlans": {
+    "title": "My session plans",
+    "subtitle": "Build a sequence from approved training units, then submit for Head Coach approval.",
+    "newPlan": "+ New plan",
+    "noPlans": "No plans yet. Create your first session plan.",
+    "table": {
+      "dateOrTemplate": "Date / template",
+      "group": "Group",
+      "units": "Units",
+      "open": "Open"
+    },
+    "templateLabel": "Template",
+    "templateUntitled": "Untitled"
+  },
+  "monthlyReports": {
+    "title": "Monthly performance reports",
+    "subtitle": "Manual generation in v1; auto-scheduled on the 1st of each month in v2 (FR-MR-01).",
+    "generateTitle": "Generate",
+    "draftsTitle": "Drafts awaiting approval ({count})",
+    "draftsEmpty": "generate a report above.",
+    "table": {
+      "trainee": "Trainee",
+      "period": "Period",
+      "attendanceRate": "Attendance rate"
+    },
+    "generateBtn": "Generate",
+    "approveDeliver": "Approve & deliver"
+  },
+  "hcCertificates": {
+    "title": "Certificates",
+    "subtitle": "Monthly Best Trainee + Best Coach awards (FR-CRT-01..03). Review the system shortlist and confirm.",
+    "year": "Year",
+    "month": "Month",
+    "groupForBestTrainee": "Group (Best Trainee)",
+    "locationForBestCoach": "Location (Best Coach)",
+    "bestTraineeTitle": "Best Trainee shortlist — {period}",
+    "bestCoachTitle": "Best Coach shortlist — {period}",
+    "noTraineeData": "No data for this group / period (no attendance recorded).",
+    "noCoachData": "No coaches ran sessions at this location in this period.",
+    "issuedTitle": "Issued this period ({count})",
+    "issuedEmpty": "No certificates issued yet for this period.",
+    "table": {
+      "trainee": "Trainee",
+      "coach": "Coach",
+      "score": "Score",
+      "attendance": "Attendance",
+      "avgEffort": "Avg effort",
+      "sessions": "Sessions",
+      "trainees": "Trainees",
+      "reportsApproved": "Reports approved",
+      "action": "Action",
+      "recipient": "Recipient",
+      "award": "Award",
+      "narrative": "Narrative",
+      "issuedBy": "Issued by",
+      "date": "Date"
+    }
+  },
+  "hcMedical": {
+    "title": "Medical compliance",
+    "subtitle": "At-a-glance view of expired / expiring documents per trainee (FR-MED-03).",
+    "expiredTitle": "Expired ({count})",
+    "expiringTitle": "Expiring within 30 days ({count})",
+    "upcomingTitle": "Upcoming (31–60 days, {count})",
+    "empty": "nothing in this bucket.",
+    "table": {
+      "trainee": "Trainee",
+      "type": "Type",
+      "expiry": "Expiry",
+      "days": "Days",
+      "file": "File",
+      "open": "Open"
+    },
+    "agoSuffix": "{n} days ago",
+    "inSuffix": "in {n} days"
+  },
+  "adminUsers": {
+    "title": "Users",
+    "subtitle": "Full directory. Filter by role/status; suspend or promote inline.",
+    "role": "Role",
+    "status": "Status",
+    "search": "Search",
+    "searchPlaceholder": "name, email or phone",
+    "countLabel": "{count} users",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "lastLogin": "Last login",
+      "never": "never"
+    },
+    "noResults": "No users match filters."
+  },
+  "hcGroups": {
+    "title": "Groups",
+    "subtitle": "Fixed weekly cohorts. Default capacity 20 (FR-GRP-01); override available per group.",
+    "newButton": "+ New group",
+    "table": {
+      "group": "Group",
+      "location": "Location",
+      "discipline": "Discipline",
+      "coach": "Coach",
+      "schedule": "Schedule",
+      "enrolled": "Enrolled",
+      "actions": "Actions",
+      "manage": "Manage"
+    },
+    "empty": "No groups yet. Create one to get started.",
+    "newPage": {
+      "title": "New group",
+      "subtitle": "A group is a fixed weekly cohort at one location. Trainees are enrolled after creation.",
+      "submit": "Create group"
+    }
+  },
+  "hcTrainingUnits": {
+    "title": "Training Units",
+    "subtitle": "Curated drill catalogue. Coaches assemble these into approved session plans.",
+    "newButton": "+ New training unit",
+    "filters": {
+      "discipline": "Discipline",
+      "category": "Category",
+      "difficulty": "Difficulty"
+    },
+    "table": {
+      "name": "Name",
+      "category": "Category",
+      "difficulty": "Difficulty",
+      "disciplines": "Disciplines",
+      "media": "Media",
+      "status": "Status",
+      "actions": "Actions",
+      "edit": "Edit"
+    },
+    "empty": "No training units match the current filters."
+  },
+  "hcSubscriptions": {
+    "title": "Subscriptions",
+    "subtitle": "Active monthly subscriptions. Default 12 sessions/month (FR-FIN-01).",
+    "newButton": "+ New subscription",
+    "activeTitle": "Active subscriptions ({count})",
+    "table": {
+      "trainee": "Trainee",
+      "group": "Group",
+      "period": "Period",
+      "fee": "Fee",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": "No active subscriptions yet."
+  },
+  "hcChampionships": {
+    "title": "Championships",
+    "subtitle": "Create events and track registrations + results (FR-CH).",
+    "newCardTitle": "New event",
+    "form": {
+      "name": "Event name",
+      "organizer": "Organizer",
+      "location": "Location",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "deadline": "Reg. deadline",
+      "fee": "Registration fee (EGP)",
+      "disciplines": "Disciplines",
+      "allowedLevels": "Allowed levels",
+      "weightCategories": "Weight categories (comma-separated)",
+      "weightPlaceholder": "60kg, 65kg, 70kg, 75kg",
+      "ageCategories": "Age categories (comma-separated)",
+      "agePlaceholder": "cadets, juniors, seniors",
+      "official": "Official event",
+      "notes": "Internal notes",
+      "submit": "Create championship"
+    },
+    "listTitle": "All championships",
+    "table": {
+      "event": "Event",
+      "dates": "Dates",
+      "deadline": "Reg. deadline",
+      "fee": "Fee",
+      "registrations": "Registrations",
+      "actions": "Actions",
+      "open": "Open"
+    },
+    "empty": "No championships yet."
+  },
+  "hcBeltExams": {
+    "title": "Belt exams",
+    "subtitle": "Schedule federation belt examinations and record passing results (FR-BLT-04 auto-updates trainee level).",
+    "newCardTitle": "Schedule a new exam",
+    "form": {
+      "discipline": "Discipline",
+      "pickPlaceholder": "— Pick —",
+      "date": "Date",
+      "location": "Location",
+      "locationPlaceholder": "Federation HQ, Cairo",
+      "federation": "Federation",
+      "examiner": "Examiner",
+      "fee": "Fee (EGP)",
+      "submit": "Schedule exam"
+    },
+    "listTitle": "Scheduled exams",
+    "table": {
+      "date": "Date",
+      "discipline": "Discipline",
+      "federation": "Federation",
+      "examiner": "Examiner",
+      "results": "Results",
+      "actions": "Actions",
+      "open": "Open"
+    },
+    "empty": "No exams scheduled."
+  },
+  "hcMerchandise": {
+    "title": "Merchandise",
+    "subtitle": "Catalog managed centrally from Fight Club. Sales = 100% CSK regardless of location (FR-MRC-03).",
+    "newButton": "+ New item",
+    "lowStockTitle": "Low stock alert ({count})",
+    "lowStockDetail": "{stock} left · threshold {threshold}",
+    "catalogTitle": "Catalog ({count})",
+    "table": {
+      "item": "Item",
+      "category": "Category",
+      "cost": "Cost",
+      "sale": "Sale",
+      "stock": "Stock",
+      "status": "Status",
+      "sales": "Sales",
+      "actions": "Actions",
+      "open": "Open"
+    },
+    "empty": "No items yet. Add boxing gloves, wraps, T-shirts, etc."
+  },
+  "hcReviewPlan": {
+    "title": "Review session plan",
+    "coachCard": "Coach",
+    "sequenceTitle": "Sequence ({count} units)",
+    "unknownUnit": "(unknown unit)",
+    "durationOverride": "{seconds}s (override)",
+    "durationDefault": "{seconds}s default",
+    "roundsOverride": "{rounds} rounds (override)",
+    "roundsDefault": "{rounds} rounds default",
+    "dash": "—",
+    "planNotes": "Plan notes"
+  },
+  "hcReviewReport": {
+    "title": "Review daily report",
+    "coachSummary": "Coach summary",
+    "incidents": "Incidents",
+    "submittedBy": "Submitted by {name} at {when}",
+    "attendanceTitle": "Attendance ({count})",
+    "evaluationsTitle": "Quick evaluations ({count})",
+    "effortBadge": "Effort {score}/10",
+    "flaggedPrefix": "Flagged: {bodyPart}{skill}",
+    "flaggedSkillSuffix": " · {skill}"
+  },
+  "hcApprovalActions": {
+    "approve": "Approve",
+    "approveDeliver": "Approve & deliver",
+    "reject": "Reject",
+    "cancelReject": "Cancel reject",
+    "confirmReject": "Confirm rejection",
+    "rejectPlaceholder": "Why is this rejected? Returned to coach for revision.",
+    "rejectReportPlaceholder": "What needs revision?",
+    "shortCommentError": "Please write a short comment (≥3 chars).",
+    "shortCommentRejectError": "Please write a short comment (≥3 chars) explaining the rejection."
+  },
+  "coachAttendance": {
+    "noTrainees": "No trainees enrolled in this group.",
+    "savedAt": "Saved {time}",
+    "saveBtn": "Save attendance",
+    "saveBtnIncomplete": "Save attendance (incomplete)",
+    "marks": {
+      "present": "Present",
+      "late": "Late",
+      "absent": "Absent",
+      "excused": "Excused"
+    }
+  },
+  "coachQuickEval": {
+    "effortLabel": "Effort (1–10)",
+    "notesPlaceholder": "Quick notes...",
+    "bodyPartPlaceholder": "Flag body part (optional)",
+    "skillPlaceholder": "Flag skill (optional)",
+    "saveBtn": "Save quick eval"
+  },
+  "coachDailyReport": {
+    "title": "Daily report",
+    "autoTitle": "Auto-included",
+    "auto": {
+      "present": "Present",
+      "late": "Late",
+      "absent": "Absent",
+      "quickEvals": "Quick evals"
+    },
+    "notesTitle": "Coach notes",
+    "rejectedPrefix": "Rejected:",
+    "summary": "Session summary",
+    "summaryPlaceholder": "What did the group cover today? Highlights and lowlights.",
+    "incidents": "Incidents (optional)",
+    "incidentsPlaceholder": "Any injuries, behavioral incidents, equipment issues, etc.",
+    "saveDraft": "Save draft",
+    "submitForApproval": "Submit for approval",
+    "resubmit": "Resubmit",
+    "pullBack": "Pull back to draft"
+  },
+  "coachPlanNew": {
+    "title": "New session plan",
+    "subtitle": "Drafts can be saved without submitting. When ready, submit for Head Coach approval (FR-SES-03).",
+    "submit": "Save draft"
+  },
+  "coachPlanDetail": {
+    "sessionPlan": "Session plan",
+    "untitledTemplate": "Untitled template",
+    "feedbackTitle": "Head Coach feedback",
+    "reviewedBy": "Reviewed by {name} on {when}",
+    "saveChanges": "Save changes",
+    "readSequenceTitle": "Sequence ({count})",
+    "removedUnit": "(removed unit)",
+    "durationOverride": "{seconds}s",
+    "durationDefault": "default {seconds}s",
+    "roundsLabel": "{rounds} rounds",
+    "roundsDefault": "default {rounds}",
+    "dash": "—",
+    "planNotes": "Plan notes"
+  },
+  "coachPlanBuilder": {
+    "group": "Group",
+    "groupPlaceholder": "— Pick a group —",
+    "sessionDate": "Session date",
+    "templateLegend": "Template (FR-SES-05)",
+    "templateCheckbox": "Save as template (reusable across groups; no fixed date)",
+    "templateName": "Template name",
+    "templateNamePlaceholder": "e.g. Boxing — fundamentals, 60 min",
+    "availableTitle": "Available units",
+    "availableHint": "Click to add to the sequence.",
+    "filterPlaceholder": "Filter by name or category...",
+    "noMatches": "No matches.",
+    "addBtn": "Add",
+    "sequenceTitle": "Session sequence ({count})",
+    "sequenceHint": "Order matters. Each unit can override duration / rounds + add coach notes.",
+    "noUnitsYet": "No units yet — pick from the left.",
+    "unknownUnit": "(unknown)",
+    "removeBtn": "Remove",
+    "durationPlaceholder": "Duration override (default {seconds}s)",
+    "roundsPlaceholder": "Rounds override (default {rounds})",
+    "unitNotesPlaceholder": "Coach notes for this unit...",
+    "planNotesLabel": "Plan-level notes",
+    "cancel": "Cancel"
+  },
+  "coachPlanActions": {
+    "submitForApproval": "Submit for approval",
+    "resubmit": "Resubmit",
+    "pullBack": "Pull back to draft"
+  },
+  "certificates": {
+    "issuedBy": "Issued by {name}",
+    "downloadPdf": "Download PDF →",
+    "defaultEmpty": "No certificates yet — keep training, keep earning.",
+    "awards": {
+      "BEST_TRAINEE_GROUP": "Best Trainee — Group",
+      "BEST_TRAINEE_LOCATION": "Best Trainee — Location",
+      "BEST_COACH_LOCATION": "Best Coach — Location",
+      "BELT_PROGRESSION": "Belt Progression",
+      "CHAMPIONSHIP": "Championship",
+      "DEFAULT": "CSK Award"
+    }
+  },
+  "unitBrowser": {
+    "discipline": "Discipline",
+    "category": "Category",
+    "difficulty": "Difficulty",
+    "table": {
+      "name": "Name",
+      "category": "Category",
+      "difficulty": "Difficulty",
+      "disciplines": "Disciplines",
+      "bodyParts": "Body parts",
+      "media": "Media"
+    },
+    "partsCount": "{count} parts",
+    "viewLink": "view",
+    "empty": "No published training units match the filters."
+  },
+  "coachCerts": {
+    "title": "My awards",
+    "subtitle": "Recognitions earned as a CSK coach."
+  },
+  "coachUnits": {
+    "title": "Training Units",
+    "subtitle": "Read-only library of approved drills. Pick from these when building a session plan."
+  },
+  "internUnits": {
+    "title": "Training Units (study)",
+    "subtitle": "Read-only catalogue. Browse approved drills to learn the curriculum."
+  },
+  "hcGroupDetail": {
+    "subtitle": "{location} · {discipline} · {enrolled} / {capacity} enrolled",
+    "details": "Details",
+    "rosterTitle": "Roster ({enrolled} / {capacity})",
+    "saveChanges": "Save changes"
+  },
+  "hcChampDetail": {
+    "subtitle": "{location} · {start} – {end} · fee {fee} EGP",
+    "registrationsTitle": "Registrations ({count})",
+    "table": {
+      "trainee": "Trainee",
+      "status": "Status",
+      "weight": "Weight",
+      "level": "Level",
+      "fights": "Fights",
+      "actions": "Actions"
+    },
+    "kg": "{kg} kg",
+    "dash": "—",
+    "empty": "No registrations yet.",
+    "recordFightTitle": "Record a fight result"
+  },
+  "hcBeltExamDetail": {
+    "title": "{discipline} belt exam",
+    "subtitle": "{date} · {location} · examiner {examiner} · fee {fee} EGP",
+    "recordedTitle": "Recorded results ({count})",
+    "table": {
+      "trainee": "Trainee",
+      "result": "Result",
+      "score": "Score",
+      "newLevel": "New level",
+      "recorded": "Recorded"
+    },
+    "empty": "No results yet.",
+    "addResultTitle": "Add a result"
+  },
+  "hcMerchDetail": {
+    "subtitle": "{nameAr} · sale {sale} EGP · cost {cost} EGP",
+    "lowStock": "Low stock",
+    "logSaleTitle": "Log a sale",
+    "editTitle": "Edit item",
+    "saveChanges": "Save changes",
+    "recentSalesTitle": "Recent sales ({count})",
+    "table": {
+      "date": "Date",
+      "customer": "Customer",
+      "soldBy": "Sold by",
+      "variant": "Variant",
+      "qty": "Qty",
+      "totalEgp": "Total (EGP)"
+    },
+    "walkIn": "Walk-in",
+    "empty": "No sales yet.",
+    "newPage": {
+      "title": "New merchandise item",
+      "subtitle": "Add to the central catalog. The item appears on the public website read-only catalog.",
+      "submit": "Create item"
+    }
+  },
+  "hcUnitDetail": {
+    "subtitle": "{nameAr} · v{version}",
+    "editTitle": "Edit unit",
+    "saveChanges": "Save changes",
+    "versionsTitle": "Recent versions (FR-UNIT-06)",
+    "versionLabel": "v{version}",
+    "dash": "—",
+    "newPage": {
+      "title": "New training unit",
+      "subtitle": "Drafts can omit the demo GIF/MP4. Publishing requires it (FR-UNIT-03).",
+      "submit": "Create unit"
+    }
+  },
+  "hcSubsNew": {
+    "title": "New subscription",
+    "subtitle": "Default: 12 sessions/month (FR-FIN-01). Pricing per location/discipline pending Captain Saied confirmation (SRS §14.2)."
+  },
+  "adminLocations": {
+    "title": "Locations",
+    "subtitle": "Manage CSK venues and partner locations. Configure default revenue splits per stream.",
+    "newButton": "+ New location",
+    "table": {
+      "name": "Name",
+      "district": "District",
+      "ownership": "Ownership",
+      "groups": "Groups",
+      "sessions": "Sessions",
+      "status": "Status",
+      "actions": "Actions",
+      "edit": "Edit"
+    },
+    "ownership": {
+      "cskOwned": "CSK-owned",
+      "partner": "Partner",
+      "patronage": "Patronage"
+    },
+    "empty": "No locations yet. Create one to get started.",
+    "newPage": {
+      "title": "New location",
+      "subtitle": "On creation, default split rules per stream are seeded automatically based on ownership (see SRS §10.1).",
+      "submit": "Create location"
+    },
+    "detail": {
+      "details": "Details",
+      "saveChanges": "Save changes",
+      "splitsTitle": "Default revenue splits (SRS §10.1)",
+      "splitsTable": {
+        "stream": "Stream",
+        "venue": "Venue %",
+        "csk": "CSK %",
+        "coach": "Coach %",
+        "other": "Other %",
+        "otherLabel": "Other label"
+      },
+      "splitsNote": "Per-coach contracts override these defaults at payment time. Editing splits is admin-only and opens an editor (TODO)."
+    }
+  },
+  "adminDisciplines": {
+    "title": "Disciplines",
+    "subtitle": "Global catalogue. Each discipline carries its own skills taxonomy used in evaluations.",
+    "newButton": "+ New discipline",
+    "table": {
+      "name": "Name",
+      "category": "Category",
+      "skills": "Skills",
+      "groups": "Groups",
+      "status": "Status",
+      "actions": "Actions",
+      "edit": "Edit"
+    },
+    "skillsSummary": "{count} skills · {preview}",
+    "empty": "No disciplines yet.",
+    "newPage": {
+      "title": "New discipline",
+      "subtitle": "Skills here become the columns of the body-map evaluation skill grid (FR-EVAL-04).",
+      "submit": "Create discipline"
+    },
+    "detail": {
+      "saveChanges": "Save changes"
+    }
+  },
+  "adminContracts": {
+    "title": "Coach contracts",
+    "subtitle": "Per-coach % overrides on top of location defaults (FR-FIN-09).",
+    "newButton": "+ New contract",
+    "allLocations": "All locations",
+    "table": {
+      "coach": "Coach",
+      "scope": "Scope",
+      "sub": "Sub %",
+      "private": "Private %",
+      "privateFixed": "Private fixed",
+      "belt": "Belt %",
+      "champ": "Champ %",
+      "effective": "Effective",
+      "actions": "Actions",
+      "edit": "Edit"
+    },
+    "empty": "No coach contract overrides yet — location defaults apply.",
+    "newPage": {
+      "title": "New coach contract",
+      "subtitle": "Override location defaults for one coach. Leave a stream blank to inherit the location rule.",
+      "submit": "Create contract"
+    },
+    "detail": {
+      "title": "Coach contract",
+      "saveChanges": "Save changes"
+    }
+  },
+  "adminPayments": {
+    "title": "Payments",
+    "subtitle": "Latest 200 payments with their auto-computed splits (FR-FIN-08).",
+    "table": {
+      "date": "Date",
+      "receipt": "Receipt",
+      "payer": "Payer",
+      "stream": "Stream",
+      "method": "Method",
+      "gross": "Gross (EGP)",
+      "splits": "Splits"
+    },
+    "empty": "No payments in the selected window."
+  },
+  "adminAnalytics": {
+    "title": "Analytics",
+    "subtitle": "Cohort retention, LTV, coach benchmarks, revenue + attendance trends ({months} months).",
+    "monthsLabel": "Months",
+    "kpi": {
+      "netRevenue": "Net revenue",
+      "avgAttendance": "Avg attendance",
+      "avgLtv": "Avg LTV",
+      "topCoach": "Top coach"
+    },
+    "revenueTitle": "Net revenue per month",
+    "attendanceTitle": "Attendance rate per month",
+    "cohortsTitle": "Cohort retention (subscription cohorts)",
+    "ltvTitle": "Lifetime value",
+    "perCohort": "Per cohort",
+    "perDiscipline": "Per discipline",
+    "ltvCohortTable": {
+      "cohort": "Cohort",
+      "trainees": "Trainees",
+      "totalNet": "Total net (EGP)",
+      "avgLtv": "Avg LTV",
+      "avgLtvMonth": "Avg LTV/month"
+    },
+    "ltvDiscTable": {
+      "discipline": "Discipline",
+      "trainees": "Trainees",
+      "totalNet": "Total net (EGP)",
+      "avgLtv": "Avg LTV"
+    },
+    "ltvEmpty": "No payments yet in window.",
+    "leaderboardTitle": "Coach performance leaderboard",
+    "leaderboardTable": {
+      "coach": "Coach",
+      "score": "Score",
+      "sessions": "Sessions",
+      "trainees": "Trainees",
+      "avgEffort": "Avg effort",
+      "reportsApproved": "Reports approved"
+    },
+    "leaderboardEmpty": "No coach activity in window."
+  },
+  "coachEvalNew": {
+    "title": "Detailed body-map evaluation",
+    "subtitle": "Tap any body part on the silhouette to score and comment."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "newSuffix": "{count} new",
+    "subtitle": "In-app inbox + per-channel preferences. Critical events (payment overdue, medical expiry) cannot be opted out (FR-NOT-04).",
+    "inboxTitle": "Inbox ({count})",
+    "empty": "No notifications yet.",
+    "preferencesTitle": "Channel preferences",
+    "markAllRead": "Mark all read",
+    "channels": {
+      "whatsapp": "WhatsApp",
+      "email": "Email"
+    },
+    "preferencesHint": "Tick a channel to stop receiving non-critical notifications on it. Critical alerts (payment overdue, medical doc expiring) still go through every channel.",
+    "muteLabel": "Mute {label}",
+    "mutedBadge": "Muted",
+    "receivingBadge": "Receiving",
+    "savePreferences": "Save preferences",
+    "savedAt": "Saved {time}"
+  },
+  "common2": {
+    "cancel": "Cancel",
+    "pickPlaceholder": "— Pick —"
+  },
+  "hcGenerateMonthly": {
+    "traineeLabel": "Trainee",
+    "yearLabel": "Year",
+    "monthLabel": "Month",
+    "defaultLabel": "Generate"
+  },
+  "hcApproveUser": {
+    "label": "Approve & welcome"
+  },
+  "hcConfirmRegistration": {
+    "label": "Confirm"
+  },
+  "hcIssueCert": {
+    "issued": "✓ Issued",
+    "issue": "Issue",
+    "confirm": "Confirm issue",
+    "cancel": "Cancel"
+  },
+  "hcRecordBelt": {
+    "trainee": "Trainee",
+    "pickPlaceholder": "— Pick —",
+    "result": "Result",
+    "passed": "Passed",
+    "failed": "Failed",
+    "scoreOpt": "Score (optional)",
+    "newLevelOpt": "New level (optional)",
+    "autoPlaceholder": "— Auto —",
+    "record": "Record"
+  },
+  "hcRecordFight": {
+    "noConfirmed": "No confirmed registrations to record results for. Confirm a registration first.",
+    "fighter": "Fighter",
+    "opponent": "Opponent",
+    "outcome": "Outcome",
+    "outcomes": {
+      "win": "Win",
+      "loss": "Loss",
+      "draw": "Draw",
+      "noContest": "No contest"
+    },
+    "method": "Method",
+    "methods": {
+      "ko": "KO",
+      "tko": "TKO",
+      "decision": "Decision",
+      "submission": "Submission",
+      "dq": "DQ",
+      "other": "Other"
+    },
+    "round": "Round",
+    "time": "Time (mm:ss)",
+    "videoUrl": "Video URL (optional)",
+    "notes": "Notes",
+    "record": "Record result"
+  },
+  "hcLogSale": {
+    "saleLocation": "Sale location",
+    "customerOpt": "Customer (optional)",
+    "walkIn": "— Walk-in —",
+    "method": "Method",
+    "methods": {
+      "cash": "Cash",
+      "vodafone": "Vodafone Cash",
+      "transfer": "Bank transfer"
+    },
+    "variant": "Variant",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price (EGP)",
+    "receipt": "Receipt {ref}",
+    "lowStockNow": "Low stock now",
+    "logSale": "Log sale"
+  },
+  "hcGroupRoster": {
+    "addTrainee": "Add trainee",
+    "chooseTrainee": "— Choose a trainee —",
+    "overrideCapacity": "Override capacity",
+    "enroll": "Enroll",
+    "trainee": "Trainee",
+    "enrolledSince": "Enrolled since",
+    "actions": "Actions",
+    "empty": "No trainees enrolled yet.",
+    "endEnrollment": "End enrollment",
+    "endConfirm": "End this enrollment?"
+  },
+  "adminUserActions": {
+    "approve": "Approve",
+    "suspendConfirm": "Suspend this account?",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "promoteConfirm": "Promote this intern to coach?",
+    "promote": "→ Coach"
+  },
+  "adminContractForm": {
+    "coach": "Coach",
+    "pickPlaceholder": "— Pick —",
+    "locationOpt": "Location (optional)",
+    "allOption": "— All —",
+    "disciplineOpt": "Discipline (optional)",
+    "streamOverrides": "Stream % overrides",
+    "streamHint": "Leave a field blank to fall back to the location default. CSK absorbs the delta when a coach % is overridden.",
+    "subscriptionPercent": "Subscription %",
+    "privatePercent": "Private session %",
+    "privateFixed": "Private — fixed rate (EGP)",
+    "beltPercent": "Belt exam %",
+    "champPercent": "Championship %",
+    "effectiveFrom": "Effective from",
+    "effectiveTo": "Effective to (optional)",
+    "notes": "Notes",
+    "cancel": "Cancel"
+  },
+  "adminDisciplineForm": {
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "category": "Category",
+    "categories": {
+      "boxing": "Boxing",
+      "kickboxing": "Kickboxing",
+      "mma": "MMA",
+      "karate": "Karate",
+      "fitness": "Fitness",
+      "other": "Other"
+    },
+    "skillsTaxonomy": "Skills taxonomy",
+    "skillsHint": "(comma- or newline-separated; used for evaluations — FR-EVAL-04)",
+    "skillsPlaceholder": "jab, cross, hooks, uppercuts, footwork, ...",
+    "active": "Active",
+    "cancel": "Cancel"
+  },
+  "adminLocationForm": {
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "district": "District",
+    "ownership": "Ownership",
+    "ownerships": {
+      "cskOwned": "CSK-owned (Fight Club default)",
+      "partner": "Partner venue",
+      "patronage": "Patronage / partnership"
+    },
+    "address": "Address",
+    "latitudeOpt": "Latitude (optional)",
+    "longitudeOpt": "Longitude (optional)",
+    "contactPerson": "Contact person",
+    "contactPhone": "Contact phone",
+    "active": "Active",
+    "cancel": "Cancel"
+  },
+  "hcGroupForm": {
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "groupName": "Group name",
+    "groupNamePlaceholder": "e.g. Boxing — Beginners — Mon/Wed evening",
+    "location": "Location",
+    "discipline": "Discipline",
+    "primaryCoach": "Primary coach",
+    "noneYet": "— None yet —",
+    "internOpt": "Intern (optional)",
+    "none": "— None —",
+    "weeklySchedule": "Weekly schedule (FR-GRP-04)",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "levelBand": "Level band",
+    "any": "— Any —",
+    "newbie": "N (newbie)",
+    "ageMin": "Age min",
+    "ageMax": "Age max",
+    "capacity": "Capacity",
+    "capacityHint": "(default 20, FR-GRP-01)",
+    "active": "Active",
+    "cancel": "Cancel"
+  },
+  "hcMerchForm": {
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "description": "Description",
+    "category": "Category",
+    "categories": {
+      "gloves": "Gloves",
+      "protective": "Protective gear",
+      "apparel": "Apparel",
+      "wraps": "Wraps",
+      "accessories": "Accessories",
+      "other": "Other"
+    },
+    "active": "Active",
+    "photoUrls": "Photo URLs (comma-separated)",
+    "photoUrlsPlaceholder": "https://..., https://...",
+    "variants": "Variants / SKUs (comma-separated)",
+    "variantsPlaceholder": "S-Black, M-Black, L-Black",
+    "cost": "Cost (EGP)",
+    "sale": "Sale (EGP)",
+    "stock": "Stock",
+    "lowStockAt": "Low-stock at",
+    "cancel": "Cancel"
+  },
+  "hcUnitForm": {
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "descriptionEn": "Description (English)",
+    "descriptionAr": "Description (Arabic)",
+    "category": "Category",
+    "difficulty": "Difficulty (1–5)",
+    "equipment": "Equipment",
+    "equipmentPlaceholder": "gloves, hand wraps",
+    "disciplines": "Disciplines",
+    "targetBodyParts": "Target body parts (FR-EVAL-03)",
+    "targetSkills": "Target skills (comma-separated, drawn from discipline taxonomy)",
+    "targetSkillsPlaceholder": "jab, cross, footwork",
+    "recommendedDose": "Recommended dose",
+    "doseHint": "Either a duration in seconds, OR rounds × round-duration.",
+    "durationSec": "Duration (seconds)",
+    "rounds": "Rounds",
+    "roundDurationSec": "Round duration (s)",
+    "demoMedia": "Demonstration media (FR-UNIT-03)",
+    "demoMediaHint": "v1: paste a publicly-reachable https URL. v2: direct upload via S3/R2 storage adapter.",
+    "mediaUrl": "Media URL (https)",
+    "mediaType": "Type",
+    "publishedLabel": "Published (must include demo media — FR-UNIT-03)",
+    "changeNote": "Change note (optional, FR-UNIT-06)",
+    "changeNotePlaceholder": "What changed?",
+    "cancel": "Cancel"
+  },
+  "hcSubsForm": {
+    "trainee": "Trainee",
+    "pickPlaceholder": "— Pick —",
+    "group": "Group",
+    "monthlyFee": "Monthly fee (EGP)",
+    "monthlyFeePlaceholder": "e.g. 1000",
+    "sessionsMonth": "Sessions / month",
+    "startMonth": "Start month",
+    "discountPercent": "Discount % (optional)",
+    "discountReason": "Discount reason (optional)",
+    "discountReasonPlaceholder": "e.g. sibling discount",
+    "create": "Create subscription",
+    "cancel": "Cancel"
+  },
+  "detailedEval": {
+    "evaluatingHeader": "Evaluating {trainee} in {group}",
+    "cadenceLabel": "Cadence",
+    "cadenceWeekly": "Weekly",
+    "cadenceMonthly": "Monthly",
+    "bodyMapTitle": "Body-map (FR-EVAL-02)",
+    "skillsTitle": "Technical skills (FR-EVAL-04)",
+    "noSkills": "No skills configured for this discipline. Edit the discipline to add a skills taxonomy.",
+    "skillCommentPlaceholder": "Optional comment",
+    "summaryComment": "Summary comment",
+    "saveEval": "Save evaluation",
+    "cancel": "Cancel"
+  }
+}

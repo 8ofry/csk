@@ -1,0 +1,29 @@
+import { getTranslations } from "next-intl/server";
+import { requireRole } from "@/lib/auth-guard";
+import { UnitBrowser } from "@/components/training-units/unit-browser";
+
+export default async function CoachTrainingUnitsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ disciplineId?: string; category?: string; difficulty?: string }>;
+}) {
+  await requireRole("COACH");
+  const [t, sp] = await Promise.all([getTranslations("coachUnits"), searchParams]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
+      </div>
+      <UnitBrowser
+        publishedOnly
+        filters={{
+          disciplineId: sp.disciplineId,
+          category: sp.category,
+          difficulty: sp.difficulty ? Number(sp.difficulty) : undefined,
+        }}
+      />
+    </div>
+  );
+}

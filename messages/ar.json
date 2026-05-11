@@ -1,0 +1,1412 @@
+{
+  "brand": {
+    "name": "أكاديمية CSK",
+    "tagline": "فريق كابتن سعيد — ملاكمة • كيك بوكسينغ • فنون قتالية مختلطة • كاراتيه • لياقة"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "about": "عن الأكاديمية",
+    "locations": "المواقع",
+    "disciplines": "الرياضات",
+    "coaches": "المدربون",
+    "schedule": "الجدول",
+    "pricing": "الأسعار",
+    "register": "التسجيل",
+    "contact": "تواصل معنا",
+    "champions": "الأبطال",
+    "merchandise": "المتجر",
+    "blog": "المدونة",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج"
+  },
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول إلى CSK",
+      "emailOrPhone": "البريد الإلكتروني أو رقم الهاتف",
+      "password": "كلمة المرور",
+      "submit": "دخول",
+      "forgot": "هل نسيت كلمة المرور؟",
+      "noAccount": "ليس لديك حساب؟",
+      "signUp": "إنشاء حساب"
+    },
+    "register": {
+      "title": "أنشئ حسابك في CSK",
+      "role": "أنا",
+      "trainee": "متدرب",
+      "coach": "مدرب",
+      "intern": "مدرب تحت التدريب",
+      "submit": "إنشاء الحساب",
+      "haveAccount": "هل لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول",
+      "fields": {
+        "fullNameAr": "الاسم بالكامل (عربي)",
+        "fullNameEn": "الاسم بالكامل (إنجليزي)",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "passwordHint": "كلمة المرور (٨ أحرف على الأقل، حروف وأرقام)"
+      },
+      "successTitle": "تم إنشاء الحساب.",
+      "successBody": "افحص بريدك للتأكيد، ثم انتظر موافقة المدرب الرئيسي."
+    }
+  },
+  "roles": {
+    "admin": "مدير النظام",
+    "head_coach": "المدرب الرئيسي",
+    "coach": "مدرب",
+    "intern": "مدرب تحت التدريب",
+    "trainee": "متدرب"
+  },
+  "home": {
+    "heroTitle": "تدرّب. تنافس. انتصر.",
+    "heroSubtitle": "أكاديمية الرياضات القتالية الرائدة في مصر.",
+    "ctaJoin": "انضم إلى CSK",
+    "ctaExplore": "اكتشف الرياضات"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "submit": "إرسال",
+    "search": "بحث",
+    "open": "فتح",
+    "close": "إغلاق",
+    "viewAll": "عرض الكل",
+    "comingSoon": "قريباً",
+    "noResults": "لا توجد نتائج",
+    "yes": "نعم",
+    "no": "لا",
+    "active": "نشط",
+    "archived": "مؤرشف",
+    "expired": "منتهي الصلاحية",
+    "expiring": "ينتهي قريباً",
+    "paid": "مدفوع",
+    "due": "مستحق",
+    "partial": "جزئي",
+    "overdue": "متأخر",
+    "saved": "تم الحفظ",
+    "perMonth": " / شهر",
+    "all": "الكل",
+    "apply": "تطبيق",
+    "back": "رجوع",
+    "next": "التالي",
+    "today": "اليوم",
+    "name": "الاسم",
+    "date": "التاريخ",
+    "status": "الحالة",
+    "actions": "إجراءات",
+    "amount": "المبلغ",
+    "method": "الطريقة",
+    "notes": "ملاحظات",
+    "approve": "اعتماد",
+    "reject": "رفض",
+    "review": "مراجعة",
+    "empty": "لا يوجد شيء بعد."
+  },
+  "badges": {
+    "draft": "مسودة",
+    "pending": "قيد الانتظار",
+    "approved": "معتمد",
+    "rejected": "مرفوض",
+    "delivered": "تم التسليم",
+    "scheduled": "مجدول",
+    "inProgress": "جارية الآن",
+    "completed": "منتهية",
+    "cancelled": "ملغاة",
+    "present": "حاضر",
+    "late": "متأخر",
+    "absent": "غائب",
+    "excused": "بعذر",
+    "pending_lower": "قيد الانتظار",
+    "overdue": "متأخر",
+    "empty": "فارغ",
+    "official": "رسمي",
+    "newSubmission": "جديد",
+    "withdrew": "انسحب",
+    "passed": "نجح",
+    "failed": "رسب",
+    "paid": "مدفوع",
+    "partial": "جزئي",
+    "due": "مستحق",
+    "published": "منشور",
+    "closed": "مغلق",
+    "submitted": "مُرسل",
+    "saved": "محفوظ"
+  },
+  "dashboards": {
+    "admin": {
+      "title": "لوحة مدير النظام",
+      "subtitle": "مؤشرات أداء عامة، نظرة مالية، إدارة المستخدمين، سجل التدقيق.",
+      "kpi": {
+        "activeTrainees": "المتدربون النشطون",
+        "mtdRevenue": "إيراد الشهر حتى الآن (ج.م)",
+        "mtdCsk": "حصة CSK لهذا الشهر",
+        "overdue": "مدفوعات متأخرة",
+        "expiringMedical": "وثائق طبية قاربت على الانتهاء",
+        "pendingApprovals": "موافقات قيد الانتظار"
+      }
+    },
+    "headCoach": {
+      "title": "لوحة المدرب الرئيسي",
+      "subtitle": "حصص اليوم، الموافقات المعلّقة، الوثائق الطبية المنتهية، البطولات القادمة.",
+      "panels": {
+        "pendingPlans": "خطط حصص بانتظار الاعتماد",
+        "pendingReports": "تقارير يومية معلّقة",
+        "expiringDocs": "وثائق طبية على وشك الانتهاء",
+        "todaysSessions": "حصص اليوم"
+      },
+      "noData": "لا توجد بيانات بعد."
+    },
+    "coach": {
+      "title": "لوحة المدرّب",
+      "subtitle": "حصص اليوم، التنبيهات، أرباح الشهر حتى الآن.",
+      "panels": {
+        "todaysSessions": "حصص اليوم",
+        "mtdEarnings": "أرباح الشهر",
+        "rejectedPlans": "خطط حصص (مرفوضة)",
+        "privateRequests": "طلبات حصص خاصة"
+      },
+      "noData": "لا توجد بيانات بعد."
+    },
+    "intern": {
+      "title": "لوحة المدرب تحت التدريب",
+      "subtitle": "المدرب المخصّص والحصص التي يتابعها لليوم.",
+      "panels": {
+        "assignedCoach": "المدرب المخصّص",
+        "shadowedToday": "حصص المتابعة لليوم",
+        "selfEvalStatus": "حالة تقييمي الذاتي"
+      },
+      "noData": "لا توجد بيانات بعد."
+    }
+  },
+  "approvals": {
+    "title": "صندوق الموافقات",
+    "subtitle": "خطط الحصص (FR-SES-03) والتقارير اليومية (FR-DR-03) في انتظار مراجعتك.",
+    "pendingUsersTitle": "حسابات في انتظار الموافقة",
+    "sessionPlansTitle": "خطط الحصص",
+    "dailyReportsTitle": "التقارير اليومية",
+    "overdueTag": "{count} متأخر",
+    "table": {
+      "submittedAt": "تاريخ الإرسال",
+      "sessionDate": "تاريخ الحصة",
+      "group": "المجموعة",
+      "coach": "المدرب",
+      "units": "الوحدات",
+      "role": "الدور",
+      "emailPhone": "البريد / الهاتف",
+      "submittedHeader": "تاريخ الإرسال"
+    },
+    "approveAndWelcome": "اعتماد وإرسال ترحيب",
+    "noPendingUsers": "لا توجد تسجيلات معلّقة.",
+    "noPendingPlans": "لا توجد خطط معلّقة.",
+    "noPendingReports": "لا توجد تقارير يومية معلّقة."
+  },
+  "coachToday": {
+    "title": "اليوم",
+    "noSessions": "لا توجد حصص مجدولة اليوم.",
+    "openSession": "فتح الحصة",
+    "startSession": "بدء الحصة"
+  },
+  "coachEarnings": {
+    "title": "أرباحي",
+    "subtitle": "بيانات لحظية مفصّلة حسب مصدر الإيراد (FR-FIN-10).",
+    "kpi": {
+      "mtd": "الشهر حتى الآن",
+      "lastMonth": "الشهر الماضي",
+      "ytd": "السنة حتى الآن"
+    },
+    "byStreamTitle": "هذا الشهر — حسب المصدر",
+    "byStreamEmpty": "لا توجد أرباح مسجّلة هذا الشهر بعد.",
+    "table": {
+      "stream": "المصدر",
+      "count": "العدد",
+      "net": "الصافي (ج.م)",
+      "myPercent": "نسبتي",
+      "myShare": "حصتي"
+    },
+    "txTitle": "آخر العمليات ({count})",
+    "txEmpty": "لا توجد عمليات بعد."
+  },
+  "adminFinancial": {
+    "title": "المالية — لوحة المالك",
+    "subtitle": "FR-FIN-11 · {from} – {to}",
+    "allPayments": "كل المدفوعات",
+    "exportCsv": "تصدير CSV",
+    "from": "من",
+    "to": "إلى",
+    "kpi": {
+      "totalRevenue": "إجمالي الإيراد",
+      "cskShare": "صافي حصة CSK",
+      "venuePayouts": "مدفوعات الشركاء",
+      "coachPayouts": "مدفوعات المدربين"
+    },
+    "byStreamTitle": "حسب مصدر الإيراد",
+    "byStreamEmpty": "لا توجد مدفوعات في هذه الفترة.",
+    "byLocationTitle": "حسب الموقع (الربح والخسارة)",
+    "byLocationEmpty": "لا يوجد إيراد منسوب لمواقع في هذه الفترة.",
+    "outstandingTitle": "الذمم المستحقّة",
+    "outstandingSubsLabel": "اشتراكات مستحقّة / متأخرة",
+    "outstandingFaceLabel": "ج.م قيمة اسمية",
+    "table": {
+      "stream": "المصدر",
+      "count": "العدد",
+      "net": "الصافي (ج.م)",
+      "location": "الموقع",
+      "gross": "الإجمالي",
+      "csk": "حصة CSK"
+    }
+  },
+  "appNav": {
+    "dashboard": "لوحة التحكم",
+    "locations": "المواقع",
+    "disciplines": "الرياضات",
+    "users": "المستخدمون",
+    "contracts": "عقود المدربين",
+    "financial": "المالية",
+    "audit": "سجل التدقيق",
+    "settings": "الإعدادات",
+    "approvals": "الموافقات",
+    "trainees": "المتدربون",
+    "coaches": "المدربون",
+    "groups": "المجموعات",
+    "trainingUnits": "وحدات التدريب",
+    "championships": "البطولات",
+    "medical": "الطبية",
+    "today": "حصة اليوم",
+    "myGroups": "مجموعاتي",
+    "sessionPlans": "خطط الحصص",
+    "privateSessions": "الحصص الخاصة",
+    "earnings": "الأرباح",
+    "shadowedSessions": "حصص المتابعة",
+    "selfEvaluation": "تقييم ذاتي",
+    "schedule": "الجدول",
+    "evaluations": "التقييمات",
+    "reports": "التقارير",
+    "payments": "المدفوعات"
+  },
+  "publicSite": {
+    "footer": {
+      "train": "تدريب",
+      "compete": "منافسة",
+      "shop": "تسوّق",
+      "csk": "CSK",
+      "rights": "© 2026 CSK — فريق كابتن سعيد. جميع الحقوق محفوظة."
+    },
+    "about": {
+      "title": "عن CSK",
+      "established": "فريق كابتن سعيد — تأسس عام 2022",
+      "storyTitle": "قصتنا",
+      "storyP1": "CSK — فريق كابتن سعيد — أكاديمية رياضات قتالية تعمل في خمسة مواقع ببنها، مصر. أسسها كابتن سعيد عام 2022، وتركز على الملاكمة والكيك بوكسينغ والفنون القتالية المختلطة والكاراتيه وتدريبات اللياقة الخاصة بالقتال.",
+      "storyP2": "من فايت كلوب (مقرّنا في حي الفلال) إلى الشركاء في نادي بنها الرياضي ومونستر جيم وآدفت جيم وكلية علوم الرياضة بجامعة بنها — كل حصة قائمة على نفس الأساس: خطط حصص منظمة، وتمارين معتمدة من المدرب الرئيسي، وتقييم فردي.",
+      "differentiatorsTitle": "ما يميّزنا",
+      "diff1": "مكتبة وحدات تدريب منسّقة — كل تمرين مُراجَع من المدرب الرئيسي ومُصنَّف حسب المهارة والعضو وصعوبة الأداء.",
+      "diff2": "تقييمات الخريطة الجسدية — يقيّم المدرّبون 20 منطقة بالجسم وكل مهارة تقنية، فتظهر صورة دقيقة للتقدّم.",
+      "diff3": "تقارير يومية وشهرية — يحصل الأهالي والمتدربون على ملخّص يومي وملف PDF شهري بهوية CSK لمتابعة الأداء.",
+      "diff4": "بطولات منضبطة — يتحقق النظام من التصريح الطبي قبل كل تأكيد، ويحفظ سجل النزالات بالكامل بعدها.",
+      "disciplinesTitle": "الرياضات",
+      "disciplinesBody": "ملاكمة · كيك بوكسينغ · فنون قتالية مختلطة · كاراتيه · لياقة — للمتدربين من المبتدئ (مستوى N) حتى الجاهز للمنافسة (مستوى C)، ولجميع الفئات العمرية."
+    },
+    "locations": {
+      "title": "مواقعنا",
+      "subtitle": "خمسة مقرّات تدريب في بنها. يمكنك الانضمام إلى أيّها.",
+      "empty": "تجهيز المواقع جارٍ.",
+      "districtLabel": "المنطقة",
+      "addressLabel": "العنوان",
+      "contactLabel": "التواصل",
+      "openMaps": "افتح في خرائط جوجل ←",
+      "cskHome": "مقر CSK"
+    },
+    "disciplines": {
+      "title": "الرياضات",
+      "subtitle": "الرياضات القتالية التي ندرّبها في CSK — اختر التي تناديك.",
+      "groupCount_one": "{count} مجموعة نشطة",
+      "groupCount_other": "{count} مجموعات نشطة",
+      "summaries": {
+        "BOXING": "العلم الجميل. حركة القدمين والتوقيت وحركة الرأس ودقّة الجاب-كروس — تُبنى مع كل تدريب على الحلبة.",
+        "KICKBOXING": "لكمات وركلات. ركلات أمامية ودائرية وضربات بالركبة — انسيابية وفعّالة من جميع المسافات.",
+        "MMA": "فنون قتالية مختلطة. ضرب وإسقاطات وتحكم أرضي وخضوع — اللعبة القتالية الكاملة.",
+        "KARATE": "تقاليد وانضباط. كاتا وكيهون وكوميتيه — إتقان قتالي يبدأ بالتقنية.",
+        "FITNESS": "لياقة خالصة. كارديو وقوة ومرونة — المحرّك الذي يُشغّل كل مقاتل.",
+        "OTHER": "برامج تخصصية بالتفاهم مع أصحاب الرياضة."
+      }
+    },
+    "coaches": {
+      "title": "مدرّبونا",
+      "subtitle": "الفريق الذي يقف خلف CSK — مقاتلون ومعلّمون.",
+      "empty": "تجميع طاقم التدريب جارٍ.",
+      "trainsAt": "يدرّب في:"
+    },
+    "schedule": {
+      "title": "الجدول",
+      "subtitle": "حصص أسبوعية متكررة لكل موقع. انضم لمرة أو ضمن مجموعة دائمة.",
+      "empty": "لا يوجد جدول عام بعد. عاود زيارتنا قريباً.",
+      "withCoach": "مع",
+      "tbd": "يُحدَّد لاحقاً"
+    },
+    "pricing": {
+      "title": "الباقات والأسعار",
+      "noteContact": "تواصل مع أقرب مقر CSK لمعرفة أسعار الاشتراكات الشهرية الحالية.",
+      "includedTitle": "ما يشمله الاشتراك",
+      "include1Strong": "{count} حصة شهرياً",
+      "include1Suffix": "لكل اشتراك مجموعة",
+      "include2": "تقييمات الخريطة الجسدية + تقارير الأداء الشهرية",
+      "include3": "تقارير يومية للحصص للأهالي (واتساب + بريد إلكتروني)",
+      "include4": "دعم التسجيل في البطولات",
+      "include5Strong": "حصص خاصة",
+      "include5Suffix": "متاحة — تُحجَز عبر مدرّبك",
+      "availableDisciplinesTitle": "الرياضات المتاحة",
+      "ctaInfo": "تختلف الرسوم الشهرية حسب الموقع والرياضة. تواصل معنا أو زر مقرّك المفضّل لمعرفة قائمة الأسعار الحالية.",
+      "getPricing": "اطلب الأسعار",
+      "startTrial": "ابدأ تجربة مجانية"
+    },
+    "champions": {
+      "title": "الأبطال",
+      "subtitle": "مقاتلو CSK الذين دخلوا الحلبة وحققوا الإنجازات.",
+      "empty": "ستظهر سجلات النزالات هنا فور تسجيل نتائج البطولات.",
+      "fights_one": "{count} نزال",
+      "fights_other": "{count} نزالات"
+    },
+    "fighter": {
+      "back": "← كل الأبطال",
+      "homeLabel": "المقر:",
+      "wld": "ف-خ-ت",
+      "methodTitle": "طرق الحسم",
+      "beltsTitle": "الأحزمة",
+      "fightsTitle": "سجل النزالات",
+      "fightsEmpty": "لا توجد نزالات مسجّلة بعد.",
+      "championshipsTitle": "البطولات",
+      "championshipsEmpty": "لا توجد تسجيلات في بطولات بعد.",
+      "table": {
+        "date": "التاريخ",
+        "event": "الحدث",
+        "opponent": "الخصم",
+        "result": "النتيجة",
+        "method": "الطريقة",
+        "round": "الجولة / الوقت",
+        "video": "الفيديو",
+        "watch": "مشاهدة",
+        "status": "الحالة",
+        "weight": "الوزن",
+        "level": "المستوى",
+        "fightsCol": "النزالات"
+      },
+      "official": "رسمي"
+    },
+    "merchandise": {
+      "title": "متجر CSK",
+      "subtitle": "معدات رياضات قتالية احترافية بهوية CSK.",
+      "subtitleContact": "تواصل معنا",
+      "subtitleTrailing": "للشراء — الدفع الإلكتروني سيكون متاحاً في النسخة الثانية.",
+      "empty": "يُحدَّث المتجر حالياً. عاود زيارتنا قريباً."
+    },
+    "contact": {
+      "title": "تواصل مع CSK",
+      "subtitle": "أسئلة عن التدريب أو الأسعار أو دعم البطولات؟ أرسل لنا رسالة.",
+      "formTitle": "أرسل رسالة",
+      "form": {
+        "name": "اسمك",
+        "email": "البريد الإلكتروني",
+        "phoneOptional": "الهاتف (اختياري)",
+        "subjectOptional": "الموضوع (اختياري)",
+        "message": "الرسالة",
+        "messagePlaceholder": "أخبرنا كيف يمكننا المساعدة...",
+        "send": "إرسال الرسالة",
+        "sending": "جاري الإرسال..."
+      },
+      "submitted": "شكراً — تم استلام رسالتك.",
+      "submittedSub": "سيتواصل معك أحد المدربين الرئيسيين قريباً عبر البريد الإلكتروني أو واتساب."
+    },
+    "blog": {
+      "title": "المدونة والأخبار",
+      "subtitle": "قصص من داخل CSK.",
+      "comingSoon": "قريباً",
+      "comingBody": "نُعدّ يوميات تدريبية وملخصات ليالي النزالات ومقابلات مع المدرّبين. هل تريد إشعاراً عند نشر أوّل مقال؟",
+      "notify": "أبلغني"
+    }
+  },
+  "trainee": {
+    "dashboard": {
+      "title": "لوحتي",
+      "subtitle": "حصتك القادمة، آخر التقارير، حالة الاشتراك، التنبيهات.",
+      "panels": {
+        "nextSession": "الحصة القادمة",
+        "latestReport": "آخر تقرير شهري",
+        "subscription": "حالة الاشتراك",
+        "medical": "حالة المستندات الطبية"
+      }
+    },
+    "medical": {
+      "title": "الطبية",
+      "subtitle": "التجديد السنوي مطلوب. المستندات منتهية الصلاحية تمنع التسجيل في البطولات.",
+      "eligibility": "الأهلية للبطولات:",
+      "cleared": "مستوفي الشروط",
+      "notCleared": "غير مستوفٍ",
+      "recordTitle": "الملف الطبي",
+      "documentsTitle": "المستندات",
+      "documentTable": {
+        "type": "النوع",
+        "issueDate": "تاريخ الإصدار",
+        "expiry": "تاريخ الانتهاء",
+        "doctor": "الطبيب",
+        "status": "الحالة",
+        "file": "الملف"
+      },
+      "uploadEmpty": "لم يتم رفع أي مستندات بعد."
+    },
+    "payments": {
+      "title": "الاشتراكات والمدفوعات",
+      "subtitle": "تابع اشتراكاتك في CSK وسجل المدفوعات والإيصالات.",
+      "intentBanner": "تم استلام محاولة الدفع. سيصل التأكيد عبر البريد الإلكتروني وواتساب فور تأكيد البوابة — عادةً خلال دقيقة.",
+      "subscriptionsHeader": "الاشتراكات النشطة",
+      "historyHeader": "سجل المدفوعات",
+      "payInPersonHint": "ادفع شخصياً — الدفع الإلكتروني قريباً",
+      "noSubs": "لا توجد اشتراكات بعد.",
+      "noPayments": "لا توجد مدفوعات مسجّلة بعد."
+    },
+    "championships": {
+      "title": "البطولات",
+      "subtitle": "تصفّح البطولات المفتوحة، سجّل نفسك، وتابع سجل نزالاتك.",
+      "myRecord": "سجل نزالاتي:",
+      "blockedNotice": "التصريح الطبي مفقود أو منتهي الصلاحية. سيتم منع التأكيد. حدّث مستنداتك من صفحة الطبية.",
+      "openHeader": "البطولات المفتوحة ({count})",
+      "myRegsHeader": "تسجيلاتي ({count})",
+      "noOpen": "لا توجد بطولات مفتوحة لم تسجّل فيها بعد.",
+      "noRegs": "لم تسجّل في أي بطولة بعد.",
+      "fightsCol": "النزالات",
+      "tableEvent": "الحدث",
+      "tableDates": "التواريخ",
+      "tableDeadline": "الموعد النهائي للتسجيل",
+      "tableFee": "الرسوم",
+      "actionOptIn": "سجّلني"
+    },
+    "certificates": {
+      "title": "شهاداتي",
+      "subtitle": "الجوائز والتكريمات التي حصلت عليها في CSK.",
+      "empty": "لا توجد شهادات بعد — استمر في التدريب، استمر في التميز."
+    },
+    "paymentsTable": {
+      "group": "المجموعة",
+      "period": "الفترة",
+      "fee": "الرسم (ج.م)",
+      "type": "النوع",
+      "receipt": "الإيصال",
+      "amount": "المبلغ (ج.م)",
+      "action": "إجراء"
+    }
+  },
+  "session": {
+    "title": "الحصة",
+    "attendanceTitle": "الحضور ({count} متدرب)",
+    "quickEvalTitle": "تقييمات سريعة (FR-EVAL-01 — أقل من دقيقة لكل متدرب)",
+    "approvedPlanTitle": "خطة الحصة المعتمدة",
+    "endSession": "إنهاء الحصة",
+    "backToToday": "العودة إلى اليوم",
+    "openDailyReport": "فتح التقرير اليومي ({status})",
+    "composeReport": "كتابة التقرير اليومي",
+    "unitRemoved": "(وحدة محذوفة)",
+    "rounds": "{rounds} جولة"
+  },
+  "sessionPlans": {
+    "title": "خطط حصصي",
+    "subtitle": "ابنِ تسلسل التمارين من الوحدات المعتمدة، ثم أرسلها للمدرب الرئيسي للموافقة.",
+    "newPlan": "+ خطة جديدة",
+    "noPlans": "لا توجد خطط بعد. ابدأ بإنشاء أول خطة.",
+    "table": {
+      "dateOrTemplate": "التاريخ / القالب",
+      "group": "المجموعة",
+      "units": "الوحدات",
+      "open": "فتح"
+    },
+    "templateLabel": "قالب",
+    "templateUntitled": "بدون عنوان"
+  },
+  "monthlyReports": {
+    "title": "تقارير الأداء الشهرية",
+    "subtitle": "إنشاء يدوي في النسخة الأولى؛ سيُجدوَل تلقائياً في الأول من كل شهر بالنسخة الثانية (FR-MR-01).",
+    "generateTitle": "إنشاء",
+    "draftsTitle": "مسودات بانتظار الاعتماد ({count})",
+    "draftsEmpty": "أنشئ تقريراً من الأعلى.",
+    "table": {
+      "trainee": "المتدرب",
+      "period": "الفترة",
+      "attendanceRate": "نسبة الحضور"
+    },
+    "generateBtn": "إنشاء",
+    "approveDeliver": "اعتماد وإرسال"
+  },
+  "hcCertificates": {
+    "title": "الشهادات",
+    "subtitle": "جوائز أفضل متدرب وأفضل مدرب الشهرية (FR-CRT-01..03). راجع القائمة المقترحة من النظام وقم بالاعتماد.",
+    "year": "السنة",
+    "month": "الشهر",
+    "groupForBestTrainee": "المجموعة (أفضل متدرب)",
+    "locationForBestCoach": "الموقع (أفضل مدرب)",
+    "bestTraineeTitle": "قائمة أفضل متدرب — {period}",
+    "bestCoachTitle": "قائمة أفضل مدرب — {period}",
+    "noTraineeData": "لا توجد بيانات لهذه المجموعة / الفترة (لم يُسجّل حضور).",
+    "noCoachData": "لا يوجد مدربون أداروا حصصاً في هذا الموقع خلال الفترة.",
+    "issuedTitle": "تم إصدارها هذه الفترة ({count})",
+    "issuedEmpty": "لم تُصدَر شهادات لهذه الفترة بعد.",
+    "table": {
+      "trainee": "المتدرب",
+      "coach": "المدرب",
+      "score": "الدرجة",
+      "attendance": "الحضور",
+      "avgEffort": "متوسط المجهود",
+      "sessions": "الحصص",
+      "trainees": "المتدربون",
+      "reportsApproved": "تقارير معتمدة",
+      "action": "إجراء",
+      "recipient": "المستلم",
+      "award": "الجائزة",
+      "narrative": "الوصف",
+      "issuedBy": "أصدرها",
+      "date": "التاريخ"
+    }
+  },
+  "hcMedical": {
+    "title": "الالتزام الطبي",
+    "subtitle": "نظرة عامة على الوثائق المنتهية أو القاربة على الانتهاء لكل متدرب (FR-MED-03).",
+    "expiredTitle": "منتهية ({count})",
+    "expiringTitle": "تنتهي خلال 30 يوماً ({count})",
+    "upcomingTitle": "قريباً (31–60 يوماً، {count})",
+    "empty": "لا يوجد شيء في هذه الفئة.",
+    "table": {
+      "trainee": "المتدرب",
+      "type": "النوع",
+      "expiry": "تاريخ الانتهاء",
+      "days": "الأيام",
+      "file": "الملف",
+      "open": "فتح"
+    },
+    "agoSuffix": "منذ {n} يوم",
+    "inSuffix": "خلال {n} يوم"
+  },
+  "adminUsers": {
+    "title": "المستخدمون",
+    "subtitle": "الدليل الكامل. صفِّ حسب الدور/الحالة؛ علِّق أو رقِّ مباشرة.",
+    "role": "الدور",
+    "status": "الحالة",
+    "search": "بحث",
+    "searchPlaceholder": "الاسم أو البريد أو الهاتف",
+    "countLabel": "{count} مستخدم",
+    "table": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "lastLogin": "آخر دخول",
+      "never": "لم يدخل بعد"
+    },
+    "noResults": "لا يوجد مستخدمون يطابقون المرشّحات."
+  },
+  "hcGroups": {
+    "title": "المجموعات",
+    "subtitle": "مجموعات أسبوعية ثابتة. السعة الافتراضية 20 (FR-GRP-01)؛ يمكن تعديلها لكل مجموعة.",
+    "newButton": "+ مجموعة جديدة",
+    "table": {
+      "group": "المجموعة",
+      "location": "الموقع",
+      "discipline": "الرياضة",
+      "coach": "المدرب",
+      "schedule": "الجدول",
+      "enrolled": "المسجَّلون",
+      "actions": "إجراءات",
+      "manage": "إدارة"
+    },
+    "empty": "لا توجد مجموعات بعد. أنشئ واحدة للبدء.",
+    "newPage": {
+      "title": "مجموعة جديدة",
+      "subtitle": "المجموعة هي مجموعة أسبوعية ثابتة في موقع واحد. يُسجَّل المتدربون بعد الإنشاء.",
+      "submit": "إنشاء المجموعة"
+    }
+  },
+  "hcTrainingUnits": {
+    "title": "الوحدات التدريبية",
+    "subtitle": "كتالوج التمارين المعتمد. يجمعها المدربون في خطط جلسات معتمدة.",
+    "newButton": "+ وحدة تدريبية جديدة",
+    "filters": {
+      "discipline": "الرياضة",
+      "category": "الفئة",
+      "difficulty": "الصعوبة"
+    },
+    "table": {
+      "name": "الاسم",
+      "category": "الفئة",
+      "difficulty": "الصعوبة",
+      "disciplines": "الرياضات",
+      "media": "الوسائط",
+      "status": "الحالة",
+      "actions": "إجراءات",
+      "edit": "تعديل"
+    },
+    "empty": "لا توجد وحدات تدريبية تطابق المرشّحات الحالية."
+  },
+  "hcSubscriptions": {
+    "title": "الاشتراكات",
+    "subtitle": "الاشتراكات الشهرية النشطة. الافتراضي 12 جلسة شهرياً (FR-FIN-01).",
+    "newButton": "+ اشتراك جديد",
+    "activeTitle": "الاشتراكات النشطة ({count})",
+    "table": {
+      "trainee": "المتدرب",
+      "group": "المجموعة",
+      "period": "الفترة",
+      "fee": "الرسوم",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "empty": "لا توجد اشتراكات نشطة بعد."
+  },
+  "hcChampionships": {
+    "title": "البطولات",
+    "subtitle": "أنشئ الفعاليات وتابع التسجيلات والنتائج (FR-CH).",
+    "newCardTitle": "فعالية جديدة",
+    "form": {
+      "name": "اسم الفعالية",
+      "organizer": "الجهة المنظِّمة",
+      "location": "المكان",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "deadline": "آخر موعد للتسجيل",
+      "fee": "رسوم التسجيل (جنيه)",
+      "disciplines": "الرياضات",
+      "allowedLevels": "المستويات المسموح بها",
+      "weightCategories": "فئات الوزن (مفصولة بفاصلة)",
+      "weightPlaceholder": "60 كجم، 65 كجم، 70 كجم، 75 كجم",
+      "ageCategories": "الفئات العمرية (مفصولة بفاصلة)",
+      "agePlaceholder": "أشبال، ناشئون، كبار",
+      "official": "فعالية رسمية",
+      "notes": "ملاحظات داخلية",
+      "submit": "إنشاء البطولة"
+    },
+    "listTitle": "كل البطولات",
+    "table": {
+      "event": "الفعالية",
+      "dates": "التواريخ",
+      "deadline": "آخر موعد",
+      "fee": "الرسوم",
+      "registrations": "التسجيلات",
+      "actions": "إجراءات",
+      "open": "فتح"
+    },
+    "empty": "لا توجد بطولات بعد."
+  },
+  "hcBeltExams": {
+    "title": "اختبارات الأحزمة",
+    "subtitle": "حدِّد مواعيد اختبارات الاتحادات وسجّل النتائج الناجحة (FR-BLT-04 يحدّث مستوى المتدرب تلقائياً).",
+    "newCardTitle": "تحديد اختبار جديد",
+    "form": {
+      "discipline": "الرياضة",
+      "pickPlaceholder": "— اختر —",
+      "date": "التاريخ",
+      "location": "المكان",
+      "locationPlaceholder": "مقر الاتحاد، القاهرة",
+      "federation": "الاتحاد",
+      "examiner": "الممتحِن",
+      "fee": "الرسوم (جنيه)",
+      "submit": "تحديد الاختبار"
+    },
+    "listTitle": "الاختبارات المجدولة",
+    "table": {
+      "date": "التاريخ",
+      "discipline": "الرياضة",
+      "federation": "الاتحاد",
+      "examiner": "الممتحِن",
+      "results": "النتائج",
+      "actions": "إجراءات",
+      "open": "فتح"
+    },
+    "empty": "لا توجد اختبارات مجدولة."
+  },
+  "hcMerchandise": {
+    "title": "البضائع",
+    "subtitle": "كتالوج تديره إدارة فايت كلوب مركزياً. المبيعات 100% للأكاديمية بصرف النظر عن الموقع (FR-MRC-03).",
+    "newButton": "+ صنف جديد",
+    "lowStockTitle": "تنبيه مخزون منخفض ({count})",
+    "lowStockDetail": "{stock} متبقي · الحد {threshold}",
+    "catalogTitle": "الكتالوج ({count})",
+    "table": {
+      "item": "الصنف",
+      "category": "الفئة",
+      "cost": "التكلفة",
+      "sale": "البيع",
+      "stock": "المخزون",
+      "status": "الحالة",
+      "sales": "المبيعات",
+      "actions": "إجراءات",
+      "open": "فتح"
+    },
+    "empty": "لا توجد أصناف بعد. أضف قفازات الملاكمة، اللفافات، التيشرتات، إلخ."
+  },
+  "hcReviewPlan": {
+    "title": "مراجعة خطة الجلسة",
+    "coachCard": "المدرب",
+    "sequenceTitle": "التسلسل ({count} وحدة)",
+    "unknownUnit": "(وحدة غير معروفة)",
+    "durationOverride": "{seconds} ث (مخصَّص)",
+    "durationDefault": "{seconds} ث افتراضي",
+    "roundsOverride": "{rounds} جولة (مخصَّص)",
+    "roundsDefault": "{rounds} جولة افتراضية",
+    "dash": "—",
+    "planNotes": "ملاحظات الخطة"
+  },
+  "hcReviewReport": {
+    "title": "مراجعة التقرير اليومي",
+    "coachSummary": "ملخص المدرب",
+    "incidents": "الحوادث",
+    "submittedBy": "أرسله {name} في {when}",
+    "attendanceTitle": "الحضور ({count})",
+    "evaluationsTitle": "التقييمات السريعة ({count})",
+    "effortBadge": "الجهد {score}/10",
+    "flaggedPrefix": "مُعلَّم: {bodyPart}{skill}",
+    "flaggedSkillSuffix": " · {skill}"
+  },
+  "hcApprovalActions": {
+    "approve": "اعتماد",
+    "approveDeliver": "اعتماد وتسليم",
+    "reject": "رفض",
+    "cancelReject": "إلغاء الرفض",
+    "confirmReject": "تأكيد الرفض",
+    "rejectPlaceholder": "لماذا تم الرفض؟ ستُعاد للمدرب للمراجعة.",
+    "rejectReportPlaceholder": "ما الذي يحتاج إلى مراجعة؟",
+    "shortCommentError": "يرجى كتابة تعليق مختصر (3 أحرف على الأقل).",
+    "shortCommentRejectError": "يرجى كتابة تعليق مختصر (3 أحرف على الأقل) لشرح سبب الرفض."
+  },
+  "coachAttendance": {
+    "noTrainees": "لا يوجد متدربون مسجَّلون في هذه المجموعة.",
+    "savedAt": "محفوظ {time}",
+    "saveBtn": "حفظ الحضور",
+    "saveBtnIncomplete": "حفظ الحضور (غير مكتمل)",
+    "marks": {
+      "present": "حاضر",
+      "late": "متأخر",
+      "absent": "غائب",
+      "excused": "بعذر"
+    }
+  },
+  "coachQuickEval": {
+    "effortLabel": "الجهد (1–10)",
+    "notesPlaceholder": "ملاحظات سريعة...",
+    "bodyPartPlaceholder": "تعليم جزء من الجسم (اختياري)",
+    "skillPlaceholder": "تعليم مهارة (اختياري)",
+    "saveBtn": "حفظ التقييم السريع"
+  },
+  "coachDailyReport": {
+    "title": "التقرير اليومي",
+    "autoTitle": "مدرَج تلقائياً",
+    "auto": {
+      "present": "حضور",
+      "late": "تأخر",
+      "absent": "غياب",
+      "quickEvals": "تقييمات سريعة"
+    },
+    "notesTitle": "ملاحظات المدرب",
+    "rejectedPrefix": "مرفوض:",
+    "summary": "ملخص الحصة",
+    "summaryPlaceholder": "ماذا غطّت المجموعة اليوم؟ النقاط المضيئة والعكس.",
+    "incidents": "الحوادث (اختياري)",
+    "incidentsPlaceholder": "أي إصابات أو حوادث سلوكية أو مشاكل معدات، إلخ.",
+    "saveDraft": "حفظ المسودة",
+    "submitForApproval": "إرسال للاعتماد",
+    "resubmit": "إعادة الإرسال",
+    "pullBack": "سحب إلى المسودة"
+  },
+  "coachPlanNew": {
+    "title": "خطة حصة جديدة",
+    "subtitle": "يمكن حفظ المسودات دون إرسالها. عند الجاهزية، أرسلها لاعتماد المدرب الرئيسي (FR-SES-03).",
+    "submit": "حفظ المسودة"
+  },
+  "coachPlanDetail": {
+    "sessionPlan": "خطة الحصة",
+    "untitledTemplate": "نموذج بدون اسم",
+    "feedbackTitle": "ملاحظات المدرب الرئيسي",
+    "reviewedBy": "راجعها {name} في {when}",
+    "saveChanges": "حفظ التغييرات",
+    "readSequenceTitle": "التسلسل ({count})",
+    "removedUnit": "(وحدة محذوفة)",
+    "durationOverride": "{seconds} ث",
+    "durationDefault": "افتراضي {seconds} ث",
+    "roundsLabel": "{rounds} جولة",
+    "roundsDefault": "افتراضي {rounds}",
+    "dash": "—",
+    "planNotes": "ملاحظات الخطة"
+  },
+  "coachPlanBuilder": {
+    "group": "المجموعة",
+    "groupPlaceholder": "— اختر مجموعة —",
+    "sessionDate": "موعد الحصة",
+    "templateLegend": "النموذج (FR-SES-05)",
+    "templateCheckbox": "حفظ كنموذج (قابل لإعادة الاستخدام؛ بدون تاريخ ثابت)",
+    "templateName": "اسم النموذج",
+    "templateNamePlaceholder": "مثل: ملاكمة — أساسيات، 60 دقيقة",
+    "availableTitle": "الوحدات المتاحة",
+    "availableHint": "اضغط للإضافة إلى التسلسل.",
+    "filterPlaceholder": "فلترة بالاسم أو الفئة...",
+    "noMatches": "لا توجد نتائج.",
+    "addBtn": "إضافة",
+    "sequenceTitle": "تسلسل الحصة ({count})",
+    "sequenceHint": "الترتيب مهم. يمكن لكل وحدة تجاوز المدة/الجولات وإضافة ملاحظات المدرب.",
+    "noUnitsYet": "لا توجد وحدات بعد — اختر من القائمة على اليسار.",
+    "unknownUnit": "(غير معروف)",
+    "removeBtn": "إزالة",
+    "durationPlaceholder": "تجاوز المدة (افتراضي {seconds} ث)",
+    "roundsPlaceholder": "تجاوز الجولات (افتراضي {rounds})",
+    "unitNotesPlaceholder": "ملاحظات المدرب لهذه الوحدة...",
+    "planNotesLabel": "ملاحظات على مستوى الخطة",
+    "cancel": "إلغاء"
+  },
+  "coachPlanActions": {
+    "submitForApproval": "إرسال للاعتماد",
+    "resubmit": "إعادة الإرسال",
+    "pullBack": "سحب إلى المسودة"
+  },
+  "certificates": {
+    "issuedBy": "أصدرها {name}",
+    "downloadPdf": "تنزيل PDF ←",
+    "defaultEmpty": "لا توجد شهادات بعد — استمر في التدريب، استمر في الكسب.",
+    "awards": {
+      "BEST_TRAINEE_GROUP": "أفضل متدرب — المجموعة",
+      "BEST_TRAINEE_LOCATION": "أفضل متدرب — الموقع",
+      "BEST_COACH_LOCATION": "أفضل مدرب — الموقع",
+      "BELT_PROGRESSION": "ترقية حزام",
+      "CHAMPIONSHIP": "بطولة",
+      "DEFAULT": "جائزة الأكاديمية"
+    }
+  },
+  "unitBrowser": {
+    "discipline": "الرياضة",
+    "category": "الفئة",
+    "difficulty": "الصعوبة",
+    "table": {
+      "name": "الاسم",
+      "category": "الفئة",
+      "difficulty": "الصعوبة",
+      "disciplines": "الرياضات",
+      "bodyParts": "أجزاء الجسم",
+      "media": "الوسائط"
+    },
+    "partsCount": "{count} جزء",
+    "viewLink": "عرض",
+    "empty": "لا توجد وحدات تدريبية منشورة تطابق المرشّحات."
+  },
+  "coachCerts": {
+    "title": "جوائزي",
+    "subtitle": "تكريمات مكتسبة كمدرب في الأكاديمية."
+  },
+  "coachUnits": {
+    "title": "الوحدات التدريبية",
+    "subtitle": "مكتبة للقراءة فقط من التمارين المعتمدة. اختر منها عند بناء خطة الحصة."
+  },
+  "internUnits": {
+    "title": "الوحدات التدريبية (للدراسة)",
+    "subtitle": "كتالوج للقراءة فقط. تصفّح التمارين المعتمدة لتتعلم المنهج."
+  },
+  "hcGroupDetail": {
+    "subtitle": "{location} · {discipline} · {enrolled} / {capacity} مسجَّلون",
+    "details": "التفاصيل",
+    "rosterTitle": "القائمة ({enrolled} / {capacity})",
+    "saveChanges": "حفظ التغييرات"
+  },
+  "hcChampDetail": {
+    "subtitle": "{location} · {start} – {end} · الرسوم {fee} جنيه",
+    "registrationsTitle": "التسجيلات ({count})",
+    "table": {
+      "trainee": "المتدرب",
+      "status": "الحالة",
+      "weight": "الوزن",
+      "level": "المستوى",
+      "fights": "النزالات",
+      "actions": "إجراءات"
+    },
+    "kg": "{kg} كجم",
+    "dash": "—",
+    "empty": "لا توجد تسجيلات بعد.",
+    "recordFightTitle": "تسجيل نتيجة نزال"
+  },
+  "hcBeltExamDetail": {
+    "title": "اختبار حزام {discipline}",
+    "subtitle": "{date} · {location} · الممتحِن {examiner} · الرسوم {fee} جنيه",
+    "recordedTitle": "النتائج المسجَّلة ({count})",
+    "table": {
+      "trainee": "المتدرب",
+      "result": "النتيجة",
+      "score": "الدرجة",
+      "newLevel": "المستوى الجديد",
+      "recorded": "تاريخ التسجيل"
+    },
+    "empty": "لا توجد نتائج بعد.",
+    "addResultTitle": "إضافة نتيجة"
+  },
+  "hcMerchDetail": {
+    "subtitle": "{nameAr} · البيع {sale} جنيه · التكلفة {cost} جنيه",
+    "lowStock": "مخزون منخفض",
+    "logSaleTitle": "تسجيل عملية بيع",
+    "editTitle": "تعديل الصنف",
+    "saveChanges": "حفظ التغييرات",
+    "recentSalesTitle": "المبيعات الأخيرة ({count})",
+    "table": {
+      "date": "التاريخ",
+      "customer": "العميل",
+      "soldBy": "البائع",
+      "variant": "النوع",
+      "qty": "الكمية",
+      "totalEgp": "الإجمالي (جنيه)"
+    },
+    "walkIn": "زبون عابر",
+    "empty": "لا توجد مبيعات بعد.",
+    "newPage": {
+      "title": "صنف بضاعة جديد",
+      "subtitle": "أضف للكتالوج المركزي. يظهر الصنف في كتالوج الموقع العام للقراءة فقط.",
+      "submit": "إنشاء الصنف"
+    }
+  },
+  "hcUnitDetail": {
+    "subtitle": "{nameAr} · إصدار {version}",
+    "editTitle": "تعديل الوحدة",
+    "saveChanges": "حفظ التغييرات",
+    "versionsTitle": "الإصدارات الأخيرة (FR-UNIT-06)",
+    "versionLabel": "إصدار {version}",
+    "dash": "—",
+    "newPage": {
+      "title": "وحدة تدريبية جديدة",
+      "subtitle": "يمكن للمسودات إغفال فيديو/صورة العرض. النشر يتطلبها (FR-UNIT-03).",
+      "submit": "إنشاء الوحدة"
+    }
+  },
+  "hcSubsNew": {
+    "title": "اشتراك جديد",
+    "subtitle": "الافتراضي: 12 جلسة/شهر (FR-FIN-01). التسعير لكل موقع/رياضة بانتظار تأكيد كابتن سعيد (SRS §14.2)."
+  },
+  "adminLocations": {
+    "title": "المواقع",
+    "subtitle": "إدارة مقرات الأكاديمية والمواقع الشريكة. اضبط نسب تقسيم الإيرادات الافتراضية لكل مصدر.",
+    "newButton": "+ موقع جديد",
+    "table": {
+      "name": "الاسم",
+      "district": "الحي",
+      "ownership": "الملكية",
+      "groups": "المجموعات",
+      "sessions": "الحصص",
+      "status": "الحالة",
+      "actions": "إجراءات",
+      "edit": "تعديل"
+    },
+    "ownership": {
+      "cskOwned": "ملك للأكاديمية",
+      "partner": "شريك",
+      "patronage": "رعاية"
+    },
+    "empty": "لا توجد مواقع بعد. أنشئ واحداً للبدء.",
+    "newPage": {
+      "title": "موقع جديد",
+      "subtitle": "عند الإنشاء، تُزرع قواعد التقسيم الافتراضية لكل مصدر تلقائياً حسب نوع الملكية (راجع SRS §10.1).",
+      "submit": "إنشاء الموقع"
+    },
+    "detail": {
+      "details": "التفاصيل",
+      "saveChanges": "حفظ التغييرات",
+      "splitsTitle": "تقسيمات الإيرادات الافتراضية (SRS §10.1)",
+      "splitsTable": {
+        "stream": "المصدر",
+        "venue": "نسبة المكان %",
+        "csk": "نسبة الأكاديمية %",
+        "coach": "نسبة المدرب %",
+        "other": "أخرى %",
+        "otherLabel": "وصف الأخرى"
+      },
+      "splitsNote": "تتجاوز عقود المدربين هذه الإعدادات الافتراضية عند الدفع. تعديل التقسيمات للمشرف فقط ويفتح محرراً (لاحقاً)."
+    }
+  },
+  "adminDisciplines": {
+    "title": "الرياضات",
+    "subtitle": "كتالوج عام. لكل رياضة شجرة مهارات خاصة بها تُستخدم في التقييمات.",
+    "newButton": "+ رياضة جديدة",
+    "table": {
+      "name": "الاسم",
+      "category": "الفئة",
+      "skills": "المهارات",
+      "groups": "المجموعات",
+      "status": "الحالة",
+      "actions": "إجراءات",
+      "edit": "تعديل"
+    },
+    "skillsSummary": "{count} مهارة · {preview}",
+    "empty": "لا توجد رياضات بعد.",
+    "newPage": {
+      "title": "رياضة جديدة",
+      "subtitle": "تصبح المهارات هنا أعمدة شبكة المهارات في تقييم خريطة الجسم (FR-EVAL-04).",
+      "submit": "إنشاء الرياضة"
+    },
+    "detail": {
+      "saveChanges": "حفظ التغييرات"
+    }
+  },
+  "adminContracts": {
+    "title": "عقود المدربين",
+    "subtitle": "نسب مخصَّصة لكل مدرب فوق الإعدادات الافتراضية للموقع (FR-FIN-09).",
+    "newButton": "+ عقد جديد",
+    "allLocations": "كل المواقع",
+    "table": {
+      "coach": "المدرب",
+      "scope": "النطاق",
+      "sub": "الاشتراك %",
+      "private": "الخاصة %",
+      "privateFixed": "الخاصة ثابت",
+      "belt": "الحزام %",
+      "champ": "البطولة %",
+      "effective": "السريان",
+      "actions": "إجراءات",
+      "edit": "تعديل"
+    },
+    "empty": "لا توجد عقود مدربين مخصصة بعد — تنطبق الإعدادات الافتراضية للموقع.",
+    "newPage": {
+      "title": "عقد مدرب جديد",
+      "subtitle": "تجاوز إعدادات الموقع لمدرب واحد. اترك المصدر فارغاً لوراثة قاعدة الموقع.",
+      "submit": "إنشاء العقد"
+    },
+    "detail": {
+      "title": "عقد مدرب",
+      "saveChanges": "حفظ التغييرات"
+    }
+  },
+  "adminPayments": {
+    "title": "المدفوعات",
+    "subtitle": "آخر 200 عملية دفع مع التقسيمات المحسوبة تلقائياً (FR-FIN-08).",
+    "table": {
+      "date": "التاريخ",
+      "receipt": "الإيصال",
+      "payer": "الدافع",
+      "stream": "المصدر",
+      "method": "الطريقة",
+      "gross": "الإجمالي (جنيه)",
+      "splits": "التقسيمات"
+    },
+    "empty": "لا توجد مدفوعات في النطاق المحدد."
+  },
+  "adminAnalytics": {
+    "title": "التحليلات",
+    "subtitle": "احتفاظ الأفواج، القيمة العمرية، مقاييس المدربين، اتجاهات الإيرادات + الحضور ({months} شهر).",
+    "monthsLabel": "أشهر",
+    "kpi": {
+      "netRevenue": "صافي الإيرادات",
+      "avgAttendance": "متوسط الحضور",
+      "avgLtv": "متوسط القيمة العمرية",
+      "topCoach": "أفضل مدرب"
+    },
+    "revenueTitle": "صافي الإيرادات شهرياً",
+    "attendanceTitle": "نسبة الحضور شهرياً",
+    "cohortsTitle": "احتفاظ الأفواج (أفواج الاشتراكات)",
+    "ltvTitle": "القيمة العمرية",
+    "perCohort": "لكل فوج",
+    "perDiscipline": "لكل رياضة",
+    "ltvCohortTable": {
+      "cohort": "الفوج",
+      "trainees": "المتدربون",
+      "totalNet": "إجمالي الصافي (جنيه)",
+      "avgLtv": "متوسط القيمة العمرية",
+      "avgLtvMonth": "متوسط القيمة العمرية/شهر"
+    },
+    "ltvDiscTable": {
+      "discipline": "الرياضة",
+      "trainees": "المتدربون",
+      "totalNet": "إجمالي الصافي (جنيه)",
+      "avgLtv": "متوسط القيمة العمرية"
+    },
+    "ltvEmpty": "لا توجد مدفوعات في هذه الفترة بعد.",
+    "leaderboardTitle": "ترتيب أداء المدربين",
+    "leaderboardTable": {
+      "coach": "المدرب",
+      "score": "النقاط",
+      "sessions": "الحصص",
+      "trainees": "المتدربون",
+      "avgEffort": "متوسط الجهد",
+      "reportsApproved": "التقارير المعتمدة"
+    },
+    "leaderboardEmpty": "لا يوجد نشاط مدربين في هذه الفترة."
+  },
+  "coachEvalNew": {
+    "title": "تقييم خريطة الجسم التفصيلي",
+    "subtitle": "اضغط على أي جزء من الجسم في الشكل لإضافة درجة وتعليق."
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "newSuffix": "{count} جديد",
+    "subtitle": "صندوق الوارد داخل التطبيق + تفضيلات لكل قناة. الأحداث الحرجة (الدفع المتأخر، انتهاء الوثائق الطبية) لا يمكن إلغاء الاشتراك بها (FR-NOT-04).",
+    "inboxTitle": "الوارد ({count})",
+    "empty": "لا توجد إشعارات بعد.",
+    "preferencesTitle": "تفضيلات القنوات",
+    "markAllRead": "تعليم الكل كمقروء",
+    "channels": {
+      "whatsapp": "واتساب",
+      "email": "البريد الإلكتروني"
+    },
+    "preferencesHint": "اختر قناة لإيقاف استلام الإشعارات غير الحرجة عليها. التنبيهات الحرجة (الدفع المتأخر، انتهاء الوثائق الطبية) ستظل تصلك عبر كل القنوات.",
+    "muteLabel": "كتم {label}",
+    "mutedBadge": "مكتوم",
+    "receivingBadge": "يستقبل",
+    "savePreferences": "حفظ التفضيلات",
+    "savedAt": "محفوظ {time}"
+  },
+  "common2": {
+    "cancel": "إلغاء",
+    "pickPlaceholder": "— اختر —"
+  },
+  "hcGenerateMonthly": {
+    "traineeLabel": "المتدرب",
+    "yearLabel": "السنة",
+    "monthLabel": "الشهر",
+    "defaultLabel": "إنشاء"
+  },
+  "hcApproveUser": {
+    "label": "اعتماد وترحيب"
+  },
+  "hcConfirmRegistration": {
+    "label": "تأكيد"
+  },
+  "hcIssueCert": {
+    "issued": "✓ صدرت",
+    "issue": "إصدار",
+    "confirm": "تأكيد الإصدار",
+    "cancel": "إلغاء"
+  },
+  "hcRecordBelt": {
+    "trainee": "المتدرب",
+    "pickPlaceholder": "— اختر —",
+    "result": "النتيجة",
+    "passed": "نجح",
+    "failed": "رسب",
+    "scoreOpt": "الدرجة (اختياري)",
+    "newLevelOpt": "المستوى الجديد (اختياري)",
+    "autoPlaceholder": "— تلقائي —",
+    "record": "تسجيل"
+  },
+  "hcRecordFight": {
+    "noConfirmed": "لا توجد تسجيلات مؤكَّدة لتسجيل نتائج لها. أكِّد تسجيلاً أولاً.",
+    "fighter": "المقاتل",
+    "opponent": "الخصم",
+    "outcome": "النتيجة",
+    "outcomes": {
+      "win": "فوز",
+      "loss": "خسارة",
+      "draw": "تعادل",
+      "noContest": "بدون مباراة"
+    },
+    "method": "الطريقة",
+    "methods": {
+      "ko": "ضربة قاضية",
+      "tko": "ضربة فنية",
+      "decision": "قرار التحكيم",
+      "submission": "استسلام",
+      "dq": "تعليق",
+      "other": "أخرى"
+    },
+    "round": "الجولة",
+    "time": "الوقت (دد:ثث)",
+    "videoUrl": "رابط الفيديو (اختياري)",
+    "notes": "ملاحظات",
+    "record": "تسجيل النتيجة"
+  },
+  "hcLogSale": {
+    "saleLocation": "موقع البيع",
+    "customerOpt": "العميل (اختياري)",
+    "walkIn": "— زبون عابر —",
+    "method": "الطريقة",
+    "methods": {
+      "cash": "نقدي",
+      "vodafone": "فودافون كاش",
+      "transfer": "تحويل بنكي"
+    },
+    "variant": "النوع",
+    "quantity": "الكمية",
+    "unitPrice": "سعر الوحدة (جنيه)",
+    "receipt": "إيصال {ref}",
+    "lowStockNow": "مخزون منخفض الآن",
+    "logSale": "تسجيل البيع"
+  },
+  "hcGroupRoster": {
+    "addTrainee": "إضافة متدرب",
+    "chooseTrainee": "— اختر متدرباً —",
+    "overrideCapacity": "تجاوز السعة",
+    "enroll": "تسجيل",
+    "trainee": "المتدرب",
+    "enrolledSince": "مسجَّل منذ",
+    "actions": "إجراءات",
+    "empty": "لا يوجد متدربون مسجَّلون بعد.",
+    "endEnrollment": "إنهاء التسجيل",
+    "endConfirm": "إنهاء هذا التسجيل؟"
+  },
+  "adminUserActions": {
+    "approve": "اعتماد",
+    "suspendConfirm": "تعليق هذا الحساب؟",
+    "suspend": "تعليق",
+    "reactivate": "إعادة تفعيل",
+    "promoteConfirm": "ترقية هذا المتدرب إلى مدرب؟",
+    "promote": "← مدرب"
+  },
+  "adminContractForm": {
+    "coach": "المدرب",
+    "pickPlaceholder": "— اختر —",
+    "locationOpt": "الموقع (اختياري)",
+    "allOption": "— الكل —",
+    "disciplineOpt": "الرياضة (اختيارية)",
+    "streamOverrides": "تجاوز نسب المصادر",
+    "streamHint": "اترك الحقل فارغاً للرجوع إلى افتراضي الموقع. تتحمل الأكاديمية الفارق عند تعديل نسبة المدرب.",
+    "subscriptionPercent": "الاشتراك %",
+    "privatePercent": "الحصة الخاصة %",
+    "privateFixed": "الخاصة — معدل ثابت (جنيه)",
+    "beltPercent": "اختبار الحزام %",
+    "champPercent": "البطولة %",
+    "effectiveFrom": "ساري من",
+    "effectiveTo": "ساري حتى (اختياري)",
+    "notes": "ملاحظات",
+    "cancel": "إلغاء"
+  },
+  "adminDisciplineForm": {
+    "nameEn": "الاسم (إنجليزي)",
+    "nameAr": "الاسم (عربي)",
+    "category": "الفئة",
+    "categories": {
+      "boxing": "ملاكمة",
+      "kickboxing": "كيك بوكسينج",
+      "mma": "MMA",
+      "karate": "كاراتيه",
+      "fitness": "لياقة",
+      "other": "أخرى"
+    },
+    "skillsTaxonomy": "شجرة المهارات",
+    "skillsHint": "(مفصولة بفاصلة أو سطر؛ تستخدم في التقييمات — FR-EVAL-04)",
+    "skillsPlaceholder": "جاب، كروس، هوكس، أبركتس، حركة قدمين، ...",
+    "active": "نشط",
+    "cancel": "إلغاء"
+  },
+  "adminLocationForm": {
+    "nameEn": "الاسم (إنجليزي)",
+    "nameAr": "الاسم (عربي)",
+    "district": "الحي",
+    "ownership": "الملكية",
+    "ownerships": {
+      "cskOwned": "ملك للأكاديمية (افتراضي فايت كلوب)",
+      "partner": "مكان شريك",
+      "patronage": "رعاية / شراكة"
+    },
+    "address": "العنوان",
+    "latitudeOpt": "خط العرض (اختياري)",
+    "longitudeOpt": "خط الطول (اختياري)",
+    "contactPerson": "شخص الاتصال",
+    "contactPhone": "هاتف الاتصال",
+    "active": "نشط",
+    "cancel": "إلغاء"
+  },
+  "hcGroupForm": {
+    "days": {
+      "mon": "الإثنين",
+      "tue": "الثلاثاء",
+      "wed": "الأربعاء",
+      "thu": "الخميس",
+      "fri": "الجمعة",
+      "sat": "السبت",
+      "sun": "الأحد"
+    },
+    "groupName": "اسم المجموعة",
+    "groupNamePlaceholder": "مثل: ملاكمة — مبتدئون — إثنين/أربعاء مساء",
+    "location": "الموقع",
+    "discipline": "الرياضة",
+    "primaryCoach": "المدرب الرئيسي",
+    "noneYet": "— لا أحد بعد —",
+    "internOpt": "متدرب مساعد (اختياري)",
+    "none": "— لا أحد —",
+    "weeklySchedule": "الجدول الأسبوعي (FR-GRP-04)",
+    "startTime": "وقت البدء",
+    "endTime": "وقت الانتهاء",
+    "levelBand": "نطاق المستوى",
+    "any": "— أي —",
+    "newbie": "N (مبتدئ)",
+    "ageMin": "الحد الأدنى للعمر",
+    "ageMax": "الحد الأقصى للعمر",
+    "capacity": "السعة",
+    "capacityHint": "(افتراضي 20، FR-GRP-01)",
+    "active": "نشطة",
+    "cancel": "إلغاء"
+  },
+  "hcMerchForm": {
+    "nameEn": "الاسم (إنجليزي)",
+    "nameAr": "الاسم (عربي)",
+    "description": "الوصف",
+    "category": "الفئة",
+    "categories": {
+      "gloves": "قفازات",
+      "protective": "معدات حماية",
+      "apparel": "ملابس",
+      "wraps": "لفافات",
+      "accessories": "إكسسوارات",
+      "other": "أخرى"
+    },
+    "active": "نشط",
+    "photoUrls": "روابط الصور (مفصولة بفاصلة)",
+    "photoUrlsPlaceholder": "https://...، https://...",
+    "variants": "الأنواع / SKUs (مفصولة بفاصلة)",
+    "variantsPlaceholder": "S-أسود، M-أسود، L-أسود",
+    "cost": "التكلفة (جنيه)",
+    "sale": "البيع (جنيه)",
+    "stock": "المخزون",
+    "lowStockAt": "الحد الأدنى للمخزون",
+    "cancel": "إلغاء"
+  },
+  "hcUnitForm": {
+    "nameEn": "الاسم (إنجليزي)",
+    "nameAr": "الاسم (عربي)",
+    "descriptionEn": "الوصف (إنجليزي)",
+    "descriptionAr": "الوصف (عربي)",
+    "category": "الفئة",
+    "difficulty": "الصعوبة (1–5)",
+    "equipment": "المعدات",
+    "equipmentPlaceholder": "قفازات، لفافات",
+    "disciplines": "الرياضات",
+    "targetBodyParts": "أجزاء الجسم المستهدفة (FR-EVAL-03)",
+    "targetSkills": "المهارات المستهدفة (مفصولة بفاصلة، من شجرة الرياضة)",
+    "targetSkillsPlaceholder": "جاب، كروس، حركة قدمين",
+    "recommendedDose": "الجرعة الموصى بها",
+    "doseHint": "إما مدة بالثواني، أو جولات × مدة الجولة.",
+    "durationSec": "المدة (ثواني)",
+    "rounds": "الجولات",
+    "roundDurationSec": "مدة الجولة (ث)",
+    "demoMedia": "وسائط العرض (FR-UNIT-03)",
+    "demoMediaHint": "v1: الصق رابط https قابل للوصول علناً. v2: رفع مباشر عبر مهايئ التخزين S3/R2.",
+    "mediaUrl": "رابط الوسائط (https)",
+    "mediaType": "النوع",
+    "publishedLabel": "منشور (يجب أن يحتوي على وسائط العرض — FR-UNIT-03)",
+    "changeNote": "ملاحظة التغيير (اختياري، FR-UNIT-06)",
+    "changeNotePlaceholder": "ماذا تغيَّر؟",
+    "cancel": "إلغاء"
+  },
+  "hcSubsForm": {
+    "trainee": "المتدرب",
+    "pickPlaceholder": "— اختر —",
+    "group": "المجموعة",
+    "monthlyFee": "الرسوم الشهرية (جنيه)",
+    "monthlyFeePlaceholder": "مثل: 1000",
+    "sessionsMonth": "جلسات/شهر",
+    "startMonth": "شهر البدء",
+    "discountPercent": "نسبة الخصم (اختيارية)",
+    "discountReason": "سبب الخصم (اختياري)",
+    "discountReasonPlaceholder": "مثل: خصم إخوة",
+    "create": "إنشاء الاشتراك",
+    "cancel": "إلغاء"
+  },
+  "detailedEval": {
+    "evaluatingHeader": "تقييم {trainee} في {group}",
+    "cadenceLabel": "التواتر",
+    "cadenceWeekly": "أسبوعي",
+    "cadenceMonthly": "شهري",
+    "bodyMapTitle": "خريطة الجسم (FR-EVAL-02)",
+    "skillsTitle": "المهارات الفنية (FR-EVAL-04)",
+    "noSkills": "لا توجد مهارات مُعرَّفة لهذه الرياضة. عدّل الرياضة لإضافة شجرة المهارات.",
+    "skillCommentPlaceholder": "تعليق اختياري",
+    "summaryComment": "تعليق ملخّص",
+    "saveEval": "حفظ التقييم",
+    "cancel": "إلغاء"
+  }
+}

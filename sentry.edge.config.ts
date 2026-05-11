@@ -1,0 +1,14 @@
+// Sentry initialization for the Edge runtime (middleware + edge route handlers).
+// No-op when SENTRY_DSN is not set.
+
+import * as Sentry from "@sentry/nextjs";
+
+const dsn = process.env.SENTRY_DSN;
+
+if (dsn) {
+  Sentry.init({
+    dsn,
+    environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV,
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  });
+}

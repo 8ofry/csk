@@ -1,0 +1,1133 @@
+// CSK Academy Management System — Prisma schema
+// Source of truth: SRS v1.0 §9 "Data Model — Entity Reference"
+// All FR/NFR IDs referenced in this schema map to the SRS document.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  HEAD_COACH
+  COACH
+  INTERN
+  TRAINEE
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Locale {
+  AR
+  EN
+}
+
+enum Ownership {
+  CSK_OWNED
+  PARTNER
+  PATRONAGE
+}
+
+enum DisciplineCategory {
+  BOXING
+  KICKBOXING
+  MMA
+  KARATE
+  FITNESS
+  OTHER
+}
+
+enum LevelBand {
+  N
+  A
+  B
+  C
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum PaymentStatus {
+  PAID
+  PARTIAL
+  DUE
+  OVERDUE
+}
+
+enum SessionPlanStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+
+enum EvaluationPeriod {
+  WEEKLY
+  MONTHLY
+}
+
+enum DailyReportStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MonthlyReportStatus {
+  DRAFT
+  APPROVED
+  DELIVERED
+}
+
+enum RevenueType {
+  SUBSCRIPTION
+  PRIVATE_SESSION
+  BELT_EXAM
+  CHAMPIONSHIP
+  MERCHANDISE
+}
+
+enum PaymentMethod {
+  CASH
+  VODAFONE_CASH
+  BANK_TRANSFER
+  ONLINE
+}
+
+enum PaymentIntentStatus {
+  PENDING     // created, gateway URL handed back to client
+  PROCESSING  // user redirected to gateway, awaiting webhook
+  SUCCEEDED   // webhook confirmed; Payment row + splits persisted
+  FAILED      // gateway returned a failure
+  CANCELLED   // user abandoned or admin cancelled
+}
+
+enum SplitRecipientType {
+  CSK
+  VENUE
+  COACH
+  FEDERATION
+  TAX_ADMIN
+  DISCIPLINE_OWNER
+}
+
+enum ChampRegistrationStatus {
+  OPTED_IN
+  COACH_CONFIRMED
+  PAID
+  WITHDREW
+}
+
+enum FightOutcome {
+  WIN
+  LOSS
+  DRAW
+  NO_CONTEST
+}
+
+enum FightMethod {
+  KO
+  TKO
+  DECISION
+  SUBMISSION
+  DQ
+  OTHER
+}
+
+enum BeltExamResultStatus {
+  PASSED
+  FAILED
+}
+
+enum MedicalDocType {
+  CLEARANCE
+  ECG
+  BLOOD
+  VISION
+  OTHER
+}
+
+enum MedicalDocStatus {
+  ACTIVE
+  EXPIRED
+}
+
+enum NotificationChannel {
+  WHATSAPP
+  EMAIL
+  IN_APP
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum CertificateAwardType {
+  BEST_TRAINEE_GROUP
+  BEST_TRAINEE_LOCATION
+  BEST_COACH_LOCATION
+  BELT_PROGRESSION
+  CHAMPIONSHIP
+  OTHER
+}
+
+// ─────────────────────────────────────────────────────────────────
+// USERS & PARENT-MANAGED FLOW (FR-AUTH-*)
+// ─────────────────────────────────────────────────────────────────
+
+model User {
+  id               String        @id @default(cuid())
+  role             UserRole
+  email            String        @unique
+  emailVerifiedAt  DateTime?
+  phone            String?       @unique
+  passwordHash     String
+  fullNameAr       String
+  fullNameEn       String
+  gender           Gender?
+  dob              DateTime?
+  profilePhotoUrl  String?
+  nationalId       String?
+  homeAddress      String?
+  emergencyContact Json? // { name, phone, relation }
+  preferredLocale  Locale        @default(AR)
+  timezone         String        @default("Africa/Cairo")
+  status           AccountStatus @default(PENDING)
+  // FR-NOT-04: per-user opt-outs from non-critical notification channels.
+  // Stored as a string array of NotificationChannel values, e.g. ["WHATSAPP"].
+  notificationOptOuts String[]   @default([])
+  // Used to compute unread badge counts on the in-app inbox.
+  notificationsReadAt DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  lastLoginAt      DateTime?
+
+  // Trainee-specific parent flow (FR-AUTH-09)
+  parentManaged Boolean @default(false)
+  parentUserId  String?
+  parent        User?   @relation("ParentChildren", fields: [parentUserId], references: [id], onDelete: SetNull)
+  children      User[]  @relation("ParentChildren")
+
+  // Disciplines this user "owns" (FR-LOC §5.1) — usually relevant for non-CSK disciplines
+  ownedDisciplines Discipline[] @relation("DisciplineOwner")
+
+  // Coach links
+  coachContracts        CoachContract[]            @relation("ContractCoach")
+  primaryGroups         Group[]                    @relation("GroupPrimaryCoach")
+  internGroups          Group[]                    @relation("GroupIntern")
+  shadowedByIntern      InternAssignment[]         @relation("InternAssignmentCoach")
+  internAssignmentsAsIntern InternAssignment[]     @relation("InternAssignmentIntern")
+
+  // Trainee links
+  enrollments        Enrollment[]
+  subscriptions      Subscription[]
+  attendances        Attendance[]
+  quickEvalsAsTrainee     QuickEvaluation[]    @relation("QuickEvalTrainee")
+  quickEvalsAsAuthor      QuickEvaluation[]    @relation("QuickEvalAuthor")
+  detailedEvalsAsTrainee  DetailedEvaluation[] @relation("DetailedEvalTrainee")
+  detailedEvalsAsAuthor   DetailedEvaluation[] @relation("DetailedEvalEvaluator")
+  monthlyReports          MonthlyReport[]      @relation("MonthlyReportTrainee")
+  championshipRegs        ChampionshipRegistration[]
+  beltExamResults         BeltExamResult[]
+  medicalRecord           MedicalRecord?
+  medicalDocuments        MedicalDocument[]
+
+  // Reports/sessions authored
+  sessionsAsCoach   Session[]      @relation("SessionCoach")
+  sessionsAsIntern  Session[]      @relation("SessionIntern")
+  sessionPlansAuthored SessionPlan[] @relation("SessionPlanAuthor")
+  sessionPlansReviewed SessionPlan[] @relation("SessionPlanReviewer")
+  dailyReportsAuthored DailyReport[] @relation("DailyReportAuthor")
+  dailyReportsReviewed DailyReport[] @relation("DailyReportReviewer")
+  monthlyReportsApproved MonthlyReport[] @relation("MonthlyReportApprover")
+  trainingUnitsCreated TrainingUnit[] @relation("TrainingUnitCreator")
+  championshipsCreated Championship[] @relation("ChampionshipCreator")
+  fightResultsRecorded FightResult[] @relation("FightResultRecorder")
+  beltExamResultsRecorded BeltExamResult[] @relation("BeltResultRecorder")
+  certificatesIssued  Certificate[] @relation("CertificateIssuer")
+  certificatesReceived Certificate[] @relation("CertificateRecipient")
+
+  // Financial
+  paymentsPaid       Payment[]      @relation("PaymentPayer")
+  paymentsLogged     Payment[]      @relation("PaymentLogger")
+  revenueSplits      RevenueSplit[]
+  merchandiseSold    MerchandiseSale[] @relation("MerchSeller")
+  merchandiseBought  MerchandiseSale[] @relation("MerchCustomer")
+
+  // Audit + notifications
+  auditLogs          AuditLog[]
+  apiTokens          ApiToken[]     @relation("UserApiTokens")
+  attendanceMarks    Attendance[]   @relation("AttendanceMarker")
+  notifications      Notification[]
+  privateSessionsAsTrainee PrivateSession[] @relation("PrivateSessionTrainee")
+  privateSessionsAsCoach   PrivateSession[] @relation("PrivateSessionCoach")
+  coachEvaluationsAsTrainee CoachEvaluation[] @relation("CoachEvalTrainee")
+  coachEvaluationsAsCoach   CoachEvaluation[] @relation("CoachEvalCoach")
+
+  @@index([role, status])
+  @@index([phone])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// LOCATIONS, DISCIPLINES, GROUPS (FR-LOC-*, FR-GRP-*)
+// ─────────────────────────────────────────────────────────────────
+
+model Location {
+  id             String     @id @default(cuid())
+  nameAr         String
+  nameEn         String
+  district       String
+  address        String
+  latitude       Decimal?   @db.Decimal(10, 7)
+  longitude      Decimal?   @db.Decimal(10, 7)
+  ownership      Ownership
+  contactPerson  String?
+  contactPhone   String?
+  openingHours   Json? // { mon: ["09:00-22:00"], ... }
+  active         Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  splitRules     LocationSplitRule[]
+  groups         Group[]
+  sessions       Session[]
+  subscriptions  Subscription[]
+  coachContracts CoachContract[]
+  privateSessions PrivateSession[]
+  merchandiseSales MerchandiseSale[]
+  revenueSplits  RevenueSplit[]
+
+  @@index([active])
+}
+
+model Discipline {
+  id              String              @id @default(cuid())
+  nameAr          String
+  nameEn          String
+  category        DisciplineCategory
+  skillsTaxonomy  Json // discipline-aware skill list (FR-EVAL-04)
+  ownerUserId     String?
+  owner           User?               @relation("DisciplineOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  active          Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  groups          Group[]
+  subscriptions   Subscription[]
+  trainingUnits   TrainingUnitDiscipline[]
+  coachContracts  CoachContract[]
+  beltExams       BeltExam[]
+  splitRules      LocationSplitRule[]
+
+  @@index([category])
+}
+
+// Per-location, per-discipline, per-revenue-stream split (§10)
+model LocationSplitRule {
+  id            String      @id @default(cuid())
+  locationId    String
+  location      Location    @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  disciplineId  String?
+  discipline    Discipline? @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
+  revenueType   RevenueType
+  venuePercent  Decimal     @db.Decimal(5, 2) @default(0)
+  cskPercent    Decimal     @db.Decimal(5, 2) @default(0)
+  coachPercent  Decimal     @db.Decimal(5, 2) @default(0)
+  otherPercent  Decimal     @db.Decimal(5, 2) @default(0)
+  otherLabel    String? // e.g. "federation", "tax/admin"
+  effectiveFrom DateTime    @default(now())
+  effectiveTo   DateTime?
+  notes         String?
+  createdAt     DateTime    @default(now())
+
+  @@unique([locationId, disciplineId, revenueType, effectiveFrom])
+  @@index([locationId, revenueType])
+}
+
+model Group {
+  id              String      @id @default(cuid())
+  name            String
+  locationId      String
+  location        Location    @relation(fields: [locationId], references: [id])
+  disciplineId    String
+  discipline      Discipline  @relation(fields: [disciplineId], references: [id])
+  levelBand       LevelBand?
+  ageBandMin      Int?
+  ageBandMax      Int?
+  primaryCoachId  String?
+  primaryCoach    User?       @relation("GroupPrimaryCoach", fields: [primaryCoachId], references: [id], onDelete: SetNull)
+  internId        String?
+  intern          User?       @relation("GroupIntern", fields: [internId], references: [id], onDelete: SetNull)
+  schedule        Json // { days: ["mon","wed"], start: "18:00", end: "19:30" }
+  capacity        Int         @default(20) // FR-GRP-01
+  active          Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  enrollments     Enrollment[]
+  subscriptions   Subscription[]
+  sessions        Session[]
+  sessionPlans    SessionPlan[]
+  dailyReports    DailyReport[]
+  internAssignments InternAssignment[]
+  certificates    Certificate[]
+
+  @@index([locationId, active])
+  @@index([disciplineId])
+}
+
+model InternAssignment {
+  id          String   @id @default(cuid())
+  internId    String
+  intern      User     @relation("InternAssignmentIntern", fields: [internId], references: [id], onDelete: Cascade)
+  coachId     String
+  coach       User     @relation("InternAssignmentCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  groupId     String?
+  group       Group?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  active      Boolean  @default(true)
+
+  @@index([coachId])
+  @@index([internId])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ENROLLMENTS & SUBSCRIPTIONS (FR-FIN-*)
+// ─────────────────────────────────────────────────────────────────
+
+model Enrollment {
+  id             String           @id @default(cuid())
+  traineeId      String
+  trainee        User             @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  groupId        String
+  group          Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  startDate      DateTime         @default(now())
+  endDate        DateTime?
+  status         EnrollmentStatus @default(ACTIVE)
+  subscriptionId String?
+  subscription   Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  createdAt      DateTime         @default(now())
+
+  @@unique([traineeId, groupId, startDate])
+  @@index([groupId, status])
+}
+
+model Subscription {
+  id                 String         @id @default(cuid())
+  traineeId          String
+  trainee            User           @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  groupId            String
+  group              Group          @relation(fields: [groupId], references: [id])
+  disciplineId       String
+  discipline         Discipline     @relation(fields: [disciplineId], references: [id])
+  locationId         String
+  location           Location       @relation(fields: [locationId], references: [id])
+  monthlyFee         Decimal        @db.Decimal(12, 2)
+  sessionsPerMonth   Int            @default(12) // FR-FIN-01 default
+  discountPercent    Decimal?       @db.Decimal(5, 2)
+  discountReason     String?
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  paymentStatus      PaymentStatus  @default(DUE)
+  active             Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  enrollments        Enrollment[]
+  payments           Payment[]      @relation("SubscriptionPayments")
+
+  @@index([traineeId, active])
+  @@index([paymentStatus])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// TRAINING UNITS (FR-UNIT-*)
+// ─────────────────────────────────────────────────────────────────
+
+model TrainingUnit {
+  id                          String                   @id @default(cuid())
+  nameAr                      String
+  nameEn                      String
+  descriptionAr               String?
+  descriptionEn               String?
+  category                    String // warm-up | technique | sparring | strength | conditioning | cool-down
+  targetBodyParts             String[]
+  targetSkills                String[]
+  difficulty                  Int // 1..5
+  recommendedDurationSeconds  Int?
+  recommendedRounds           Int?
+  recommendedRoundDurationSec Int?
+  equipmentRequired           String[]
+  demoMediaUrl                String?
+  demoMediaType               String? // gif | mp4
+  version                     Int                      @default(1)
+  published                   Boolean                  @default(false)
+  createdById                 String
+  createdBy                   User                     @relation("TrainingUnitCreator", fields: [createdById], references: [id])
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @updatedAt
+
+  disciplines                 TrainingUnitDiscipline[]
+  versions                    TrainingUnitVersion[]
+
+  @@index([category])
+}
+
+model TrainingUnitDiscipline {
+  trainingUnitId String
+  trainingUnit   TrainingUnit @relation(fields: [trainingUnitId], references: [id], onDelete: Cascade)
+  disciplineId   String
+  discipline     Discipline   @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+
+  @@id([trainingUnitId, disciplineId])
+}
+
+// FR-UNIT-06 — version history
+model TrainingUnitVersion {
+  id             String       @id @default(cuid())
+  trainingUnitId String
+  trainingUnit   TrainingUnit @relation(fields: [trainingUnitId], references: [id], onDelete: Cascade)
+  version        Int
+  snapshot       Json // full unit state at this version
+  changedById    String
+  changeNote     String?
+  createdAt      DateTime     @default(now())
+
+  @@unique([trainingUnitId, version])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SESSION PLANS & SESSIONS (FR-SES-*)
+// ─────────────────────────────────────────────────────────────────
+
+model SessionPlan {
+  id                String            @id @default(cuid())
+  groupId           String
+  group             Group             @relation(fields: [groupId], references: [id])
+  sessionDate       DateTime
+  status            SessionPlanStatus @default(DRAFT)
+  unitsSequence     Json // [{ trainingUnitId, durationOverrideSec, roundsOverride, notes }, ...]
+  notes             String?
+  createdById       String
+  createdBy         User              @relation("SessionPlanAuthor", fields: [createdById], references: [id])
+  reviewedById      String?
+  reviewedBy        User?             @relation("SessionPlanReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt        DateTime?
+  rejectionComment  String?
+  isTemplate        Boolean           @default(false) // FR-SES-05
+  templateName      String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  sessions          Session[]
+
+  @@index([groupId, sessionDate])
+  @@index([status])
+}
+
+model Session {
+  id              String        @id @default(cuid())
+  planId          String?
+  plan            SessionPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
+  groupId         String
+  group           Group         @relation(fields: [groupId], references: [id])
+  locationId      String
+  location        Location      @relation(fields: [locationId], references: [id])
+  coachId         String
+  coach           User          @relation("SessionCoach", fields: [coachId], references: [id])
+  internId        String?
+  intern          User?         @relation("SessionIntern", fields: [internId], references: [id], onDelete: SetNull)
+  scheduledStart  DateTime
+  scheduledEnd    DateTime
+  actualStart     DateTime?
+  actualEnd       DateTime?
+  status          SessionStatus @default(SCHEDULED)
+  executedSequence Json? // FR-SES-06: actual delivered sequence vs planned
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  attendances      Attendance[]
+  quickEvaluations QuickEvaluation[]
+  dailyReport      DailyReport?
+  coachEvaluations CoachEvaluation[]
+
+  @@index([groupId, scheduledStart])
+  @@index([coachId, scheduledStart])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ATTENDANCE & EVALUATIONS (FR-ATT-*, FR-EVAL-*)
+// ─────────────────────────────────────────────────────────────────
+
+model Attendance {
+  id          String           @id @default(cuid())
+  sessionId   String
+  session     Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  traineeId   String
+  trainee     User             @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  status      AttendanceStatus
+  arrivalTime DateTime?
+  markedById  String
+  markedBy    User             @relation("AttendanceMarker", fields: [markedById], references: [id])
+  markedAt    DateTime         @default(now())
+
+  @@unique([sessionId, traineeId])
+  @@index([traineeId])
+}
+
+model QuickEvaluation {
+  id              String   @id @default(cuid())
+  sessionId       String
+  session         Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  traineeId       String
+  trainee         User     @relation("QuickEvalTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+  effortScore     Int // 1..10
+  notes           String?
+  flaggedBodyPart String?
+  flaggedSkill    String?
+  createdById     String
+  createdBy       User     @relation("QuickEvalAuthor", fields: [createdById], references: [id])
+  createdAt       DateTime @default(now())
+
+  @@unique([sessionId, traineeId])
+  @@index([traineeId, createdAt])
+}
+
+model DetailedEvaluation {
+  id               String           @id @default(cuid())
+  traineeId        String
+  trainee          User             @relation("DetailedEvalTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+  evaluatorId      String
+  evaluator        User             @relation("DetailedEvalEvaluator", fields: [evaluatorId], references: [id])
+  contextGroupId   String?
+  evaluationDate   DateTime         @default(now())
+  period           EvaluationPeriod
+  bodyPartScores   Json // { "head_neck": {score: 8, comment: "..."}, ... } FR-EVAL-03
+  skillScores      Json // discipline-aware (FR-EVAL-04)
+  summaryComment   String?
+  createdAt        DateTime         @default(now())
+
+  @@index([traineeId, evaluationDate])
+}
+
+// FR-EVAL-08: anonymous-to-coach trainee→coach evaluation, part of daily report
+model CoachEvaluation {
+  id            String   @id @default(cuid())
+  sessionId     String
+  session       Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  coachId       String
+  coach         User     @relation("CoachEvalCoach", fields: [coachId], references: [id])
+  traineeId     String
+  trainee       User     @relation("CoachEvalTrainee", fields: [traineeId], references: [id])
+  rating        Int // 1..10
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  @@unique([sessionId, traineeId])
+  @@index([coachId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// REPORTS (FR-DR-*, FR-MR-*)
+// ─────────────────────────────────────────────────────────────────
+
+model DailyReport {
+  id              String            @id @default(cuid())
+  sessionId       String            @unique
+  session         Session           @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  groupId         String
+  group           Group             @relation(fields: [groupId], references: [id])
+  coachId         String
+  coach           User              @relation("DailyReportAuthor", fields: [coachId], references: [id])
+  submittedAt     DateTime?
+  status          DailyReportStatus @default(DRAFT)
+  summary         String?
+  incidents       String?
+  headCoachNotes  String?
+  reviewedById    String?
+  reviewedBy      User?             @relation("DailyReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([groupId, status])
+  @@index([status, submittedAt])
+}
+
+model MonthlyReport {
+  id                  String              @id @default(cuid())
+  traineeId           String
+  trainee             User                @relation("MonthlyReportTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+  periodYear          Int
+  periodMonth         Int
+  attendanceSummary   Json
+  evaluationSummary   Json
+  milestones          Json
+  narrative           String?
+  status              MonthlyReportStatus @default(DRAFT)
+  generatedAt         DateTime            @default(now())
+  approvedById        String?
+  approvedBy          User?               @relation("MonthlyReportApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt          DateTime?
+  deliveredAt         DateTime?
+  pdfUrl              String?
+
+  @@unique([traineeId, periodYear, periodMonth])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FINANCIAL (FR-FIN-*, §10)
+// ─────────────────────────────────────────────────────────────────
+
+model Payment {
+  id             String         @id @default(cuid())
+  revenueType    RevenueType
+  referenceId    String? // FK to subscription/private/belt/championship/merch — soft
+  payerUserId    String
+  payerUser      User           @relation("PaymentPayer", fields: [payerUserId], references: [id])
+  amountGross    Decimal        @db.Decimal(12, 2)
+  amountNet      Decimal        @db.Decimal(12, 2) // after discounts, before splits
+  currency       String         @default("EGP")
+  method         PaymentMethod
+  receiptNumber  String         @unique
+  paidAt         DateTime       @default(now())
+  loggedById     String
+  loggedBy       User           @relation("PaymentLogger", fields: [loggedById], references: [id])
+  notes          String?
+  refundedAt     DateTime?
+  refundOfId     String?
+  refundOf       Payment?       @relation("PaymentRefunds", fields: [refundOfId], references: [id])
+  refunds        Payment[]      @relation("PaymentRefunds")
+
+  splits             RevenueSplit[]
+  subscription       Subscription?  @relation("SubscriptionPayments", fields: [subscriptionId], references: [id])
+  subscriptionId     String?
+  privateSession     PrivateSession? @relation(fields: [privateSessionId], references: [id])
+  privateSessionId   String?
+  championshipReg    ChampionshipRegistration? @relation(fields: [championshipRegId], references: [id])
+  championshipRegId  String?
+  beltExamResult     BeltExamResult? @relation(fields: [beltExamResultId], references: [id])
+  beltExamResultId   String?
+  merchandiseSale    MerchandiseSale? @relation(fields: [merchandiseSaleId], references: [id])
+  merchandiseSaleId  String?
+  paymentIntent      PaymentIntent?
+
+  @@index([revenueType, paidAt])
+  @@index([payerUserId])
+}
+
+// Online-payment intent (FR-FIN v2). Created before redirecting the user to
+// Paymob (or another gateway); resolved by the webhook handler which calls
+// logPayment() to persist a real Payment + RevenueSplit rows.
+model PaymentIntent {
+  id                  String              @id @default(cuid())
+  revenueType         RevenueType
+  payerUserId         String
+  amount              Decimal             @db.Decimal(12, 2)
+  currency            String              @default("EGP")
+  status              PaymentIntentStatus @default(PENDING)
+  provider            String              // "paymob" | "console" | future
+  providerOrderId     String? // gateway-side order/reference id
+  providerData        Json?   // raw payloads from initiate + webhook
+  // Same FK fan-out as Payment so we know what the intent is paying for.
+  subscriptionId      String?
+  privateSessionId    String?
+  championshipRegId   String?
+  beltExamResultId    String?
+  merchandiseSaleId   String?
+  // Context needed to resolve the split rule when settling the intent.
+  locationId          String?
+  coachUserId         String?
+  disciplineId        String?
+  // Populated when status moves to SUCCEEDED.
+  paymentId           String?  @unique
+  payment             Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  // Audit
+  createdById         String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([payerUserId])
+  @@index([providerOrderId])
+}
+
+// §10.3: splits must sum to 100% — enforced in application service layer
+model RevenueSplit {
+  id             String              @id @default(cuid())
+  paymentId      String
+  payment        Payment             @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  recipientType  SplitRecipientType
+  recipientUserId String?
+  recipientUser  User?               @relation(fields: [recipientUserId], references: [id], onDelete: SetNull)
+  recipientLocationId String?
+  recipientLocation Location?        @relation(fields: [recipientLocationId], references: [id], onDelete: SetNull)
+  recipientLabel String? // for federation/tax — informational
+  percent        Decimal             @db.Decimal(5, 2)
+  amount         Decimal             @db.Decimal(12, 2)
+  computedAt     DateTime            @default(now())
+
+  @@index([paymentId])
+  @@index([recipientUserId])
+}
+
+// FR-FIN-09: per-coach contract (per location, per discipline)
+model CoachContract {
+  id                          String      @id @default(cuid())
+  coachId                     String
+  coach                       User        @relation("ContractCoach", fields: [coachId], references: [id], onDelete: Cascade)
+  locationId                  String?
+  location                    Location?   @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  disciplineId                String?
+  discipline                  Discipline? @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
+  subscriptionPercent         Decimal?    @db.Decimal(5, 2)
+  privateSessionPercent       Decimal?    @db.Decimal(5, 2)
+  privateSessionFixedRate     Decimal?    @db.Decimal(12, 2)
+  beltExamPercent             Decimal?    @db.Decimal(5, 2)
+  championshipPercent         Decimal?    @db.Decimal(5, 2)
+  effectiveFrom               DateTime    @default(now())
+  effectiveTo                 DateTime?
+  active                      Boolean     @default(true)
+  notes                       String?
+  createdAt                   DateTime    @default(now())
+  updatedAt                   DateTime    @updatedAt
+
+  @@index([coachId, active])
+  @@index([locationId, disciplineId])
+}
+
+// FR-FIN-06: private sessions
+model PrivateSession {
+  id              String        @id @default(cuid())
+  traineeId       String
+  trainee         User          @relation("PrivateSessionTrainee", fields: [traineeId], references: [id])
+  coachId         String
+  coach           User          @relation("PrivateSessionCoach", fields: [coachId], references: [id])
+  locationId      String
+  location        Location      @relation(fields: [locationId], references: [id])
+  scheduledStart  DateTime
+  scheduledEnd    DateTime
+  fee             Decimal       @db.Decimal(12, 2)
+  status          SessionStatus @default(SCHEDULED)
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+  cancellationReason String?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  payments        Payment[]
+
+  @@index([traineeId, scheduledStart])
+  @@index([coachId, scheduledStart])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CHAMPIONSHIPS, BELT EXAMS, MEDICAL (FR-CH-*, FR-BLT-*, FR-MED-*)
+// ─────────────────────────────────────────────────────────────────
+
+model Championship {
+  id                   String                     @id @default(cuid())
+  name                 String
+  organizer            String
+  isOfficial           Boolean                    @default(true)
+  locationLabel        String
+  startDate            DateTime
+  endDate              DateTime
+  disciplines          String[] // discipline IDs
+  weightCategories     Json
+  ageCategories        Json
+  allowedLevels        LevelBand[]
+  registrationDeadline DateTime
+  registrationFee      Decimal                    @db.Decimal(12, 2)
+  notes                String?
+  createdById          String
+  createdBy            User                       @relation("ChampionshipCreator", fields: [createdById], references: [id])
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+
+  registrations        ChampionshipRegistration[]
+
+  @@index([startDate])
+}
+
+model ChampionshipRegistration {
+  id                String                  @id @default(cuid())
+  championshipId    String
+  championship      Championship            @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  traineeId         String
+  trainee           User                    @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  weightKg          Decimal?                @db.Decimal(5, 2)
+  ageAtRegistration Int?
+  isAmateur         Boolean                 @default(true)
+  level             LevelBand?
+  targetWeightClass String?
+  weightCutNotes    String?
+  status            ChampRegistrationStatus @default(OPTED_IN)
+  confirmedAt       DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  payments          Payment[]
+  fightResults      FightResult[]
+
+  @@unique([championshipId, traineeId])
+  @@index([traineeId])
+}
+
+model FightResult {
+  id             String                   @id @default(cuid())
+  registrationId String
+  registration   ChampionshipRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  opponentName   String
+  outcome        FightOutcome
+  method         FightMethod?
+  round          Int?
+  timeInRound    String? // mm:ss
+  videoUrl       String?
+  notes          String?
+  recordedById   String
+  recordedBy     User                     @relation("FightResultRecorder", fields: [recordedById], references: [id])
+  recordedAt     DateTime                 @default(now())
+
+  @@index([registrationId])
+}
+
+model BeltExam {
+  id            String           @id @default(cuid())
+  disciplineId  String
+  discipline    Discipline       @relation(fields: [disciplineId], references: [id])
+  examDate      DateTime
+  locationLabel String
+  examinerName  String
+  federation    String
+  fee           Decimal          @db.Decimal(12, 2)
+  notes         String?
+  createdAt     DateTime         @default(now())
+
+  results       BeltExamResult[]
+
+  @@index([examDate])
+}
+
+model BeltExamResult {
+  id             String               @id @default(cuid())
+  examId         String
+  exam           BeltExam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  traineeId      String
+  trainee        User                 @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  result         BeltExamResultStatus
+  score          Decimal?             @db.Decimal(5, 2)
+  newLevel       LevelBand? // FR-BLT-04 set on pass
+  recordedById   String
+  recordedBy     User                 @relation("BeltResultRecorder", fields: [recordedById], references: [id])
+  recordedAt     DateTime             @default(now())
+
+  payments       Payment[]
+
+  @@unique([examId, traineeId])
+  @@index([traineeId, recordedAt])
+}
+
+model MedicalRecord {
+  id                       String   @id @default(cuid())
+  traineeId                String   @unique
+  trainee                  User     @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  bloodType                String?
+  allergies                String?
+  chronicConditions        String?
+  currentMedications       String?
+  primaryPhysicianName     String?
+  primaryPhysicianPhone    String?
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactRelation String?
+  lastUpdatedAt            DateTime @default(now()) @updatedAt
+}
+
+model MedicalDocument {
+  id            String           @id @default(cuid())
+  traineeId     String
+  trainee       User             @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  documentType  MedicalDocType
+  fileUrl       String
+  issueDate     DateTime
+  expiryDate    DateTime
+  issuingDoctor String?
+  status        MedicalDocStatus @default(ACTIVE)
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([traineeId, expiryDate])
+  @@index([status, expiryDate])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MERCHANDISE (FR-MRC-*)
+// ─────────────────────────────────────────────────────────────────
+
+model MerchandiseItem {
+  id                 String           @id @default(cuid())
+  nameAr             String
+  nameEn             String
+  description        String?
+  category           String
+  photos             String[]
+  variants           Json // [{sku, size, color, stock}]
+  costPrice          Decimal          @db.Decimal(12, 2)
+  salePrice          Decimal          @db.Decimal(12, 2)
+  stockLevel         Int              @default(0)
+  lowStockThreshold  Int              @default(5)
+  active             Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  sales              MerchandiseSale[]
+
+  @@index([active])
+}
+
+model MerchandiseSale {
+  id                 String           @id @default(cuid())
+  itemId             String
+  item               MerchandiseItem  @relation(fields: [itemId], references: [id])
+  variantSku         String?
+  quantity           Int
+  unitPrice          Decimal          @db.Decimal(12, 2)
+  totalPrice         Decimal          @db.Decimal(12, 2)
+  customerUserId     String?
+  customer           User?            @relation("MerchCustomer", fields: [customerUserId], references: [id], onDelete: SetNull)
+  locationId         String?
+  location           Location?        @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  soldAt             DateTime         @default(now())
+  soldById           String
+  soldBy             User             @relation("MerchSeller", fields: [soldById], references: [id])
+
+  payments           Payment[]
+
+  @@index([soldAt])
+  @@index([itemId])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// NOTIFICATIONS, CERTIFICATES, AUDIT (FR-NOT-*, FR-CRT-*)
+// ─────────────────────────────────────────────────────────────────
+
+model Notification {
+  id          String              @id @default(cuid())
+  recipientId String
+  recipient   User                @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  eventType   String
+  channel     NotificationChannel
+  payload     Json
+  status      NotificationStatus  @default(QUEUED)
+  retryCount  Int                 @default(0)
+  errorMessage String?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@index([recipientId, createdAt])
+  @@index([status, createdAt])
+}
+
+model Certificate {
+  id              String                @id @default(cuid())
+  recipientId    String
+  recipient      User                  @relation("CertificateRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  awardType      CertificateAwardType
+  groupId        String?
+  group          Group?                @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  periodYear     Int?
+  periodMonth    Int?
+  narrative      String?
+  issuedById     String
+  issuedBy       User                  @relation("CertificateIssuer", fields: [issuedById], references: [id])
+  issuedAt       DateTime              @default(now())
+  pdfUrl         String?
+
+  @@index([recipientId, issuedAt])
+}
+
+// Mobile / 3rd-party API tokens. Issued on POST /api/v1/auth/login, sent
+// as `Authorization: Bearer <raw>`. Stored as a SHA-256 hash so a DB leak
+// does not expose live tokens.
+model ApiToken {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation("UserApiTokens", fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 hex digest of the raw token. Raw value is only returned once at issue.
+  tokenHash   String    @unique
+  /// Optional human-readable label (e.g. "iPhone 15 — Cap Saied").
+  label       String?
+  /// First 8 chars of the raw token, for display only.
+  tokenPrefix String?
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, revokedAt])
+}
+
+// NFR-SEC-04: audit trail of sensitive actions
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorId      String?
+  actor        User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action       String
+  entityType   String
+  entityId     String?
+  changes      Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+}
