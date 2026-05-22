@@ -116,7 +116,8 @@
   }
   .spotlight-glow::after {
     content: "";
-    @apply absolute -inset-[2px] rounded-inherit bg-gradient-to-r from-csk-gold/0 via-csk-gold/40 to-csk-gold/0 z-[-1] opacity-0 transition-opacity duration-500 blur-sm;
+    @apply absolute -inset-[2px] bg-gradient-to-r from-csk-gold/0 via-csk-gold/40 to-csk-gold/0 z-[-1] opacity-0 transition-opacity duration-500 blur-sm;
+    border-radius: inherit;
   }
   .spotlight-glow:hover::after {
     @apply opacity-100;
