@@ -36,9 +36,9 @@ export function PublicNavbar() {
 
   return (
     <header
-      className={`fixed top-0 z-50 w-full transition-all duration-500 ${
+      className={`fixed top-0 z-50 w-full transition-all duration-700 ${
         scrolled
-          ? "bg-[#050505]/95 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.6)]"
+          ? "bg-[#050505]/70 backdrop-blur-2xl border-b border-white/5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)]"
           : "bg-transparent"
       }`}
     >
@@ -74,9 +74,10 @@ export function PublicNavbar() {
           <LanguageSwitcher />
           <Link
             href="/login"
-            className="hidden rounded-full bg-csk-gold px-5 py-2 text-xs font-bold uppercase tracking-wider text-csk-black transition-all hover:bg-csk-goldLight hover:shadow-[0_0_20px_-5px_rgba(212,175,55,0.6)] sm:inline-block"
+            className="group relative hidden overflow-hidden rounded-full bg-csk-gold px-6 py-2.5 text-xs font-black uppercase tracking-wider text-csk-black transition-all hover:scale-105 hover:shadow-[0_0_20px_-5px_rgba(212,175,55,0.6)] sm:inline-flex items-center justify-center"
           >
-            Member Login
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full" />
+            <span className="relative z-10">Member Login</span>
           </Link>
           {/* Mobile burger */}
           <button
@@ -106,9 +107,10 @@ export function PublicNavbar() {
               <Link
                 href="/login"
                 onClick={() => setMobileOpen(false)}
-                className="block w-full rounded-full bg-csk-gold px-6 py-3 text-center text-sm font-bold uppercase tracking-wider text-csk-black"
+                className="group relative block w-full overflow-hidden rounded-full bg-csk-gold px-6 py-3 text-center text-sm font-black uppercase tracking-wider text-csk-black transition-all"
               >
-                Member Login
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full" />
+                <span className="relative z-10">Member Login</span>
               </Link>
             </div>
           </nav>

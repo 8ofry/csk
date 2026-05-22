@@ -37,6 +37,7 @@ export default defineConfig({
         env: {
           ...process.env,
           NEXT_PUBLIC_DEFAULT_LOCALE: "en",
+          E2E_TESTING: "true",
         },
       },
 });

@@ -2,22 +2,25 @@ import { jsonResponse } from "@/lib/api";
 
 // GET /api/v1/public — discovery index for v2 mobile and integrators.
 export function GET() {
+  const publicEndpoints = {
+    "GET /api/v1/public/locations": "List active CSK venues",
+    "GET /api/v1/public/disciplines": "List active disciplines with active group counts",
+    "GET /api/v1/public/coaches": "List active coaches with their disciplines + locations",
+    "GET /api/v1/public/schedule": "Weekly schedule grouped per location",
+    "GET /api/v1/public/champions?limit=24": "CSK fighters with W-L-D record + method breakdown",
+    "GET /api/v1/public/fighter/:id":
+      "Sanitized per-fighter profile (record + fights + championships + belt levels)",
+    "GET /api/v1/public/pricing": "Pricing snapshot",
+    "GET /api/v1/public/merchandise": "Active in-stock merchandise items",
+    "POST /api/v1/public/contact": "Submit a public inquiry",
+    "POST /api/v1/public/register-trainee": "Self-register a trainee account (creates PENDING)",
+  };
+
   return jsonResponse({
     version: "v1",
     docs: "/README.md",
-    public: {
-      "GET /api/v1/public/locations": "List active CSK venues",
-      "GET /api/v1/public/disciplines": "List active disciplines with active group counts",
-      "GET /api/v1/public/coaches": "List active coaches with their disciplines + locations",
-      "GET /api/v1/public/schedule": "Weekly schedule grouped per location",
-      "GET /api/v1/public/champions?limit=24": "CSK fighters with W-L-D record + method breakdown",
-      "GET /api/v1/public/fighter/:id":
-        "Sanitized per-fighter profile (record + fights + championships + belt levels)",
-      "GET /api/v1/public/pricing": "Pricing snapshot",
-      "GET /api/v1/public/merchandise": "Active in-stock merchandise items",
-      "POST /api/v1/public/contact": "Submit a public inquiry",
-      "POST /api/v1/public/register-trainee": "Self-register a trainee account (creates PENDING)",
-    },
+    endpoints: publicEndpoints,
+    public: publicEndpoints,
     auth: {
       "POST /api/v1/auth/login":
         "Body { identifier, password, deviceLabel? } → { token, expiresAt, user }",

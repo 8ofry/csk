@@ -8,7 +8,7 @@ test.describe("public pages", () => {
     await page.goto("/en");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByText("CSK", { exact: false }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: /join csk/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /join csk/i }).first()).toBeVisible();
   });
 
   test("locations page lists CSK venues", async ({ page }) => {

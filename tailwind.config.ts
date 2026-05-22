@@ -85,12 +85,22 @@ const config: Config = {
           "0%, 100%": { opacity: "1", filter: "brightness(1)" },
           "50%": { opacity: "0.8", filter: "brightness(1.2)" },
         },
+        "ambient-drift": {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "33%": { transform: "translate(20px, -30px) scale(1.05)" },
+          "66%": { transform: "translate(-20px, 20px) scale(0.95)" },
+        },
+        "border-spin": {
+          "100%": { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
+        "ambient-drift": "ambient-drift 15s ease-in-out infinite",
+        "border-spin": "border-spin 4s linear infinite",
       },
     },
   },

@@ -14,8 +14,11 @@ export default async function PublicLayout({ children }: { children: React.React
       <main className="flex-1">{children}</main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/10 bg-[#030303]">
-        <div className="container mx-auto px-4 py-16">
+      <footer className="relative border-t border-white/5 bg-[#030303] overflow-hidden">
+        {/* Subtle top glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-1/2 bg-gradient-to-r from-transparent via-csk-gold/30 to-transparent" />
+        
+        <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="mb-10 grid grid-cols-1 gap-10 md:grid-cols-4">
             {/* Brand */}
             <div className="md:col-span-1">

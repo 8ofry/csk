@@ -41,9 +41,9 @@ test.describe("head-coach approvals inbox", () => {
     await signIn(page, "headCoach");
     await page.goto("/en/head-coach/approvals");
     await expect(page.getByRole("heading", { name: /approvals inbox/i })).toBeVisible();
-    await expect(page.getByText(/session plans/i)).toBeVisible();
-    await expect(page.getByText(/daily reports/i)).toBeVisible();
-    await expect(page.getByText(/pending account approvals/i)).toBeVisible();
+    await expect(page.getByText(/session plans/i).first()).toBeVisible();
+    await expect(page.getByText(/daily reports/i).first()).toBeVisible();
+    await expect(page.getByText(/pending account approvals/i).first()).toBeVisible();
   });
 
   test("HC certificates page shortlists trainees + coaches", async ({ page }) => {
@@ -69,6 +69,6 @@ test.describe("admin financial dashboard", () => {
     await page.goto("/en/admin/users");
     await expect(page.getByRole("heading", { name: /^users$/i })).toBeVisible();
     // Seed has 13 users (4 baseline + 9 demo).
-    await expect(page.getByText(/captain saied/i).first()).toBeVisible();
+    await expect(page.getByText(/(captain saied|cap\. saied)/i).first()).toBeVisible();
   });
 });

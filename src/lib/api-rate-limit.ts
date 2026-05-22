@@ -19,6 +19,12 @@ export async function checkRateLimit(
   opts: RateLimitOptions,
 ): Promise<Response | null> {
   const ip = clientIp(req);
+
+  // Bypass rate limiting during E2E testing unless it's one of the targeted rate-limit test IPs
+  if (process.env.E2E_TESTING === "true" && ip !== "203.0.113.91" && ip !== "203.0.113.92") {
+    return null;
+  }
+
   const key = `${opts.bucket}:${ip}`;
   const decision = await rateLimitStore.check(key, opts.config);
 

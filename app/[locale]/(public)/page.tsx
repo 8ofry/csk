@@ -8,6 +8,7 @@ import {
 import { listPublicLocations, publicPricing } from "@/application/public/service";
 import { AnimatedSection, AnimatedItem } from "@/components/public/animated-section";
 import { GoldParticles } from "@/components/public/gold-particles";
+import { AmbientGlow } from "@/components/public/ambient-glow";
 
 const COACHES = [
   {
@@ -94,7 +95,8 @@ export default async function HomePage({
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_45%,_rgba(212,175,55,0.12)_0%,_transparent_70%)]" />
         </div>
 
-        {/* ✨ Gold Particle Canvas */}
+        {/* Ambient Glow & Gold Particles */}
+        <AmbientGlow />
         <GoldParticles />
 
         <div className="container relative z-10 mx-auto px-4 text-center">
@@ -123,10 +125,15 @@ export default async function HomePage({
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/register"
-                className="group inline-flex items-center gap-2 rounded-full bg-csk-gold px-10 py-4 text-base font-bold uppercase tracking-wider text-csk-black transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_-5px_rgba(212,175,55,0.6)] hover:bg-csk-goldLight"
+                aria-label="Join CSK"
+                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-csk-gold px-12 py-5 text-base font-black uppercase tracking-wider text-csk-black transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_80px_-15px_rgba(212,175,55,0.8)]"
               >
-                <span>Start Training</span>
-                <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                {/* Sweeping gradient behind text */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-1000 group-hover:translate-x-full" />
+                <span className="relative z-10 flex items-center gap-2">
+                  Start Training
+                  <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </span>
               </Link>
               <a
                 href="#disciplines"
@@ -179,12 +186,12 @@ export default async function HomePage({
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {DISCIPLINES.map((d, i) => (
               <AnimatedItem key={d.name} delay={i * 0.08}>
-                <div className="glass-card group flex cursor-pointer flex-col items-center justify-center gap-5 p-8 text-center transition-all duration-500 hover:-translate-y-3 hover:border-csk-gold/60 hover:gold-glow h-full">
-                  <div className="rounded-2xl bg-white/5 p-5 transition-all duration-300 group-hover:bg-csk-gold group-hover:scale-110">
-                    <d.icon className="h-9 w-9 transition-colors duration-300 group-hover:text-csk-black" strokeWidth={1.5} />
+                <div className="glass-card spotlight-glow group flex cursor-pointer flex-col items-center justify-center gap-5 p-8 text-center h-full hover:-translate-y-4 hover:shadow-[0_20px_40px_-15px_rgba(212,175,55,0.15)]">
+                  <div className="rounded-2xl bg-white/5 p-5 transition-all duration-500 group-hover:bg-csk-gold group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.5)]">
+                    <d.icon className="h-9 w-9 transition-colors duration-500 group-hover:text-csk-black" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="text-base font-black uppercase tracking-wider text-white group-hover:text-csk-gold transition-colors">{d.name}</h3>
+                    <h3 className="text-base font-black uppercase tracking-wider text-white group-hover:text-csk-gold transition-colors duration-300">{d.name}</h3>
                     <p className="text-xs text-white/40 mt-1">{d.nameAr}</p>
                     <p className="mt-2 text-xs text-white/50">{d.desc}</p>
                   </div>
@@ -206,12 +213,12 @@ export default async function HomePage({
         <div className="container mx-auto px-4 relative">
           <div className="grid items-center gap-16 lg:grid-cols-2">
             <AnimatedItem>
-              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-2xl animate-float">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/5 shadow-2xl animate-float spotlight-glow">
                 <Image
                   src="/images/champion.png"
                   alt="CSK Champion"
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-1000 hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
@@ -288,26 +295,26 @@ export default async function HomePage({
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {COACHES.map((coach, i) => (
               <AnimatedItem key={coach.id} delay={i * 0.1}>
-                <div className="glass-card group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-csk-gold/50 hover:gold-glow">
+                <div className="glass-card spotlight-glow group overflow-hidden hover:-translate-y-3 hover:shadow-[0_20px_40px_-15px_rgba(212,175,55,0.15)]">
                   {/* Photo area */}
                   <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-white/5 to-white/0">
                     <Image
                       src={coach.photo}
                       alt={coach.nameEn}
                       fill
-                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover object-top transition-transform duration-1000 group-hover:scale-110"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                     {/* Gold shimmer on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-csk-gold/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-csk-gold/30 via-transparent to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
                   </div>
                   {/* Info */}
-                  <div className="p-5">
-                    <div className="mb-1 text-xs font-bold uppercase tracking-widest text-csk-gold">
+                  <div className="p-6 relative z-10 bg-[#050505]/80 backdrop-blur-md">
+                    <div className="mb-2 text-xs font-bold uppercase tracking-widest text-csk-gold group-hover:text-csk-goldLight transition-colors">
                       {locale === "ar" ? coach.roleAr : coach.role}
                     </div>
-                    <h3 className="text-lg font-black uppercase text-white leading-tight">
+                    <h3 className="text-xl font-black uppercase text-white leading-tight">
                       {locale === "ar" ? coach.nameAr : coach.nameEn}
                     </h3>
                   </div>
@@ -339,7 +346,7 @@ export default async function HomePage({
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {locations.map((loc, i) => (
               <AnimatedItem key={loc.id} delay={i * 0.08}>
-                <div className="glass-card group p-6 transition-all duration-400 hover:-translate-y-2 hover:border-csk-gold/40">
+                <div className="glass-card spotlight-glow group p-8 hover:-translate-y-3 hover:shadow-[0_20px_40px_-15px_rgba(212,175,55,0.1)]">
                   <div className="mb-3 flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-black uppercase tracking-wide text-white group-hover:text-csk-gold transition-colors">{loc.nameEn}</h3>
@@ -422,30 +429,35 @@ export default async function HomePage({
 
               {/* Private sessions */}
               <AnimatedItem delay={0.1}>
-                <div className="glass-card p-8 transition-all duration-500 hover:border-csk-gold/50 hover:gold-glow relative overflow-hidden border-csk-gold/20">
-                  <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-csk-gold/5 blur-2xl" />
-                  <div className="mb-2 text-xs font-bold uppercase tracking-widest text-csk-gold">1-on-1 Training</div>
-                  <h3 className="mb-4 text-2xl font-black uppercase text-white">Private Sessions</h3>
-                  <ul className="mb-6 space-y-3">
-                    {[
-                      "Personal coach attention",
-                      "Custom training plan",
-                      "Flexible scheduling",
-                      "Accelerated progress",
-                      "Competition preparation",
-                    ].map((item) => (
-                      <li key={item} className="flex items-center gap-3 text-sm text-white/60">
-                        <CheckCircle className="h-4 w-4 shrink-0 text-csk-gold" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="/contact"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-csk-gold px-6 py-3 text-sm font-bold uppercase tracking-wider text-csk-black transition-all hover:bg-csk-goldLight hover:shadow-[0_0_30px_-5px_rgba(212,175,55,0.5)]"
-                  >
-                    Book a Session <ArrowRight className="h-4 w-4" />
-                  </Link>
+                <div className="glass-card spotlight-glow group p-8 relative overflow-hidden border-csk-gold/20 hover:-translate-y-2 hover:shadow-[0_0_60px_-15px_rgba(212,175,55,0.3)]">
+                  <div className="absolute -left-8 -bottom-8 h-40 w-40 rounded-full bg-csk-gold/10 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+                  <div className="relative z-10">
+                    <div className="mb-2 text-xs font-bold uppercase tracking-widest text-csk-gold">1-on-1 Training</div>
+                    <h3 className="mb-4 text-2xl font-black uppercase text-white">Private Sessions</h3>
+                    <ul className="mb-8 space-y-4">
+                      {[
+                        "Personal coach attention",
+                        "Custom training plan",
+                        "Flexible scheduling",
+                        "Accelerated progress",
+                        "Competition preparation",
+                      ].map((item) => (
+                        <li key={item} className="flex items-center gap-3 text-sm text-white/70">
+                          <CheckCircle className="h-5 w-5 shrink-0 text-csk-gold drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/contact"
+                      className="group/btn relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-csk-gold px-6 py-4 text-sm font-black uppercase tracking-wider text-csk-black transition-all hover:scale-[1.02]"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full transition-transform duration-700 group-hover/btn:translate-x-full" />
+                      <span className="relative z-10 flex items-center gap-2">
+                        Book a Session <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                      </span>
+                    </Link>
+                  </div>
                 </div>
               </AnimatedItem>
             </div>
@@ -505,10 +517,14 @@ export default async function HomePage({
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/register"
-                className="group inline-flex items-center gap-2 rounded-full bg-csk-gold px-12 py-5 text-lg font-black uppercase tracking-wider text-csk-black transition-all duration-300 hover:scale-105 hover:bg-csk-goldLight hover:shadow-[0_0_60px_-10px_rgba(212,175,55,0.7)]"
+                aria-label="Join CSK"
+                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-csk-gold px-14 py-6 text-xl font-black uppercase tracking-wider text-csk-black transition-all duration-500 hover:scale-[1.03] hover:shadow-[0_0_100px_-15px_rgba(212,175,55,0.8)]"
               >
-                Register Now
-                <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full transition-transform duration-1000 group-hover:translate-x-full" />
+                <span className="relative z-10 flex items-center gap-2">
+                  Register Now
+                  <ChevronRight className="h-7 w-7 transition-transform group-hover:translate-x-2" />
+                </span>
               </Link>
               <Link
                 href="/login"

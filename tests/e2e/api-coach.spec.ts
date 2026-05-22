@@ -71,7 +71,7 @@ test.describe("coach /api/v1/coach/*", () => {
       "/api/v1/coach/sessions/seed-session-past/quick-eval",
       {
         headers: bearer(session),
-        data: { traineeId, effortScore: 8, notes: "Cleaned-up jab" },
+        data: { traineeId, effortScore: 9, notes: "Good footwork today" },
       },
     );
     expect(eval_.status()).toBe(200);

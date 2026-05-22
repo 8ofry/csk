@@ -89,10 +89,17 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl;
+    @apply bg-[#050505]/60 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] relative overflow-hidden;
   }
   .glass-card {
-    @apply bg-gradient-to-br from-white/5 to-transparent backdrop-blur-lg border border-white/10 rounded-xl shadow-lg;
+    @apply relative bg-gradient-to-br from-white/[0.02] to-transparent backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl transition-all duration-500 overflow-hidden;
+  }
+  .glass-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent opacity-0 transition-opacity duration-500 pointer-events-none;
+  }
+  .glass-card:hover::before {
+    @apply opacity-100;
   }
   .text-gradient-gold {
     @apply bg-gradient-to-r from-csk-gold via-csk-goldLight to-csk-gold bg-clip-text text-transparent;
@@ -101,7 +108,18 @@
     @apply w-24 h-1 rounded-full bg-gradient-to-r from-csk-gold to-csk-goldLight mx-auto my-6;
   }
   .gold-glow {
-    box-shadow: 0 0 40px -10px rgba(212,175,55,0.6);
+    box-shadow: 0 0 40px -10px rgba(212,175,55,0.4);
+  }
+  /* New Spotlight glow effect for elements */
+  .spotlight-glow {
+    @apply relative z-0;
+  }
+  .spotlight-glow::after {
+    content: "";
+    @apply absolute -inset-[2px] rounded-inherit bg-gradient-to-r from-csk-gold/0 via-csk-gold/40 to-csk-gold/0 z-[-1] opacity-0 transition-opacity duration-500 blur-sm;
+  }
+  .spotlight-glow:hover::after {
+    @apply opacity-100;
   }
   .nav-link {
     @apply relative text-sm font-medium text-white/70 transition-colors hover:text-csk-gold;
