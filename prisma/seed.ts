@@ -664,6 +664,329 @@ async function seedDemoData(refs: SeedRefs) {
     });
   }
   console.log(`  ✓ ${items.length} merchandise items`);
+
+  console.log("→ Seeding pending user approval…");
+  await prisma.user.upsert({
+    where: { id: "seed-user-pending-trainee" },
+    create: {
+      id: "seed-user-pending-trainee",
+      role: "TRAINEE",
+      email: "pending.trainee@csk.local",
+      phone: "+201000000099",
+      passwordHash: await hash(SEED_PASSWORD),
+      fullNameAr: "متدرب قيد الانتظار",
+      fullNameEn: "Pending Trainee",
+      status: "PENDING",
+      emailVerifiedAt: null,
+      preferredLocale: "AR",
+    },
+    update: { status: "PENDING" },
+  });
+
+  console.log("→ Seeding payments and splits…");
+  await prisma.subscription.update({
+    where: { id: "seed-sub-1" },
+    data: { paymentStatus: "PAID" },
+  });
+  await prisma.subscription.update({
+    where: { id: "seed-sub-3" },
+    data: { paymentStatus: "PAID" },
+  });
+
+  const pay1 = await prisma.payment.upsert({
+    where: { receiptNumber: "REC-SUB-1" },
+    create: {
+      id: "seed-payment-sub-1",
+      revenueType: "SUBSCRIPTION",
+      subscriptionId: "seed-sub-1",
+      payerUserId: refs.traineeAhmedId,
+      amountGross: 1000,
+      amountNet: 1000,
+      currency: "EGP",
+      method: "CASH",
+      receiptNumber: "REC-SUB-1",
+      paidAt: periodStart,
+      loggedById: "seed-user-admin",
+    },
+    update: { subscriptionId: "seed-sub-1" },
+  });
+
+  const pay3 = await prisma.payment.upsert({
+    where: { receiptNumber: "REC-SUB-3" },
+    create: {
+      id: "seed-payment-sub-3",
+      revenueType: "SUBSCRIPTION",
+      subscriptionId: "seed-sub-3",
+      payerUserId: "seed-user-trainee-yara",
+      amountGross: 900,
+      amountNet: 900,
+      currency: "EGP",
+      method: "VODAFONE_CASH",
+      receiptNumber: "REC-SUB-3",
+      paidAt: periodStart,
+      loggedById: "seed-user-admin",
+    },
+    update: { subscriptionId: "seed-sub-3" },
+  });
+
+  await prisma.revenueSplit.deleteMany({
+    where: { paymentId: { in: [pay1.id, pay3.id] } },
+  });
+
+  await prisma.revenueSplit.createMany({
+    data: [
+      {
+        paymentId: pay1.id,
+        recipientType: "CSK",
+        amount: 850,
+        percent: 85,
+        computedAt: periodStart,
+      },
+      {
+        paymentId: pay1.id,
+        recipientType: "COACH",
+        recipientUserId: refs.coachMohamedId,
+        amount: 150,
+        percent: 15,
+        computedAt: periodStart,
+      },
+      {
+        paymentId: pay3.id,
+        recipientType: "VENUE",
+        recipientLocationId: "seed-loc-monster-gym",
+        amount: 540,
+        percent: 60,
+        computedAt: periodStart,
+      },
+      {
+        paymentId: pay3.id,
+        recipientType: "CSK",
+        amount: 225,
+        percent: 25,
+        computedAt: periodStart,
+      },
+      {
+        paymentId: pay3.id,
+        recipientType: "COACH",
+        recipientUserId: "seed-user-coach-tarek",
+        amount: 135,
+        percent: 15,
+        computedAt: periodStart,
+      },
+    ],
+  });
+
+  console.log("→ Seeding overdue subscriptions…");
+  await prisma.subscription.update({
+    where: { id: "seed-sub-4" },
+    data: { paymentStatus: "OVERDUE" },
+  });
+  await prisma.subscription.update({
+    where: { id: "seed-sub-5" },
+    data: { paymentStatus: "OVERDUE" },
+  });
+
+  console.log("→ Seeding expiring/expired medical documents…");
+  const in5Days = new Date(now);
+  in5Days.setDate(in5Days.getDate() + 5);
+
+  const expired2DaysAgo = new Date(now);
+  expired2DaysAgo.setDate(expired2DaysAgo.getDate() - 2);
+
+  await prisma.medicalRecord.upsert({
+    where: { traineeId: "seed-user-trainee-sara" },
+    create: {
+      traineeId: "seed-user-trainee-sara",
+      bloodType: "A-",
+      emergencyContactName: "Sara Parent",
+      emergencyContactPhone: "+201000999991",
+    },
+    update: {},
+  });
+
+  await prisma.medicalRecord.upsert({
+    where: { traineeId: "seed-user-trainee-hassan" },
+    create: {
+      traineeId: "seed-user-trainee-hassan",
+      bloodType: "B+",
+      emergencyContactName: "Hassan Parent",
+      emergencyContactPhone: "+201000999992",
+    },
+    update: {},
+  });
+
+  await prisma.medicalDocument.upsert({
+    where: { id: "seed-meddoc-sara-expiring" },
+    create: {
+      id: "seed-meddoc-sara-expiring",
+      traineeId: "seed-user-trainee-sara",
+      documentType: "CLEARANCE",
+      fileUrl: "https://placeholder.csk.local/medical/sara-clearance.pdf",
+      issueDate: new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()),
+      expiryDate: in5Days,
+      status: "ACTIVE",
+    },
+    update: { expiryDate: in5Days, status: "ACTIVE" },
+  });
+
+  await prisma.medicalDocument.upsert({
+    where: { id: "seed-meddoc-hassan-expired" },
+    create: {
+      id: "seed-meddoc-hassan-expired",
+      traineeId: "seed-user-trainee-hassan",
+      documentType: "CLEARANCE",
+      fileUrl: "https://placeholder.csk.local/medical/hassan-clearance.pdf",
+      issueDate: new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()),
+      expiryDate: expired2DaysAgo,
+      status: "ACTIVE",
+    },
+    update: { expiryDate: expired2DaysAgo, status: "ACTIVE" },
+  });
+
+  console.log("→ Seeding pending session plan…");
+  const planPendingDate = nextWeekday(now, 2, "19:00");
+  await prisma.sessionPlan.upsert({
+    where: { id: "seed-plan-pending-1" },
+    create: {
+      id: "seed-plan-pending-1",
+      groupId: "seed-group-kick-monster",
+      sessionDate: planPendingDate,
+      status: "PENDING",
+      unitsSequence: [
+        { trainingUnitId: "seed-unit-warmup" },
+        { trainingUnitId: "seed-unit-roundhouse" },
+        { trainingUnitId: "seed-unit-cooldown" },
+      ],
+      createdById: "seed-user-coach-tarek",
+    },
+    update: { status: "PENDING" },
+  });
+
+  console.log("→ Seeding rejected session plan…");
+  const planRejectedDate = nextWeekday(now, 3, "18:00");
+  await prisma.sessionPlan.upsert({
+    where: { id: "seed-plan-rejected-1" },
+    create: {
+      id: "seed-plan-rejected-1",
+      groupId: "seed-group-boxing-fc-evening",
+      sessionDate: planRejectedDate,
+      status: "REJECTED",
+      unitsSequence: [
+        { trainingUnitId: "seed-unit-warmup" },
+        { trainingUnitId: "seed-unit-pushups" },
+        { trainingUnitId: "seed-unit-cooldown" },
+      ],
+      createdById: refs.coachMohamedId,
+      reviewedById: refs.headCoachId,
+      reviewedAt: new Date(),
+      rejectionComment: "Please specify skill details for sparring or increase intensity.",
+    },
+    update: { status: "REJECTED", rejectionComment: "Please specify skill details for sparring or increase intensity." },
+  });
+
+  console.log("→ Seeding past session with pending daily report…");
+  const yesterdayStart = new Date(now);
+  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+  yesterdayStart.setHours(18, 0, 0, 0);
+
+  const yesterdayEnd = new Date(yesterdayStart);
+  yesterdayEnd.setMinutes(yesterdayEnd.getMinutes() + 90);
+
+  const pendingSessionId = "seed-session-pending-report";
+  await prisma.session.upsert({
+    where: { id: pendingSessionId },
+    create: {
+      id: pendingSessionId,
+      groupId: "seed-group-boxing-fc-evening",
+      locationId: "seed-loc-fight-club",
+      coachId: refs.coachMohamedId,
+      scheduledStart: yesterdayStart,
+      scheduledEnd: yesterdayEnd,
+      actualStart: yesterdayStart,
+      actualEnd: yesterdayEnd,
+      status: "COMPLETED",
+    },
+    update: {},
+  });
+
+  for (const tid of boxingTrainees) {
+    await prisma.attendance.upsert({
+      where: { sessionId_traineeId: { sessionId: pendingSessionId, traineeId: tid } },
+      create: {
+        sessionId: pendingSessionId,
+        traineeId: tid,
+        status: "PRESENT",
+        markedById: refs.coachMohamedId,
+      },
+      update: {},
+    });
+    await prisma.quickEvaluation.upsert({
+      where: { sessionId_traineeId: { sessionId: pendingSessionId, traineeId: tid } },
+      create: {
+        sessionId: pendingSessionId,
+        traineeId: tid,
+        effortScore: tid === refs.traineeAhmedId ? 8 : 6,
+        notes: "Attended yesterday.",
+        createdById: refs.coachMohamedId,
+      },
+      update: {},
+    });
+  }
+
+  await prisma.dailyReport.upsert({
+    where: { sessionId: pendingSessionId },
+    create: {
+      sessionId: pendingSessionId,
+      groupId: "seed-group-boxing-fc-evening",
+      coachId: refs.coachMohamedId,
+      submittedAt: new Date(yesterdayEnd.getTime() + 30 * 60 * 1000),
+      status: "PENDING",
+      summary: "Practiced standard guard positions and light punches. Good effort by everyone.",
+    },
+    update: { status: "PENDING" },
+  });
+
+  console.log("→ Seeding private sessions…");
+  const privateTodayStart = new Date(now);
+  privateTodayStart.setHours(15, 0, 0, 0);
+  const privateTodayEnd = new Date(privateTodayStart);
+  privateTodayEnd.setHours(16, 0, 0, 0);
+
+  await prisma.privateSession.upsert({
+    where: { id: "seed-private-1" },
+    create: {
+      id: "seed-private-1",
+      traineeId: refs.traineeAhmedId,
+      coachId: refs.coachMohamedId,
+      locationId: "seed-loc-fight-club",
+      scheduledStart: privateTodayStart,
+      scheduledEnd: privateTodayEnd,
+      fee: 400,
+      status: "SCHEDULED",
+      notes: "Focus on boxing footwork.",
+    },
+    update: { status: "SCHEDULED" },
+  });
+
+  const sessionTodayId = "seed-session-today-boxing";
+  const todayBoxingStart = new Date(now);
+  todayBoxingStart.setHours(18, 0, 0, 0);
+  const todayBoxingEnd = new Date(todayBoxingStart);
+  todayBoxingEnd.setHours(19, 30, 0, 0);
+
+  await prisma.session.upsert({
+    where: { id: sessionTodayId },
+    create: {
+      id: sessionTodayId,
+      groupId: "seed-group-boxing-fc-evening",
+      locationId: "seed-loc-fight-club",
+      coachId: refs.coachMohamedId,
+      scheduledStart: todayBoxingStart,
+      scheduledEnd: todayBoxingEnd,
+      status: "SCHEDULED",
+    },
+    update: {},
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────
