@@ -17,7 +17,7 @@ export default async function PaymentsListPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string; revenueType?: string }>;
 }) {
-  await requireRole("ADMIN");
+  await requireRole("HEAD_COACH");
   const sp = await searchParams;
 
   const [t, payments] = await Promise.all([

@@ -38,10 +38,15 @@ export async function listAllSubscriptions(filters: { paymentStatus?: string } =
     },
     orderBy: { currentPeriodEnd: "asc" },
     include: {
-      trainee: { select: { id: true, fullNameEn: true, fullNameAr: true } },
+      trainee: { select: { id: true, fullNameEn: true, fullNameAr: true, phone: true } },
       group: { select: { name: true } },
       location: { select: { nameEn: true } },
       discipline: { select: { nameEn: true } },
+      payments: {
+        orderBy: { paidAt: "desc" },
+        take: 1,
+        select: { paidAt: true },
+      },
     },
   });
 }

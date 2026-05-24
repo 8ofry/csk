@@ -88,12 +88,24 @@ export default async function SubscriptionsPage() {
                     {s.currentPeriodEnd.toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-end">{Number(s.monthlyFee).toFixed(2)} EGP</TableCell>
-                  <TableCell>{statusBadge(s.paymentStatus, badgeLabels)}</TableCell>
+                  <TableCell>
+                    <div>{statusBadge(s.paymentStatus, badgeLabels)}</div>
+                    {s.paymentStatus === "PAID" && (s as any).payments?.[0]?.paidAt && (
+                      <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                        {(s as any).payments[0].paidAt.toLocaleDateString()}{" "}
+                        {(s as any).payments[0].paidAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="text-end">
                     <LogPaymentInline
                       subscriptionId={s.id}
                       payerUserId={s.trainee.id}
                       defaultAmount={Number(s.monthlyFee)}
+                      traineeName={s.trainee.fullNameEn}
+                      traineePhone={s.trainee.phone}
+                      groupName={s.group.name}
+                      locationName={s.location.nameEn}
                     />
                   </TableCell>
                 </TableRow>

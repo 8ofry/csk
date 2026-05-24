@@ -27,6 +27,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { href: "/head-coach/coaches", labelKey: "coaches" },
     { href: "/head-coach/groups", labelKey: "groups" },
     { href: "/head-coach/subscriptions", labelKey: "subscriptions" },
+    { href: "/admin/financial/payments", labelKey: "payments" },
     { href: "/head-coach/training-units", labelKey: "trainingUnits" },
     { href: "/head-coach/championships", labelKey: "championships" },
     { href: "/head-coach/medical", labelKey: "medical" },
