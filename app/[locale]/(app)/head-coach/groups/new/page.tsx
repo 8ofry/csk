@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth-guard";
+
+export const dynamic = "force-dynamic";
 import { GroupForm } from "@/components/head-coach/group-form";
 import { createGroupAction } from "@/app/actions/groups";
 import { listLocations } from "@/application/locations/service";
