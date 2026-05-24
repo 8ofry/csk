@@ -146,11 +146,11 @@ export function LogPaymentInline({
           </div>
         </div>
         <div className="flex gap-1.5 mt-1">
-          <Button size="xs" variant="outline" onClick={printReceipt} className="text-[10px] h-7 px-2">
+          <Button size="sm" variant="outline" onClick={printReceipt} className="text-[10px] h-7 px-2">
             Download / Print
           </Button>
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             onClick={shareOnWhatsApp}
             className="text-[10px] h-7 px-2 border-emerald-500/30 text-emerald-600 hover:bg-emerald-50"
@@ -158,7 +158,7 @@ export function LogPaymentInline({
             Share WhatsApp
           </Button>
           <Button
-            size="xs"
+            size="sm"
             variant="ghost"
             onClick={() => setReceipt(null)}
             className="text-[10px] h-7 px-2 ml-auto"

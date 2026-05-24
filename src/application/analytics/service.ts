@@ -88,7 +88,7 @@ export async function lifetimeValue(window: AnalyticsWindow) {
       amountNet: true,
       paidAt: true,
       subscription: { select: { discipline: { select: { nameEn: true } } } },
-      privateSession: { select: { coach: { select: { primaryGroups: { select: { discipline: { select: { nameEn: true } } }, take: 1 } } } } },
+      privateSession: { select: { coach: { select: { groupCoachAssignments: { select: { group: { select: { discipline: { select: { nameEn: true } } } } }, take: 1 } } } } },
     },
   });
 
@@ -106,7 +106,7 @@ export async function lifetimeValue(window: AnalyticsWindow) {
     cohortKey: monthKey(earliestByTrainee.get(p.payerUserId) ?? p.paidAt),
     disciplineKey:
       p.subscription?.discipline?.nameEn ??
-      p.privateSession?.coach?.primaryGroups?.[0]?.discipline?.nameEn ??
+      p.privateSession?.coach?.groupCoachAssignments?.[0]?.group?.discipline?.nameEn ??
       undefined,
   }));
 

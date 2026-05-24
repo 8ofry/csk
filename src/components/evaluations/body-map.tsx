@@ -2,9 +2,9 @@
 
 // Stylized interactive body silhouette for the detailed evaluation (FR-EVAL-02).
 // Front view + back view; each region opens the side panel for scoring.
-// Region keys MUST match TARGET_BODY_PARTS in @/application/training-units/schemas.
+// Now supports a fully interactive raw anatomical SVG in "Muscles_front_and_back.svg".
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export type BodyPartKey =
   | "head_neck"
@@ -72,6 +72,8 @@ export interface BodyMapProps {
   /** Called when user changes a region's score/comment. */
   onChange?: (key: BodyPartKey, patch: { score?: number; comment?: string }) => void;
   readOnly?: boolean;
+  /** Raw SVG content for anatomical view */
+  svgContent?: string;
 }
 
 function scoreColor(score?: number): string {
@@ -81,34 +83,234 @@ function scoreColor(score?: number): string {
   return "fill-red-500/40 stroke-red-600";
 }
 
-export function BodyMap({ scores = {}, comments = {}, onChange, readOnly }: BodyMapProps) {
+function getPartKey(relativeX: number, relativeY: number): BodyPartKey | null {
+  if (relativeX < 203.5) {
+    // Front view
+    if (relativeY < 50) return "head_neck";
+    if (relativeY >= 50 && relativeY < 95 && (relativeX < 75 || relativeX > 130)) {
+      return relativeX < 100 ? "shoulders_l" : "shoulders_r";
+    }
+    if (relativeY >= 75 && relativeY < 140 && (relativeX < 65 || relativeX > 140)) {
+      return relativeX < 100 ? "upper_arms_l" : "upper_arms_r";
+    }
+    if (relativeY >= 140 && relativeY < 200 && (relativeX < 60 || relativeX > 145)) {
+      return relativeX < 100 ? "forearms_l" : "forearms_r";
+    }
+    if (relativeY >= 50 && relativeY < 110 && relativeX >= 65 && relativeX <= 140) return "chest";
+    if (relativeY >= 110 && relativeY < 170 && relativeX >= 65 && relativeX <= 140) return "core_abs";
+    if (relativeY >= 170 && relativeY < 200 && relativeX >= 65 && relativeX <= 140) return "hips";
+    if (relativeY >= 200 && relativeY < 270) {
+      return relativeX < 100 ? "thighs_l" : "thighs_r";
+    }
+    if (relativeY >= 270 && relativeY < 295) {
+      return relativeX < 100 ? "knees_l" : "knees_r";
+    }
+    if (relativeY >= 295 && relativeY < 340) {
+      return relativeX < 100 ? "shins_l" : "shins_r";
+    }
+    if (relativeY >= 340) {
+      return relativeX < 100 ? "feet_l" : "feet_r";
+    }
+  } else {
+    // Back view
+    if (relativeY < 50) return "head_neck";
+    if (relativeY >= 50 && relativeY < 95 && (relativeX < 280 || relativeX > 335)) {
+      return relativeX < 305 ? "shoulders_r" : "shoulders_l";
+    }
+    if (relativeY >= 75 && relativeY < 140 && (relativeX < 270 || relativeX > 345)) {
+      return relativeX < 305 ? "upper_arms_r" : "upper_arms_l";
+    }
+    if (relativeY >= 140 && relativeY < 200 && (relativeX < 265 || relativeX > 350)) {
+      return relativeX < 305 ? "forearms_r" : "forearms_l";
+    }
+    if (relativeY >= 50 && relativeY < 110 && relativeX >= 270 && relativeX <= 345) return "upper_back";
+    if (relativeY >= 110 && relativeY < 170 && relativeX >= 270 && relativeX <= 345) return "lower_back";
+    if (relativeY >= 170 && relativeY < 200 && relativeX >= 270 && relativeX <= 345) return "hips";
+    if (relativeY >= 200 && relativeY < 270) {
+      return relativeX < 305 ? "thighs_r" : "thighs_l";
+    }
+    if (relativeY >= 270 && relativeY < 295) {
+      return relativeX < 305 ? "knees_r" : "knees_l";
+    }
+    if (relativeY >= 295 && relativeY < 340) {
+      return relativeX < 305 ? "shins_r" : "shins_l";
+    }
+    if (relativeY >= 340) {
+      return relativeX < 305 ? "feet_r" : "feet_l";
+    }
+  }
+  return null;
+}
+
+export function BodyMap({ scores = {}, comments = {}, onChange, readOnly, svgContent }: BodyMapProps) {
   const [active, setActive] = useState<BodyPartKey | null>(null);
+  const [retryTrigger, setRetryTrigger] = useState(0);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
+  
   const front = REGIONS.filter((r) => r.side === "front");
   const back = REGIONS.filter((r) => r.side === "back");
-
   const allKeys = REGIONS.map((r) => r.key);
+
+  // Dynamic SVG event wiring & styling
+  useEffect(() => {
+    if (!svgContent || !svgContainerRef.current) return;
+
+    const svgElement = svgContainerRef.current.querySelector("svg");
+    if (!svgElement) return;
+
+    svgElement.setAttribute("width", "100%");
+    svgElement.setAttribute("height", "auto");
+    svgElement.style.maxWidth = "100%";
+    svgElement.style.height = "auto";
+
+    const paths = svgContainerRef.current.querySelectorAll("path");
+    const svgRect = svgElement.getBoundingClientRect();
+
+    if (svgRect.width === 0) {
+      const timer = setTimeout(() => {
+        setRetryTrigger((p) => p + 1);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+
+    const pathKeysMap = new Map<SVGPathElement, BodyPartKey>();
+
+    paths.forEach((path) => {
+      const rect = path.getBoundingClientRect();
+      const relativeX = ((rect.left + rect.width / 2 - svgRect.left) / svgRect.width) * 407;
+      const relativeY = ((rect.top + rect.height / 2 - svgRect.top) / svgRect.height) * 354.4;
+
+      const key = getPartKey(relativeX, relativeY);
+      if (key) {
+        pathKeysMap.set(path, key);
+        path.style.cursor = "pointer";
+
+        const clickHandler = (e: Event) => {
+          e.preventDefault();
+          setActive(key);
+        };
+        path.addEventListener("click", clickHandler);
+
+        const enterHandler = () => {
+          if (!scores[key]) {
+            path.setAttribute(
+              "style",
+              "fill: #c5a880; fill-opacity: 0.45; stroke: #c5a880; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s;"
+            );
+          }
+        };
+
+        const leaveHandler = () => {
+          updatePathStyles();
+        };
+
+        path.addEventListener("mouseenter", enterHandler);
+        path.addEventListener("mouseleave", leaveHandler);
+      }
+    });
+
+    const updatePathStyles = () => {
+      paths.forEach((path) => {
+        const key = pathKeysMap.get(path);
+        if (!key) return;
+
+        const isSelected = active === key;
+        const score = scores[key];
+
+        let fill = "transparent";
+        let fillOpacity = "0.2";
+        let stroke = "transparent";
+        let strokeWidth = "0";
+
+        if (score == null) {
+          if (isSelected) {
+            fill = "#c5a880";
+            fillOpacity = "0.5";
+            stroke = "#c5a880";
+            strokeWidth = "2";
+          } else {
+            path.removeAttribute("style");
+            path.style.cursor = "pointer";
+            return;
+          }
+        } else {
+          if (score >= 8) {
+            fill = "#10b981";
+            fillOpacity = isSelected ? "0.6" : "0.35";
+            stroke = "#059669";
+            strokeWidth = isSelected ? "2.5" : "1.2";
+          } else if (score >= 5) {
+            fill = "#f59e0b";
+            fillOpacity = isSelected ? "0.6" : "0.35";
+            stroke = "#d97706";
+            strokeWidth = isSelected ? "2.5" : "1.2";
+          } else {
+            fill = "#ef4444";
+            fillOpacity = isSelected ? "0.6" : "0.35";
+            stroke = "#dc2626";
+            strokeWidth = isSelected ? "2.5" : "1.2";
+          }
+        }
+
+        path.setAttribute(
+          "style",
+          `fill: ${fill}; fill-opacity: ${fillOpacity}; stroke: ${stroke}; stroke-width: ${strokeWidth}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;`
+        );
+      });
+    };
+
+    updatePathStyles();
+
+    return () => {
+      paths.forEach((path) => {
+        path.removeAttribute("style");
+      });
+    };
+  }, [svgContent, retryTrigger, active, scores]);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[auto_1fr]">
-      <div className="flex justify-center gap-6">
-        <Silhouette
-          label="Front"
-          regions={front}
-          scores={scores}
-          activeKey={active}
-          onClick={(k) => setActive(k)}
-        />
-        <Silhouette
-          label="Back"
-          regions={back}
-          scores={scores}
-          activeKey={active}
-          onClick={(k) => setActive(k)}
-        />
-      </div>
+      {svgContent ? (
+        <div className="flex flex-col items-center justify-center max-w-[550px] w-full mx-auto">
+          <div className="mb-2 text-xs font-semibold text-csk-gold tracking-wide uppercase">
+            Anatomical Muscle Assessment (TAP TO SCORE)
+          </div>
+          <div
+            ref={svgContainerRef}
+            className="w-full bg-muted/5 border border-muted-foreground/10 rounded-xl p-4 shadow-sm select-none"
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+          />
+        </div>
+      ) : (
+        <div className="flex justify-center gap-6">
+          <Silhouette
+            label="Front"
+            regions={front}
+            scores={scores}
+            activeKey={active}
+            onClick={(k) => setActive(k)}
+          />
+          <Silhouette
+            label="Back"
+            regions={back}
+            scores={scores}
+            activeKey={active}
+            onClick={(k) => setActive(k)}
+          />
+        </div>
+      )}
 
       <div className="space-y-3">
-        <h3 className="font-semibold">{active ? prettify(active) : "Tap a body part"}</h3>
+        <h3 className="font-semibold text-lg text-foreground flex items-center gap-2">
+          {active ? (
+            <>
+              <span className="h-2 w-2 rounded-full bg-csk-gold animate-pulse" />
+              {prettify(active)}
+            </>
+          ) : (
+            "Tap a body part"
+          )}
+        </h3>
         {active ? (
           <RegionPanel
             partKey={active}
@@ -124,15 +326,15 @@ export function BodyMap({ scores = {}, comments = {}, onChange, readOnly }: Body
         )}
 
         {Object.keys(scores).length > 0 && (
-          <div className="mt-6">
+          <div className="mt-6 border-t pt-4">
             <h4 className="text-sm font-medium text-muted-foreground">Scored so far</h4>
-            <ul className="mt-2 grid grid-cols-2 gap-1 text-xs">
+            <ul className="mt-2 grid grid-cols-2 gap-1.5 text-xs">
               {allKeys
                 .filter((k) => scores[k] != null)
                 .map((k) => (
-                  <li key={k} className="flex justify-between rounded-md border px-2 py-1">
-                    <span>{prettify(k)}</span>
-                    <strong>{scores[k]}/10</strong>
+                  <li key={k} className="flex justify-between items-center rounded-md border bg-muted/20 px-2.5 py-1.5 shadow-sm">
+                    <span className="font-medium text-foreground">{prettify(k)}</span>
+                    <strong className="text-csk-gold font-bold">{scores[k]}/10</strong>
                   </li>
                 ))}
             </ul>
@@ -194,19 +396,21 @@ function RegionPanel({
   onChange?: (key: BodyPartKey, patch: { score?: number; comment?: string }) => void;
 }) {
   return (
-    <div className="space-y-3 rounded-md border p-4">
+    <div className="space-y-3 rounded-md border p-4 bg-muted/5 shadow-inner">
       <div>
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">Score (1–10)</label>
-        <div className="flex flex-wrap gap-1">
+        <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          Score (1–10)
+        </label>
+        <div className="flex flex-wrap gap-1.5">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
             <button
               key={n}
               type="button"
               disabled={readOnly}
               onClick={() => onChange?.(partKey, { score: n })}
-              className={`flex h-9 w-9 items-center justify-center rounded-md border text-sm ${
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-medium transition ${
                 score === n
-                  ? "border-csk-gold bg-csk-gold/20 text-csk-gold"
+                  ? "border-csk-gold bg-csk-gold/20 text-csk-gold shadow-sm"
                   : "border-border text-muted-foreground hover:bg-muted"
               }`}
             >
@@ -216,13 +420,16 @@ function RegionPanel({
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">Comment</label>
+        <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          Comment / Observation
+        </label>
         <textarea
           disabled={readOnly}
           value={comment ?? ""}
           onChange={(e) => onChange?.(partKey, { comment: e.target.value })}
           rows={3}
-          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold disabled:cursor-not-allowed disabled:opacity-50"
+          placeholder="Describe muscle response, strength, or flex issues..."
+          className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
     </div>

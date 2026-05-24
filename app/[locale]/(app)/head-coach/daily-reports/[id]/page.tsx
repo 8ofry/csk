@@ -5,14 +5,15 @@ import { prisma } from "@/infrastructure/db/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DailyReportActions } from "@/components/head-coach/daily-report-actions";
+import { getBodyPartLabel } from "@/components/coach/quick-eval-grid";
 
 export default async function HeadCoachDailyReportPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
 }) {
   await requireRole("HEAD_COACH");
-  const { id } = await params;
+  const { id, locale } = await params;
   const [t, tBadges, tActions, report] = await Promise.all([
     getTranslations("hcReviewReport"),
     getTranslations("badges"),
@@ -129,7 +130,7 @@ export default async function HeadCoachDailyReportPage({
                 {(q.flaggedBodyPart || q.flaggedSkill) && (
                   <p className="mt-1 text-xs text-muted-foreground">
                     {t("flaggedPrefix", {
-                      bodyPart: q.flaggedBodyPart ?? "",
+                      bodyPart: q.flaggedBodyPart ? getBodyPartLabel(q.flaggedBodyPart, locale) : "",
                       skill: q.flaggedSkill ? t("flaggedSkillSuffix", { skill: q.flaggedSkill }) : "",
                     })}
                   </p>

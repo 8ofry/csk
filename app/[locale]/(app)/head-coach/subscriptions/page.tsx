@@ -90,10 +90,10 @@ export default async function SubscriptionsPage() {
                   <TableCell className="text-end">{Number(s.monthlyFee).toFixed(2)} EGP</TableCell>
                   <TableCell>
                     <div>{statusBadge(s.paymentStatus, badgeLabels)}</div>
-                    {s.paymentStatus === "PAID" && (s as any).payments?.[0]?.paidAt && (
+                    {s.paymentStatus === "PAID" && (s as unknown as { payments?: { paidAt: Date }[] }).payments?.[0]?.paidAt && (
                       <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                        {(s as any).payments[0].paidAt.toLocaleDateString()}{" "}
-                        {(s as any).payments[0].paidAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {(s as unknown as { payments?: { paidAt: Date }[] }).payments?.[0]?.paidAt?.toLocaleDateString()}{" "}
+                        {(s as unknown as { payments?: { paidAt: Date }[] }).payments?.[0]?.paidAt?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </div>
                     )}
                   </TableCell>

@@ -58,7 +58,7 @@ export default async function PublicSchedulePage() {
                             <div className="font-medium">{g.name}</div>
                             <div className="mt-1 text-xs text-muted-foreground">
                               {g.discipline.nameEn} · {t("withCoach")}{" "}
-                              {g.primaryCoach?.fullNameEn ?? t("tbd")}
+                              {g.coaches.map((c) => c.coach.fullNameEn).join(" & ") || t("tbd")}
                             </div>
                           </div>
                           <Badge variant="outline">{g.discipline.category}</Badge>

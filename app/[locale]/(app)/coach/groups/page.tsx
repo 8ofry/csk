@@ -1,8 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { listGroups } from "@/application/groups/service";
 import { requireRole } from "@/lib/auth-guard";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -19,23 +17,18 @@ interface ScheduleJson {
   endTime?: string;
 }
 
-export default async function GroupsPage() {
-  await requireRole("HEAD_COACH");
+export default async function CoachGroupsPage() {
+  const user = await requireRole("COACH");
   const [t, groups] = await Promise.all([
     getTranslations("hcGroups"),
-    listGroups(),
+    listGroups({ coachId: user.id }),
   ]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("subtitle")}</p>
-        </div>
-        <Button asChild>
-          <Link href="/head-coach/groups/new">{t("newButton")}</Link>
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground">List of training cohorts assigned to you.</p>
       </div>
 
       <Table>
@@ -47,7 +40,6 @@ export default async function GroupsPage() {
             <TableHead>{t("table.coach")}</TableHead>
             <TableHead>{t("table.schedule")}</TableHead>
             <TableHead className="text-end">{t("table.enrolled")}</TableHead>
-            <TableHead className="text-end">{t("table.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -84,17 +76,12 @@ export default async function GroupsPage() {
                 <TableCell className="text-end">
                   {g._count.enrollments} / {g.capacity}
                 </TableCell>
-                <TableCell className="text-end">
-                  <Button asChild variant="ghost" size="sm">
-                    <Link href={`/head-coach/groups/${g.id}`}>{t("table.manage")}</Link>
-                  </Button>
-                </TableCell>
               </TableRow>
             );
           })}
           {groups.length === 0 && (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-muted-foreground">
+              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                 {t("empty")}
               </TableCell>
             </TableRow>

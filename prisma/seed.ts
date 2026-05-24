@@ -297,15 +297,25 @@ async function seedDemoData(refs: SeedRefs) {
       name: "Boxing — Beginners (Mon/Wed evening)",
       locationId: fightClubId,
       disciplineId: boxingId,
-      primaryCoachId: refs.coachMohamedId,
-      schedule: { days: ["mon", "wed"], startTime: "18:00", endTime: "19:30" },
+      levelBands: ["N", "A", "B"] as ("N" | "A" | "B" | "C")[],
+      coaches: [
+        { coachId: refs.coachMohamedId, levels: ["N", "A"] as ("N" | "A" | "B" | "C")[] },
+        { coachId: "seed-user-coach-tarek", levels: ["B"] as ("N" | "A" | "B" | "C")[] },
+      ],
+      interns: ["seed-user-intern-omar"],
+      schedule: { days: ["sun", "mon", "wed"], startTime: "18:00", endTime: "19:30" },
     },
     {
       id: "seed-group-kick-monster",
       name: "Kickboxing — Intermediate (Tue/Thu)",
       locationId: monsterId,
       disciplineId: kickboxingId,
-      primaryCoachId: "seed-user-coach-tarek",
+      levelBands: ["A", "B", "C"] as ("N" | "A" | "B" | "C")[],
+      coaches: [
+        { coachId: "seed-user-coach-tarek", levels: ["A", "B"] as ("N" | "A" | "B" | "C")[] },
+        { coachId: "seed-user-coach-ali", levels: ["C"] as ("N" | "A" | "B" | "C")[] },
+      ],
+      interns: [] as string[],
       schedule: { days: ["tue", "thu"], startTime: "19:00", endTime: "20:30" },
     },
     {
@@ -313,7 +323,11 @@ async function seedDemoData(refs: SeedRefs) {
       name: "MMA — Advanced (Sat morning)",
       locationId: fightClubId,
       disciplineId: mmaId,
-      primaryCoachId: "seed-user-coach-ali",
+      levelBands: ["B", "C"] as ("N" | "A" | "B" | "C")[],
+      coaches: [
+        { coachId: "seed-user-coach-ali", levels: ["B", "C"] as ("N" | "A" | "B" | "C")[] },
+      ],
+      interns: [] as string[],
       schedule: { days: ["sat"], startTime: "10:00", endTime: "12:00" },
     },
     {
@@ -321,7 +335,11 @@ async function seedDemoData(refs: SeedRefs) {
       name: "Karate — Kihon (Sun/Tue)",
       locationId: facultyId,
       disciplineId: karateId,
-      primaryCoachId: "seed-user-coach-karim",
+      levelBands: ["N", "A"] as ("N" | "A" | "B" | "C")[],
+      coaches: [
+        { coachId: "seed-user-coach-karim", levels: ["N", "A"] as ("N" | "A" | "B" | "C")[] },
+      ],
+      interns: [] as string[],
       schedule: { days: ["sun", "tue"], startTime: "17:00", endTime: "18:30" },
     },
     {
@@ -329,12 +347,20 @@ async function seedDemoData(refs: SeedRefs) {
       name: "Combat fitness (daily 6am)",
       locationId: addfitId,
       disciplineId: fitnessId,
-      primaryCoachId: "seed-user-coach-tarek",
+      levelBands: ["N"] as ("N" | "A" | "B" | "C")[],
+      coaches: [
+        { coachId: "seed-user-coach-tarek", levels: ["N"] as ("N" | "A" | "B" | "C")[] },
+      ],
+      interns: [] as string[],
       schedule: { days: ["mon", "tue", "wed", "thu", "fri"], startTime: "06:00", endTime: "07:00" },
     },
   ];
 
   for (const g of groups) {
+    // Delete existing assignments for idempotency
+    await prisma.groupCoachAssignment.deleteMany({ where: { groupId: g.id } });
+    await prisma.groupInternAssignment.deleteMany({ where: { groupId: g.id } });
+
     await prisma.group.upsert({
       where: { id: g.id },
       create: {
@@ -342,12 +368,42 @@ async function seedDemoData(refs: SeedRefs) {
         name: g.name,
         locationId: g.locationId,
         disciplineId: g.disciplineId,
-        primaryCoachId: g.primaryCoachId,
+        levelBands: g.levelBands,
         schedule: g.schedule as object,
         capacity: 20,
         active: true,
+        coaches: {
+          create: g.coaches.map((c) => ({
+            coachId: c.coachId,
+            levels: c.levels,
+          })),
+        },
+        interns: {
+          create: g.interns.map((i) => ({
+            internId: i,
+          })),
+        },
       },
-      update: {},
+      update: {
+        name: g.name,
+        locationId: g.locationId,
+        disciplineId: g.disciplineId,
+        levelBands: g.levelBands,
+        schedule: g.schedule as object,
+        capacity: 20,
+        active: true,
+        coaches: {
+          create: g.coaches.map((c) => ({
+            coachId: c.coachId,
+            levels: c.levels,
+          })),
+        },
+        interns: {
+          create: g.interns.map((i) => ({
+            internId: i,
+          })),
+        },
+      },
     });
   }
   console.log(`  ✓ ${groups.length} groups`);

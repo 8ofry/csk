@@ -46,25 +46,32 @@ export async function listPublicCoaches() {
       fullNameEn: true,
       fullNameAr: true,
       profilePhotoUrl: true,
-      primaryGroups: {
-        where: { active: true },
+      groupCoachAssignments: {
+        where: { group: { active: true } },
         select: {
-          location: { select: { nameEn: true } },
-          discipline: { select: { nameEn: true, category: true } },
+          group: {
+            select: {
+              location: { select: { nameEn: true } },
+              discipline: { select: { nameEn: true, category: true } },
+            },
+          },
         },
       },
     },
   });
 
-  return coaches.map((c) => ({
-    id: c.id,
-    fullNameEn: c.fullNameEn,
-    fullNameAr: c.fullNameAr,
-    profilePhotoUrl: c.profilePhotoUrl,
-    locations: [...new Set(c.primaryGroups.map((g) => g.location.nameEn))],
-    disciplines: [...new Set(c.primaryGroups.map((g) => g.discipline.nameEn))],
-    categories: [...new Set(c.primaryGroups.map((g) => g.discipline.category))],
-  }));
+  return coaches.map((c) => {
+    const groups = c.groupCoachAssignments.map((a) => a.group);
+    return {
+      id: c.id,
+      fullNameEn: c.fullNameEn,
+      fullNameAr: c.fullNameAr,
+      profilePhotoUrl: c.profilePhotoUrl,
+      locations: [...new Set(groups.map((g) => g.location.nameEn))],
+      disciplines: [...new Set(groups.map((g) => g.discipline.nameEn))],
+      categories: [...new Set(groups.map((g) => g.discipline.category))],
+    };
+  });
 }
 
 export async function publicScheduleByLocation() {
@@ -83,7 +90,11 @@ export async function publicScheduleByLocation() {
           name: true,
           schedule: true,
           discipline: { select: { nameEn: true, category: true } },
-          primaryCoach: { select: { fullNameEn: true } },
+          coaches: {
+            select: {
+              coach: { select: { fullNameEn: true } },
+            },
+          },
         },
       },
     },

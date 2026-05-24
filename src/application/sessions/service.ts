@@ -41,7 +41,14 @@ export async function listScheduledForCoach(
   windowEnd: Date,
 ): Promise<DerivedOccurrence[]> {
   const groups = await prisma.group.findMany({
-    where: { primaryCoachId: coachId, active: true },
+    where: {
+      coaches: {
+        some: {
+          coachId,
+        },
+      },
+      active: true,
+    },
     include: { location: { select: { id: true, nameEn: true } } },
   });
 
@@ -102,11 +109,17 @@ export async function startSession(opts: {
 
   const group = await prisma.group.findUnique({
     where: { id: groupId },
-    include: { location: true },
+    include: {
+      location: true,
+      coaches: true,
+      interns: true,
+    },
   });
   if (!group) throw new SessionStartError("Group not found");
-  if (group.primaryCoachId !== coachId) {
-    throw new SessionStartError("Only the primary coach can start sessions for this group");
+  
+  const isAssigned = group.coaches.some((c) => c.coachId === coachId);
+  if (!isAssigned) {
+    throw new SessionStartError("Only assigned coaches can start sessions for this group");
   }
 
   const schedule = group.schedule as unknown as WeeklySchedule | null;
@@ -149,7 +162,7 @@ export async function startSession(opts: {
           groupId,
           locationId: group.locationId,
           coachId,
-          internId: group.internId,
+          internId: group.interns[0]?.internId ?? null,
           planId: plan?.id ?? null,
           scheduledStart,
           scheduledEnd: expected.end,

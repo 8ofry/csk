@@ -251,8 +251,8 @@ model User {
 
   // Coach links
   coachContracts        CoachContract[]            @relation("ContractCoach")
-  primaryGroups         Group[]                    @relation("GroupPrimaryCoach")
-  internGroups          Group[]                    @relation("GroupIntern")
+  groupCoachAssignments GroupCoachAssignment[] @relation("CoachGroupAssignments")
+  groupInternAssignments GroupInternAssignment[] @relation("InternGroupAssignments")
   shadowedByIntern      InternAssignment[]         @relation("InternAssignmentCoach")
   internAssignmentsAsIntern InternAssignment[]     @relation("InternAssignmentIntern")
 
@@ -389,13 +389,11 @@ model Group {
   location        Location    @relation(fields: [locationId], references: [id])
   disciplineId    String
   discipline      Discipline  @relation(fields: [disciplineId], references: [id])
-  levelBand       LevelBand?
+  levelBands      LevelBand[]
   ageBandMin      Int?
   ageBandMax      Int?
-  primaryCoachId  String?
-  primaryCoach    User?       @relation("GroupPrimaryCoach", fields: [primaryCoachId], references: [id], onDelete: SetNull)
-  internId        String?
-  intern          User?       @relation("GroupIntern", fields: [internId], references: [id], onDelete: SetNull)
+  coaches         GroupCoachAssignment[]
+  interns         GroupInternAssignment[]
   schedule        Json // { days: ["mon","wed"], start: "18:00", end: "19:30" }
   capacity        Int         @default(20) // FR-GRP-01
   active          Boolean     @default(true)
@@ -412,6 +410,31 @@ model Group {
 
   @@index([locationId, active])
   @@index([disciplineId])
+}
+
+model GroupCoachAssignment {
+  id        String      @id @default(cuid())
+  groupId   String
+  group     Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  coachId   String
+  coach     User        @relation("CoachGroupAssignments", fields: [coachId], references: [id], onDelete: Cascade)
+  levels    LevelBand[]
+  createdAt DateTime    @default(now())
+
+  @@unique([groupId, coachId])
+  @@index([coachId])
+}
+
+model GroupInternAssignment {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  internId  String
+  intern    User     @relation("InternGroupAssignments", fields: [internId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([groupId, internId])
+  @@index([internId])
 }
 
 model InternAssignment {

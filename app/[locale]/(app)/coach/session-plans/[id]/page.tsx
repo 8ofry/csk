@@ -37,7 +37,7 @@ export default async function CoachPlanDetailPage({
   const [units, groups] = await Promise.all([
     listTrainingUnits({ publishedOnly: true }),
     prisma.group.findMany({
-      where: { primaryCoachId: user.id, active: true },
+      where: { coaches: { some: { coachId: user.id } }, active: true },
       select: { id: true, name: true, location: { select: { nameEn: true } } },
     }),
   ]);

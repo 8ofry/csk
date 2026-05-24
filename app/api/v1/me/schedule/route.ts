@@ -23,7 +23,13 @@ export async function GET(req: Request) {
           schedule: true,
           location: { select: { id: true, nameEn: true } },
           discipline: { select: { id: true, nameEn: true } },
-          primaryCoach: { select: { id: true, fullNameEn: true } },
+          coaches: {
+            select: {
+              coach: {
+                select: { id: true, fullNameEn: true },
+              },
+            },
+          },
         },
       },
     },
@@ -53,8 +59,8 @@ export async function GET(req: Request) {
         location: enr.group.location,
         discipline: enr.group.discipline,
         coach: {
-          id: enr.group.primaryCoach?.id ?? null,
-          fullNameEn: enr.group.primaryCoach?.fullNameEn ?? null,
+          id: enr.group.coaches[0]?.coach?.id ?? null,
+          fullNameEn: enr.group.coaches[0]?.coach?.fullNameEn ?? null,
         },
         scheduledStart: occ.start,
         scheduledEnd: occ.end,

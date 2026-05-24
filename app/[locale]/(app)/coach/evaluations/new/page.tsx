@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/auth-guard";
 import { prisma } from "@/infrastructure/db/prisma";
 import { DetailedEvalForm } from "@/components/evaluations/detailed-eval-form";
 import { createDetailedEvalAction } from "@/app/actions/detailed-eval";
+import fs from "fs";
+import path from "path";
 
 export default async function NewDetailedEvalPage({
   searchParams,
@@ -22,15 +24,26 @@ export default async function NewDetailedEvalPage({
     }),
     prisma.group.findUnique({
       where: { id: sp.groupId },
-      include: { discipline: true },
+      include: { discipline: true, coaches: true },
     }),
   ]);
 
   if (!trainee || trainee.role !== "TRAINEE" || !group) notFound();
-  if (group.primaryCoachId !== user.id) notFound();
+  
+  const isAssigned = group.coaches.some((c) => c.coachId === user.id);
+  if (!isAssigned) notFound();
 
   const skills =
     (group.discipline.skillsTaxonomy as { skills?: string[] } | null)?.skills ?? [];
+
+  // Read the SVG content
+  let svgContent = "";
+  try {
+    const svgPath = path.join(process.cwd(), "Muscles_front_and_back.svg");
+    svgContent = fs.readFileSync(svgPath, "utf-8");
+  } catch (err) {
+    console.error("Failed to read Muscles_front_and_back.svg:", err);
+  }
 
   return (
     <div className="space-y-6">
@@ -46,6 +59,7 @@ export default async function NewDetailedEvalPage({
         skills={skills}
         onSubmit={createDetailedEvalAction}
         redirectTo={`/coach/sessions/${sp.groupId}`}
+        svgContent={svgContent}
       />
     </div>
   );

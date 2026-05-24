@@ -14,18 +14,27 @@ export class GroupCapacityError extends Error {
   }
 }
 
-export async function listGroups(filters?: { locationId?: string; active?: boolean }) {
+export async function listGroups(filters?: { locationId?: string; active?: boolean; coachId?: string }) {
   return prisma.group.findMany({
     where: {
       locationId: filters?.locationId,
       active: filters?.active,
+      coaches: filters?.coachId ? { some: { coachId: filters.coachId } } : undefined,
     },
     orderBy: [{ active: "desc" }, { name: "asc" }],
     include: {
       location: { select: { id: true, nameEn: true, nameAr: true } },
       discipline: { select: { id: true, nameEn: true, nameAr: true, category: true } },
-      primaryCoach: { select: { id: true, fullNameEn: true, fullNameAr: true } },
-      intern: { select: { id: true, fullNameEn: true, fullNameAr: true } },
+      coaches: {
+        include: {
+          coach: { select: { id: true, fullNameEn: true, fullNameAr: true } },
+        },
+      },
+      interns: {
+        include: {
+          intern: { select: { id: true, fullNameEn: true, fullNameAr: true } },
+        },
+      },
       _count: { select: { enrollments: true } },
     },
   });
@@ -37,8 +46,16 @@ export async function getGroup(id: string) {
     include: {
       location: true,
       discipline: true,
-      primaryCoach: true,
-      intern: true,
+      coaches: {
+        include: {
+          coach: true,
+        },
+      },
+      interns: {
+        include: {
+          intern: true,
+        },
+      },
       enrollments: {
         where: { status: "ACTIVE" },
         include: {
@@ -58,14 +75,23 @@ export async function createGroup(input: GroupInput, actorId: string) {
       name: data.name,
       locationId: data.locationId,
       disciplineId: data.disciplineId,
-      primaryCoachId: data.primaryCoachId ?? null,
-      internId: data.internId ?? null,
-      levelBand: data.levelBand ?? null,
+      levelBands: data.levelBands,
       ageBandMin: data.ageBandMin ?? null,
       ageBandMax: data.ageBandMax ?? null,
       schedule: data.schedule,
       capacity: data.capacity,
       active: data.active,
+      coaches: {
+        create: data.coaches.map((c) => ({
+          coachId: c.coachId,
+          levels: c.levels,
+        })),
+      },
+      interns: {
+        create: data.interns.map((iId) => ({
+          internId: iId,
+        })),
+      },
     },
   });
   await prisma.auditLog.create({
@@ -82,32 +108,49 @@ export async function createGroup(input: GroupInput, actorId: string) {
 
 export async function updateGroup(id: string, input: GroupInput, actorId: string) {
   const data = groupInputSchema.parse(input);
-  const updated = await prisma.group.update({
-    where: { id },
-    data: {
-      name: data.name,
-      locationId: data.locationId,
-      disciplineId: data.disciplineId,
-      primaryCoachId: data.primaryCoachId ?? null,
-      internId: data.internId ?? null,
-      levelBand: data.levelBand ?? null,
-      ageBandMin: data.ageBandMin ?? null,
-      ageBandMax: data.ageBandMax ?? null,
-      schedule: data.schedule,
-      capacity: data.capacity,
-      active: data.active,
-    },
+  return prisma.$transaction(async (tx) => {
+    // Delete existing assignments for clean overwrite
+    await tx.groupCoachAssignment.deleteMany({ where: { groupId: id } });
+    await tx.groupInternAssignment.deleteMany({ where: { groupId: id } });
+
+    const updated = await tx.group.update({
+      where: { id },
+      data: {
+        name: data.name,
+        locationId: data.locationId,
+        disciplineId: data.disciplineId,
+        levelBands: data.levelBands,
+        ageBandMin: data.ageBandMin ?? null,
+        ageBandMax: data.ageBandMax ?? null,
+        schedule: data.schedule,
+        capacity: data.capacity,
+        active: data.active,
+        coaches: {
+          create: data.coaches.map((c) => ({
+            coachId: c.coachId,
+            levels: c.levels,
+          })),
+        },
+        interns: {
+          create: data.interns.map((iId) => ({
+            internId: iId,
+          })),
+        },
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId,
+        action: "group.update",
+        entityType: "Group",
+        entityId: id,
+        changes: { ...data },
+      },
+    });
+
+    return updated;
   });
-  await prisma.auditLog.create({
-    data: {
-      actorId,
-      action: "group.update",
-      entityType: "Group",
-      entityId: id,
-      changes: { ...data },
-    },
-  });
-  return updated;
 }
 
 export async function enrollTrainee(opts: {

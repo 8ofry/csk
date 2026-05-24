@@ -16,6 +16,7 @@ export interface DetailedEvalFormProps {
   skills: string[];
   onSubmit: (formData: FormData) => Promise<{ ok?: true; id?: string; error?: string }>;
   redirectTo: string;
+  svgContent?: string;
 }
 
 export function DetailedEvalForm({
@@ -26,6 +27,7 @@ export function DetailedEvalForm({
   skills,
   onSubmit,
   redirectTo,
+  svgContent,
 }: DetailedEvalFormProps) {
   const t = useTranslations("detailedEval");
   const router = useRouter();
@@ -94,7 +96,7 @@ export function DetailedEvalForm({
 
       <section>
         <h2 className="mb-3 text-xl font-semibold">{t("bodyMapTitle")}</h2>
-        <BodyMap scores={bodyScores} comments={bodyComments} onChange={patchBody} />
+        <BodyMap scores={bodyScores} comments={bodyComments} onChange={patchBody} svgContent={svgContent} />
       </section>
 
       <section>

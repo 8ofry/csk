@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+const DAY_KEYS = ["sat", "sun", "mon", "tue", "wed", "thu", "fri"] as const;
 
 interface OptionList {
   id: string;
@@ -22,6 +22,9 @@ export interface GroupFormProps {
     primaryCoachId?: string | null;
     internId?: string | null;
     levelBand?: string | null;
+    levelBands?: string[];
+    coaches?: { coachId: string; levels: string[] }[];
+    interns?: string[];
     ageBandMin?: number | null;
     ageBandMax?: number | null;
     schedule?: { days?: string[]; startTime?: string; endTime?: string };
@@ -51,12 +54,41 @@ export function GroupForm({
   const [pending, startTransition] = useTransition();
   const initialDays = new Set(defaultValues?.schedule?.days ?? []);
 
+  // Initialize level bands from levelBands array or fallback to legacy levelBand
+  const [selectedLevels, setSelectedLevels] = useState<string[]>(
+    defaultValues?.levelBands ?? (defaultValues?.levelBand ? [defaultValues.levelBand] : ["N"])
+  );
+
+  // Initialize coaches from coaches assignments array or fallback to legacy primaryCoachId
+  const [selectedCoaches, setSelectedCoaches] = useState<{ coachId: string; levels: string[] }[]>(
+    defaultValues?.coaches ??
+      (defaultValues?.primaryCoachId
+        ? [{ coachId: defaultValues.primaryCoachId, levels: defaultValues?.levelBands ?? ["N"] }]
+        : [])
+  );
+
+  // Initialize interns from interns array or fallback to legacy internId
+  const [selectedInterns, setSelectedInterns] = useState<string[]>(
+    defaultValues?.interns ?? (defaultValues?.internId ? [defaultValues.internId] : [])
+  );
+
   return (
     <form
       className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
+        
+        // Append selected level bands
+        selectedLevels.forEach((lvl) => {
+          fd.append("levelBands", lvl);
+        });
+
+        // Append selected interns
+        selectedInterns.forEach((iId) => {
+          fd.append("interns", iId);
+        });
+
         startTransition(async () => {
           setError(null);
           const result = await onSubmit(fd);
@@ -100,34 +132,175 @@ export function GroupForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="primaryCoachId">{t("primaryCoach")}</Label>
-          <SelectField
-            id="primaryCoachId"
-            name="primaryCoachId"
-            defaultValue={defaultValues?.primaryCoachId ?? ""}
-            options={[{ id: "", label: t("noneYet") }, ...coaches]}
-          />
-        </div>
-        <div>
-          <Label htmlFor="internId">{t("internOpt")}</Label>
-          <SelectField
-            id="internId"
-            name="internId"
-            defaultValue={defaultValues?.internId ?? ""}
-            options={[{ id: "", label: t("none") }, ...interns]}
-          />
+      {/* Multi-Level Selection */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">{t("levelBands") ?? "Group Levels"}</Label>
+        <div className="flex flex-wrap gap-2">
+          {["N", "A", "B", "C"].map((lvl) => {
+            const isChecked = selectedLevels.includes(lvl);
+            return (
+              <label
+                key={lvl}
+                className="flex cursor-pointer items-center gap-1 rounded-md border px-3 py-2 text-sm has-[:checked]:border-csk-gold has-[:checked]:bg-csk-gold/10 transition-all hover:bg-muted/40"
+              >
+                <input
+                  type="checkbox"
+                  value={lvl}
+                  checked={isChecked}
+                  onChange={(e) => {
+                    let next: string[];
+                    if (e.target.checked) {
+                      next = [...selectedLevels, lvl];
+                    } else {
+                      next = selectedLevels.filter((l) => l !== lvl);
+                    }
+                    setSelectedLevels(next);
+
+                    // Adjust each coach's assigned levels so they don't contain any removed level
+                    setSelectedCoaches(
+                      selectedCoaches.map((sc) => ({
+                        ...sc,
+                        levels: sc.levels.filter((l) => next.includes(l)),
+                      }))
+                    );
+                  }}
+                  className="h-4 w-4 accent-csk-gold"
+                />
+                <span>{lvl === "N" ? (t("newbie") ?? "N") : lvl}</span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
+      {/* Coaches Selection with Assignment Level Matrix */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">{t("coaches") ?? "Coaches & Levels Matrix"}</Label>
+        <div className="space-y-3 rounded-md border p-4 bg-muted/10">
+          {coaches.map((c) => {
+            const coachAssignment = selectedCoaches.find((sc) => sc.coachId === c.id);
+            const isCoachChecked = !!coachAssignment;
+
+            return (
+              <div key={c.id} className="border-b border-muted/50 pb-3 last:border-b-0 last:pb-0">
+                <label className="flex cursor-pointer items-center gap-2 font-medium text-sm">
+                  <input
+                    type="checkbox"
+                    checked={isCoachChecked}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedCoaches([
+                          ...selectedCoaches,
+                          { coachId: c.id, levels: [...selectedLevels] }, // Default to all selected levels
+                        ]);
+                      } else {
+                        setSelectedCoaches(selectedCoaches.filter((sc) => sc.coachId !== c.id));
+                      }
+                    }}
+                    className="h-4 w-4 accent-csk-gold"
+                  />
+                  <span className="text-foreground">{c.label}</span>
+                </label>
+
+                {isCoachChecked && (
+                  <div className="mt-2 ml-6 pl-3 border-l-2 border-csk-gold/40 space-y-1">
+                    <span className="text-xs text-muted-foreground block font-medium">
+                      {t("assignLevelsToCoach") ?? "Assign Levels for this Coach:"}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedLevels.map((lvl) => {
+                        const isLvlChecked = coachAssignment.levels.includes(lvl);
+                        return (
+                          <label
+                            key={lvl}
+                            className="flex cursor-pointer items-center gap-1 rounded border px-2.5 py-1 text-xs has-[:checked]:border-csk-gold has-[:checked]:bg-csk-gold/15 transition-all"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isLvlChecked}
+                              onChange={(e) => {
+                                let nextLevels: string[];
+                                if (e.target.checked) {
+                                  nextLevels = [...coachAssignment.levels, lvl];
+                                } else {
+                                  nextLevels = coachAssignment.levels.filter((l) => l !== lvl);
+                                }
+                                setSelectedCoaches(
+                                  selectedCoaches.map((sc) =>
+                                    sc.coachId === c.id ? { ...sc, levels: nextLevels } : sc
+                                  )
+                                );
+                              }}
+                              className="h-3.5 w-3.5 accent-csk-gold"
+                            />
+                            <span>{lvl === "N" ? (t("newbie") ?? "N") : lvl}</span>
+                          </label>
+                        );
+                      })}
+                      {selectedLevels.length === 0 && (
+                        <span className="text-xs text-destructive font-medium">
+                          {t("pleaseSelectLevelsFirst") ?? "Choose group levels first"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {coaches.length === 0 && (
+            <span className="text-xs text-muted-foreground">
+              No coaches available
+            </span>
+          )}
+        </div>
+        {/* Hidden input field storing the stringified JSON array of coach-level mappings */}
+        <input type="hidden" name="coachesJson" value={JSON.stringify(selectedCoaches)} />
+      </div>
+
+      {/* Interns Selection */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">{t("internOpt") ?? "Interns"}</Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 rounded-md border p-4 bg-muted/10">
+          {interns.map((i) => {
+            const isChecked = selectedInterns.includes(i.id);
+            return (
+              <label
+                key={i.id}
+                className="flex cursor-pointer items-center gap-2 text-sm p-1 rounded hover:bg-muted/30 transition-all"
+              >
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedInterns([...selectedInterns, i.id]);
+                    } else {
+                      setSelectedInterns(selectedInterns.filter((id) => id !== i.id));
+                    }
+                  }}
+                  className="h-4 w-4 accent-csk-gold"
+                />
+                <span>{i.label}</span>
+              </label>
+            );
+          })}
+          {interns.length === 0 && (
+            <span className="text-xs text-muted-foreground py-2">
+              {t("none") ?? "No interns available"}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Weekly Schedule Section */}
       <fieldset className="rounded-md border p-4">
         <legend className="px-2 text-sm font-medium">{t("weeklySchedule")}</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {DAY_KEYS.map((key) => (
             <label
               key={key}
-              className="flex cursor-pointer items-center gap-1 rounded-md border px-3 py-2 text-sm has-[:checked]:border-csk-gold has-[:checked]:bg-csk-gold/10"
+              className="flex cursor-pointer items-center gap-1 rounded-md border px-3 py-2 text-sm has-[:checked]:border-csk-gold has-[:checked]:bg-csk-gold/10 transition-all hover:bg-muted/40"
             >
               <input
                 type="checkbox"
@@ -166,22 +339,7 @@ export function GroupForm({
         </div>
       </fieldset>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="levelBand">{t("levelBand")}</Label>
-          <SelectField
-            id="levelBand"
-            name="levelBand"
-            defaultValue={defaultValues?.levelBand ?? ""}
-            options={[
-              { id: "", label: t("any") },
-              { id: "N", label: t("newbie") },
-              { id: "A", label: "A" },
-              { id: "B", label: "B" },
-              { id: "C", label: "C" },
-            ]}
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="ageBandMin">{t("ageMin")}</Label>
           <Input
@@ -224,7 +382,7 @@ export function GroupForm({
             className="mt-1"
           />
         </div>
-        <label className="flex items-end gap-2 text-sm">
+        <label className="flex items-end gap-2 text-sm cursor-pointer pb-2">
           <input
             type="checkbox"
             name="active"

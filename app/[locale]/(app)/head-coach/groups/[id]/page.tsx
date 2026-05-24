@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { getGroup } from "@/application/groups/service";
 import { requireRole } from "@/lib/auth-guard";
 import { GroupForm } from "@/components/head-coach/group-form";
@@ -13,6 +14,7 @@ import {
   listActiveInterns,
   listActiveTrainees,
 } from "@/application/users/directory";
+import { Button } from "@/components/ui/button";
 
 export default async function EditGroupPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole("HEAD_COACH");
@@ -57,9 +59,9 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
               name: group.name,
               locationId: group.locationId,
               disciplineId: group.disciplineId,
-              primaryCoachId: group.primaryCoachId,
-              internId: group.internId,
-              levelBand: group.levelBand,
+              levelBands: group.levelBands,
+              coaches: group.coaches.map((c) => ({ coachId: c.coachId, levels: c.levels })),
+              interns: group.interns.map((i) => i.internId),
               ageBandMin: group.ageBandMin,
               ageBandMax: group.ageBandMax,
               schedule: group.schedule as { days?: string[]; startTime?: string; endTime?: string },
@@ -78,9 +80,14 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            {t("rosterTitle", { enrolled: group.enrollments.length, capacity: group.capacity })}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              {t("rosterTitle", { enrolled: group.enrollments.length, capacity: group.capacity })}
+            </CardTitle>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/head-coach/trainees">+ Add New Trainee</Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <GroupRoster

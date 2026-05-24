@@ -62,14 +62,21 @@ async function resolveContext(input: LogPaymentInput): Promise<PaymentContext> {
         select: {
           locationId: true,
           disciplineId: true,
-          group: { select: { primaryCoachId: true } },
+          group: {
+            select: {
+              coaches: {
+                select: { coachId: true },
+                take: 1,
+              },
+            },
+          },
         },
       });
       if (!sub) throw new PaymentValidationError("Subscription not found");
       return {
         locationId: sub.locationId,
         disciplineId: sub.disciplineId,
-        coachUserId: sub.group.primaryCoachId,
+        coachUserId: sub.group?.coaches?.[0]?.coachId ?? null,
       };
     }
     case "PRIVATE_SESSION": {

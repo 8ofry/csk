@@ -21,9 +21,14 @@ export const groupInputSchema = z.object({
   name: z.string().min(2),
   locationId: z.string().min(1),
   disciplineId: z.string().min(1),
-  primaryCoachId: z.string().nullable().optional(),
-  internId: z.string().nullable().optional(),
-  levelBand: levelBandSchema.nullable().optional(),
+  levelBands: z.array(levelBandSchema).min(1, "Pick at least one level"),
+  coaches: z.array(
+    z.object({
+      coachId: z.string().min(1),
+      levels: z.array(levelBandSchema),
+    })
+  ).min(1, "Assign at least one coach"),
+  interns: z.array(z.string()).default([]),
   ageBandMin: z.coerce.number().int().min(0).max(120).nullable().optional(),
   ageBandMax: z.coerce.number().int().min(0).max(120).nullable().optional(),
   schedule: weeklyScheduleSchema,

@@ -12,6 +12,8 @@ import { EndSessionButton } from "@/components/coach/end-session-button";
 import { ComposeReportButton } from "@/components/coach/compose-report-button";
 import { getDailyReportBySessionId } from "@/application/daily-reports/service";
 import type { AttendanceMark } from "@/application/attendance/service";
+import fs from "fs";
+import path from "path";
 
 interface UnitItemRaw {
   trainingUnitId: string;
@@ -45,6 +47,15 @@ export default async function SessionDetailPage({
       ? await listTrainingUnits({})
       : [];
   const unitsById = new Map(unitDirectory.map((u) => [u.id, u]));
+
+  // Read the SVG content
+  let svgContent = "";
+  try {
+    const svgPath = path.join(process.cwd(), "Muscles_front_and_back.svg");
+    svgContent = fs.readFileSync(svgPath, "utf-8");
+  } catch (err) {
+    console.error("Failed to read Muscles_front_and_back.svg:", err);
+  }
 
   return (
     <div className="space-y-6">
@@ -101,6 +112,7 @@ export default async function SessionDetailPage({
         <CardContent>
           <QuickEvalGrid
             sessionId={session.id}
+            svgContent={svgContent}
             trainees={trainees.map((t) => {
               const e = evalMap.get(t.id);
               return {

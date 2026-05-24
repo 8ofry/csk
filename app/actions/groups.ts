@@ -13,13 +13,18 @@ import { requireRole } from "@/lib/auth-guard";
 
 function parseFormData(fd: FormData) {
   const days = fd.getAll("days").map((d) => dayOfWeekSchema.parse(String(d)));
+  const levelBands = fd.getAll("levelBands").map((lvl) => String(lvl));
+  const coachesRaw = String(fd.get("coachesJson") ?? "[]");
+  const coaches = JSON.parse(coachesRaw);
+  const interns = fd.getAll("interns").map((iId) => String(iId));
+
   return groupInputSchema.parse({
     name: fd.get("name") ?? "",
     locationId: fd.get("locationId") ?? "",
     disciplineId: fd.get("disciplineId") ?? "",
-    primaryCoachId: fd.get("primaryCoachId") || null,
-    internId: fd.get("internId") || null,
-    levelBand: fd.get("levelBand") || null,
+    levelBands,
+    coaches,
+    interns,
     ageBandMin: fd.get("ageBandMin") || null,
     ageBandMax: fd.get("ageBandMax") || null,
     schedule: {
