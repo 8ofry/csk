@@ -286,7 +286,8 @@
     "schedule": "Schedule",
     "evaluations": "Evaluations",
     "reports": "Reports",
-    "payments": "Payments"
+    "payments": "Payments",
+    "subscriptions": "Subscriptions"
   },
   "publicSite": {
     "footer": {
