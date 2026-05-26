@@ -9,6 +9,7 @@ import {
   resubmitPlan,
   submitPlan,
   updateDraftPlan,
+  reviewPlan,
 } from "@/application/session-plans/service";
 import { sessionPlanInputSchema, planUnitItemSchema } from "@/application/session-plans/schemas";
 import { requireRole } from "@/lib/auth-guard";
@@ -127,3 +128,22 @@ export async function rejectPlanAction(
     return { error: e instanceof Error ? e.message : "Unknown error" };
   }
 }
+
+export async function reviewPlanAction(
+  id: string,
+  action: "approve" | "reject",
+  units: { trainingUnitId: string; durationOverrideSec?: number | null; roundsOverride?: number | null; notes?: string }[],
+  notes: string | undefined,
+  comment: string,
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    const user = await requireRole("HEAD_COACH");
+    await reviewPlan(id, user.id, action, units, notes, comment);
+    revalidatePath("/head-coach/approvals");
+    revalidatePath(`/head-coach/approvals/${id}`);
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Unknown error" };
+  }
+}
+

@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth-guard";
 
 export async function logSubscriptionPaymentAction(
   formData: FormData,
-): Promise<{ ok?: true; paymentId?: string; receiptNumber?: string; error?: string }> {
+): Promise<{ ok?: true; paymentId?: string; receiptNumber?: string; subscriptionStatus?: string; error?: string }> {
   try {
     const user = await requireRole("HEAD_COACH");
     const data = logPaymentSchema.parse({
@@ -25,6 +25,7 @@ export async function logSubscriptionPaymentAction(
       ok: true,
       paymentId: result.payment.id,
       receiptNumber: result.payment.receiptNumber,
+      subscriptionStatus: result.subscriptionStatus,
     };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

@@ -83,12 +83,6 @@ export async function generateForTrainee(input: GenerateInput, actorId: string) 
       date: (c.confirmedAt ?? c.championship.startDate).toISOString().slice(0, 10),
     });
   }
-
-  const periodLabel = new Date(year, month - 1, 1).toLocaleString("en", {
-    month: "long",
-    year: "numeric",
-  });
-
   const reportData = {
     attendance: summary.attendance,
     averageEffort: summary.averageEffort,

@@ -73,43 +73,56 @@ export default async function SubscriptionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {subs.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell>
-                    <div className="font-medium">{s.trainee.fullNameEn}</div>
-                    <div className="text-xs text-muted-foreground">{s.trainee.fullNameAr}</div>
-                  </TableCell>
-                  <TableCell>
-                    {s.group.name}{" "}
-                    <span className="text-xs text-muted-foreground">@ {s.location.nameEn}</span>
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {s.currentPeriodStart.toLocaleDateString()} —{" "}
-                    {s.currentPeriodEnd.toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-end">{Number(s.monthlyFee).toFixed(2)} EGP</TableCell>
-                  <TableCell>
-                    <div>{statusBadge(s.paymentStatus, badgeLabels)}</div>
-                    {s.paymentStatus === "PAID" && (s as unknown as { payments?: { paidAt: Date }[] }).payments?.[0]?.paidAt && (
-                      <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                        {(s as unknown as { payments?: { paidAt: Date }[] }).payments?.[0]?.paidAt?.toLocaleDateString()}{" "}
-                        {(s as unknown as { payments?: { paidAt: Date }[] }).payments?.[0]?.paidAt?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-end">
-                    <LogPaymentInline
-                      subscriptionId={s.id}
-                      payerUserId={s.trainee.id}
-                      defaultAmount={Number(s.monthlyFee)}
-                      traineeName={s.trainee.fullNameEn}
-                      traineePhone={s.trainee.phone}
-                      groupName={s.group.name}
-                      locationName={s.location.nameEn}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+              {subs.map((s) => {
+                const totalPaid = s.payments
+                  .filter((p) => p.paidAt >= s.currentPeriodStart && p.paidAt <= s.currentPeriodEnd)
+                  .reduce((sum, p) => sum + Number(p.amountNet), 0);
+                const remaining = Number(s.monthlyFee) - totalPaid;
+                const defaultAmount = remaining > 0 ? remaining : Number(s.monthlyFee);
+
+                return (
+                  <TableRow key={s.id}>
+                    <TableCell>
+                      <div className="font-medium">{s.trainee.fullNameEn}</div>
+                      <div className="text-xs text-muted-foreground">{s.trainee.fullNameAr}</div>
+                    </TableCell>
+                    <TableCell>
+                      {s.group.name}{" "}
+                      <span className="text-xs text-muted-foreground">@ {s.location.nameEn}</span>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {s.currentPeriodStart.toLocaleDateString()} —{" "}
+                      {s.currentPeriodEnd.toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-end">{Number(s.monthlyFee).toFixed(2)} EGP</TableCell>
+                    <TableCell>
+                      <div>{statusBadge(s.paymentStatus, badgeLabels)}</div>
+                      {s.paymentStatus === "PARTIAL" && (
+                        <div className="text-[11px] text-amber-600 font-semibold mt-0.5">
+                          Paid: {totalPaid.toFixed(2)} / {Number(s.monthlyFee).toFixed(2)} EGP
+                        </div>
+                      )}
+                      {s.payments?.[0]?.paidAt && (
+                        <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                          {s.payments[0].paidAt.toLocaleDateString()}{" "}
+                          {s.payments[0].paidAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-end">
+                      <LogPaymentInline
+                        subscriptionId={s.id}
+                        payerUserId={s.trainee.id}
+                        defaultAmount={defaultAmount}
+                        traineeName={s.trainee.fullNameEn}
+                        traineePhone={s.trainee.phone}
+                        groupName={s.group.name}
+                        locationName={s.location.nameEn}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {subs.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground">

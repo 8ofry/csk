@@ -60,7 +60,6 @@ export function resolveSplitRules(input: ResolveInput): SplitRule[] {
   const { revenueType, locationRule, coachContract } = input;
 
   const venue = Number(locationRule.venuePercent);
-  const baseCsk = Number(locationRule.cskPercent);
   const baseCoach = Number(locationRule.coachPercent);
   const other = Number(locationRule.otherPercent);
   const otherLabel = locationRule.otherLabel ?? undefined;

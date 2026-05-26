@@ -51,8 +51,8 @@ const BODY_PART_LABELS: Record<BodyPartKey, { en: string; ar: string }> = {
   feet_l: { en: "Left Foot", ar: "القدم اليسرى" },
   feet_r: { en: "Right Foot", ar: "القدم اليمنى" },
 };
-
-// General body parts list for simple selector
+// General body parts list for simple selector (commented out as unused to prevent build warning)
+/*
 const GENERAL_BODY_PARTS: { key: BodyPartKey; label: { en: string; ar: string } }[] = [
   { key: "head_neck", label: { en: "Head / Neck", ar: "الرأس / الرقبة" } },
   { key: "chest", label: { en: "Chest", ar: "الصدر" } },
@@ -65,6 +65,7 @@ const GENERAL_BODY_PARTS: { key: BodyPartKey; label: { en: string; ar: string } 
   { key: "thighs_l", label: { en: "Left Leg / Foot", ar: "الرجل اليسرى / القدم" } },
   { key: "thighs_r", label: { en: "Right Leg / Foot", ar: "الرجل اليمنى / القدم" } },
 ];
+*/
 
 export function getBodyPartLabel(key: string | null, locale: string): string {
   if (!key) return "";
@@ -345,7 +346,7 @@ function QuickEvalForm({
       initialGeneralComment = data.generalComment ?? "";
       
       if (Array.isArray(data.technicalActions)) {
-        initialTechActions = data.technicalActions.map((ta: any, idx: number) => ({
+        initialTechActions = data.technicalActions.map((ta: { id?: string; action?: string; score?: number; comment?: string }, idx: number) => ({
           id: ta.id || `init-${idx}`,
           action: ta.action ?? "",
           score: ta.score ?? 0,
@@ -539,7 +540,7 @@ function QuickEvalForm({
     ]);
   };
 
-  const updateTechActionRow = (id: string, field: keyof TechEvalRow, value: any) => {
+  const updateTechActionRow = <K extends keyof TechEvalRow>(id: string, field: K, value: TechEvalRow[K]) => {
     setTechActions((prev) =>
       prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
     );

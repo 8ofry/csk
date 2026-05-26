@@ -28,6 +28,8 @@ export function LogPaymentInline({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<string | null>(null);
+  const [paidAmount, setPaidAmount] = useState<number>(defaultAmount);
+  const [paymentStatus, setPaymentStatus] = useState<string>("PAID");
 
   const printReceipt = () => {
     const printWindow = window.open("", "_blank", "width=600,height=600");
@@ -38,8 +40,8 @@ export function LogPaymentInline({
           <title>CSK Academy Receipt - ${receipt}</title>
           <style>
             body { font-family: system-ui, -apple-system, sans-serif; padding: 30px; color: #111; line-height: 1.5; }
-            .header { text-align: center; border-bottom: 2px solid #D4AF37; padding-bottom: 15px; margin-bottom: 25px; }
-            .logo { font-size: 26px; font-weight: 800; color: #000; letter-spacing: -0.5px; }
+            .header { text-align: center; border-bottom: 2px solid #D4AF37; padding-bottom: 20px; margin-bottom: 25px; }
+            .logo { font-size: 24px; font-weight: 800; color: #111; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 5px; }
             .csk { color: #D4AF37; }
             .title { font-size: 16px; margin-top: 8px; font-weight: 600; text-transform: uppercase; color: #555; }
             .success { color: #16a34a; font-weight: bold; margin-top: 10px; font-size: 14px; letter-spacing: 0.5px; }
@@ -51,7 +53,8 @@ export function LogPaymentInline({
         </head>
         <body>
           <div class="header">
-            <div class="logo">⚔ CSK <span class="csk">ACADEMY</span></div>
+            <img src="${window.location.origin}/images/logo.png" alt="CSK Academy Logo" style="height: 70px; margin: 0 auto 10px auto; display: block; object-fit: contain;" />
+            <div class="logo">CSK <span class="csk">ACADEMY</span></div>
             <div class="title">Official Payment Receipt</div>
             <div class="success">✓ PAYMENT SUCCESSFUL</div>
           </div>
@@ -82,11 +85,13 @@ export function LogPaymentInline({
             </tr>
             <tr>
               <td class="label">Amount Paid:</td>
-              <td><strong>${defaultAmount.toFixed(2)} EGP</strong></td>
+              <td><strong>${paidAmount.toFixed(2)} EGP</strong></td>
             </tr>
             <tr>
               <td class="label">Payment Status:</td>
-              <td style="color: #16a34a; font-weight: 600;">PAID IN FULL</td>
+              <td style="color: ${paymentStatus === "PAID" ? "#16a34a" : "#d97706"}; font-weight: 600;">
+                ${paymentStatus === "PAID" ? "PAID IN FULL" : "PARTIAL PAYMENT"}
+              </td>
             </tr>
             <tr>
               <td class="label">Date:</td>
@@ -111,7 +116,7 @@ export function LogPaymentInline({
   };
 
   const shareOnWhatsApp = () => {
-    const shareMessage = `Hello ${traineeName}, your payment of ${defaultAmount.toFixed(
+    const shareMessage = `Hello ${traineeName}, your payment of ${paidAmount.toFixed(
       2,
     )} EGP for ${groupName} at ${locationName} has been successfully received. Receipt Number: ${receipt}. Thank you for training with CSK Academy! ⚔`;
     let cleanPhone = traineePhone ? traineePhone.replace(/[^\d]/g, "") : "";
@@ -142,7 +147,7 @@ export function LogPaymentInline({
             <span className="text-muted-foreground">Group:</span> {groupName}
           </div>
           <div>
-            <span className="text-muted-foreground">Amount:</span> {defaultAmount.toFixed(2)} EGP
+            <span className="text-muted-foreground">Amount:</span> {paidAmount.toFixed(2)} EGP
           </div>
         </div>
         <div className="flex gap-1.5 mt-1">
@@ -186,12 +191,15 @@ export function LogPaymentInline({
         const fd = new FormData(e.currentTarget);
         fd.set("subscriptionId", subscriptionId);
         fd.set("payerUserId", payerUserId);
+        const val = Number(fd.get("amountGross") ?? defaultAmount);
+        setPaidAmount(val);
         startTransition(async () => {
           setError(null);
           const result = await logSubscriptionPaymentAction(fd);
           if (result.error) setError(result.error);
           else if (result.receiptNumber) {
             setReceipt(result.receiptNumber);
+            setPaymentStatus(result.subscriptionStatus || "PAID");
             router.refresh();
           }
         });

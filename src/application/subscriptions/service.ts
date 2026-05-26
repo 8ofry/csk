@@ -44,8 +44,7 @@ export async function listAllSubscriptions(filters: { paymentStatus?: string } =
       discipline: { select: { nameEn: true } },
       payments: {
         orderBy: { paidAt: "desc" },
-        take: 1,
-        select: { paidAt: true },
+        select: { paidAt: true, amountNet: true },
       },
     },
   });

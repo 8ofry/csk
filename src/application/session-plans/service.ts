@@ -165,6 +165,47 @@ export async function rejectPlan(id: string, headCoachId: string, comment: strin
   });
 }
 
+export async function reviewPlan(
+  id: string,
+  headCoachId: string,
+  action: "approve" | "reject",
+  units: { trainingUnitId: string; durationOverrideSec?: number | null; roundsOverride?: number | null; notes?: string }[],
+  notes: string | undefined,
+  comment: string,
+) {
+  const plan = await prisma.sessionPlan.findUnique({ where: { id }, select: { status: true } });
+  if (!plan) throw new PlanAuthorizationError("Plan not found");
+
+  const targetStatus = nextStatus(
+    plan.status as PlanStatus,
+    action,
+    action === "reject" ? { rejectionComment: comment } : {}
+  );
+
+  const updated = await prisma.sessionPlan.update({
+    where: { id },
+    data: {
+      status: targetStatus,
+      unitsSequence: units,
+      notes: notes || null,
+      reviewedById: headCoachId,
+      reviewedAt: new Date(),
+      rejectionComment: comment || null,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: headCoachId,
+      action: `session-plan.review-${action}`,
+      entityType: "SessionPlan",
+      entityId: id,
+      changes: { newStatus: targetStatus, comment },
+    },
+  });
+  return updated;
+}
+
 interface TransitionOpts {
   actorId: string;
   action: string;

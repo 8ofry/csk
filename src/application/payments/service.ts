@@ -243,6 +243,7 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
     }
 
     // Update subscription payment status if relevant
+    let subscriptionStatus: string | undefined = undefined;
     if (data.revenueType === "SUBSCRIPTION" && data.subscriptionId) {
       const sub = await tx.subscription.findUnique({
         where: { id: data.subscriptionId },
@@ -266,6 +267,7 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
           amountPaidInPeriod: totalPaid,
           periodEnd: sub.currentPeriodEnd,
         });
+        subscriptionStatus = newStatus;
         await tx.subscription.update({
           where: { id: data.subscriptionId },
           data: { paymentStatus: newStatus },
@@ -287,7 +289,7 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
       },
     });
 
-    return { payment, splits: splitResult };
+    return { payment, splits: splitResult, subscriptionStatus };
   });
 }
 

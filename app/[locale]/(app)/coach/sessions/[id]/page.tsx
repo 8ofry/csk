@@ -10,7 +10,6 @@ import { SessionInteractionPanel } from "@/components/coach/session-interaction-
 import { EndSessionButton } from "@/components/coach/end-session-button";
 import { ComposeReportButton } from "@/components/coach/compose-report-button";
 import { getDailyReportBySessionId } from "@/application/daily-reports/service";
-import type { AttendanceMark } from "@/application/attendance/service";
 import { prisma } from "@/infrastructure/db/prisma";
 import fs from "fs";
 import path from "path";
