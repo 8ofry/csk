@@ -266,6 +266,57 @@ export function QuickEvalGrid({
   );
 }
 
+function CompactStarRating({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: number;
+  onChange: (val: number) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          disabled={disabled}
+          onClick={() => onChange(star)}
+          className="p-0.5 focus:outline-none focus:scale-110 transition shrink-0"
+        >
+          <svg
+            className={`h-5 w-5 transition-all ${
+              star <= value
+                ? "text-amber-500 fill-amber-500 drop-shadow-sm scale-105"
+                : "text-muted-foreground/30 hover:text-amber-500/40"
+            }`}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        </button>
+      ))}
+      <span className="text-[10px] font-bold text-muted-foreground ml-1">
+        {value}/5
+      </span>
+    </div>
+  );
+}
+
+interface TechEvalRow {
+  id: string;
+  action: string;
+  score: number;
+  comment: string;
+}
+
 function QuickEvalForm({
   sessionId,
   row,
@@ -285,18 +336,31 @@ function QuickEvalForm({
   // Parse structured JSON notes if exists
   let initialGeneralScore = 0;
   let initialGeneralComment = "";
-  let initialTechnicalAction = "";
-  let initialTechnicalScore = 0;
-  let initialTechnicalComment = "";
+  let initialTechActions: TechEvalRow[] = [];
 
   if (row.current?.notes) {
     try {
       const data = JSON.parse(row.current.notes);
       initialGeneralScore = data.generalScore ?? 0;
       initialGeneralComment = data.generalComment ?? "";
-      initialTechnicalAction = data.technicalAction ?? "";
-      initialTechnicalScore = data.technicalScore ?? 0;
-      initialTechnicalComment = data.technicalComment ?? "";
+      
+      if (Array.isArray(data.technicalActions)) {
+        initialTechActions = data.technicalActions.map((ta: any, idx: number) => ({
+          id: ta.id || `init-${idx}`,
+          action: ta.action ?? "",
+          score: ta.score ?? 0,
+          comment: ta.comment ?? "",
+        }));
+      } else if (data.technicalAction) {
+        initialTechActions = [
+          {
+            id: "init-0",
+            action: data.technicalAction,
+            score: data.technicalScore ?? 0,
+            comment: data.technicalComment ?? "",
+          },
+        ];
+      }
     } catch {
       // Fallback if notes is plain text
       initialGeneralComment = row.current.notes;
@@ -306,23 +370,117 @@ function QuickEvalForm({
   const [flaggedPart, setFlaggedPart] = useState<BodyPartKey | null>(
     row.current?.flaggedBodyPart as BodyPartKey | null
   );
-  const [showModal, setShowModal] = useState(false);
 
   // Star rating states
   const [generalScore, setGeneralScore] = useState(initialGeneralScore);
   const [generalComment, setGeneralComment] = useState(initialGeneralComment);
+  const [techActions, setTechActions] = useState<TechEvalRow[]>(initialTechActions);
 
-  const [technicalAction, setTechnicalAction] = useState(initialTechnicalAction);
-  const [technicalScore, setTechnicalScore] = useState(initialTechnicalScore);
-  const [technicalComment, setTechnicalComment] = useState(initialTechnicalComment);
+  // Inline SVG Ref and useEffect hook
+  const inlineSvgRef = useRef<HTMLDivElement>(null);
+  const [retryTrigger, setRetryTrigger] = useState(0);
+
+  useEffect(() => {
+    if (!svgContent || !inlineSvgRef.current) return;
+
+    const svgElement = inlineSvgRef.current.querySelector("svg");
+    if (!svgElement) return;
+
+    svgElement.setAttribute("width", "100%");
+    svgElement.setAttribute("height", "auto");
+    svgElement.style.maxWidth = "100%";
+    svgElement.style.maxHeight = "250px";
+    svgElement.style.height = "auto";
+
+    const paths = inlineSvgRef.current.querySelectorAll("path");
+    const svgRect = svgElement.getBoundingClientRect();
+
+    if (svgRect.width === 0) {
+      const timer = setTimeout(() => {
+        setRetryTrigger((p) => p + 1);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+
+    const pathKeysMap = new Map<SVGPathElement, BodyPartKey>();
+
+    paths.forEach((path) => {
+      const rect = path.getBoundingClientRect();
+      const relativeX = ((rect.left + rect.width / 2 - svgRect.left) / svgRect.width) * 407;
+      const relativeY = ((rect.top + rect.height / 2 - svgRect.top) / svgRect.height) * 354.4;
+
+      const key = getPartKey(relativeX, relativeY);
+      if (key) {
+        pathKeysMap.set(path, key);
+        path.style.cursor = "pointer";
+
+        const clickHandler = (e: Event) => {
+          e.preventDefault();
+          handleBodyPartChange(key);
+        };
+        path.addEventListener("click", clickHandler);
+
+        const enterHandler = () => {
+          if (flaggedPart !== key) {
+            path.setAttribute(
+              "style",
+              "fill: #c5a880; fill-opacity: 0.45; stroke: #c5a880; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;"
+            );
+          }
+        };
+
+        const leaveHandler = () => {
+          updatePathStyles();
+        };
+
+        path.addEventListener("mouseenter", enterHandler);
+        path.addEventListener("mouseleave", leaveHandler);
+      }
+    });
+
+    const updatePathStyles = () => {
+      paths.forEach((path) => {
+        const key = pathKeysMap.get(path);
+        if (!key) return;
+
+        const isSelected = flaggedPart === key;
+
+        let fill = "transparent";
+        let fillOpacity = "0.2";
+        let stroke = "transparent";
+        let strokeWidth = "0";
+
+        if (isSelected) {
+          fill = "#ef4444";
+          fillOpacity = "0.55";
+          stroke = "#dc2626";
+          strokeWidth = "2.5";
+        } else {
+          path.removeAttribute("style");
+          path.style.cursor = "pointer";
+          return;
+        }
+
+        path.setAttribute(
+          "style",
+          `fill: ${fill}; fill-opacity: ${fillOpacity}; stroke: ${stroke}; stroke-width: ${strokeWidth}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;`
+        );
+      });
+    };
+
+    updatePathStyles();
+
+    return () => {
+      paths.forEach((path) => {
+        path.removeAttribute("style");
+      });
+    };
+  }, [svgContent, retryTrigger, flaggedPart]);
 
   // Trigger evaluation reset when selecting a new body part to auto-load related options
   const handleBodyPartChange = (part: BodyPartKey | null) => {
     setFlaggedPart(part);
-    // Auto reset technical action if the body part type changes
-    setTechnicalAction("");
-    setTechnicalScore(0);
-    setTechnicalComment("");
+    setTechActions([]);
   };
 
   // Determine list of technical actions based on body parts
@@ -369,6 +527,28 @@ function QuickEvalForm({
 
   const techOptions = getTechnicalActions(flaggedPart);
 
+  const addTechActionRow = () => {
+    setTechActions((prev) => [
+      ...prev,
+      {
+        id: Math.random().toString(36).substring(2, 9),
+        action: "",
+        score: 0,
+        comment: "",
+      },
+    ]);
+  };
+
+  const updateTechActionRow = (id: string, field: keyof TechEvalRow, value: any) => {
+    setTechActions((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
+    );
+  };
+
+  const removeTechActionRow = (id: string) => {
+    setTechActions((prev) => prev.filter((row) => row.id !== id));
+  };
+
   // Form submission: serialize notes to JSON string
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -379,15 +559,21 @@ function QuickEvalForm({
       const payload = {
         generalScore,
         generalComment,
-        technicalAction,
-        technicalScore,
-        technicalComment,
+        technicalActions: techActions.map((ta) => ({
+          action: ta.action,
+          score: ta.score,
+          comment: ta.comment,
+        })),
       };
       fd.set("notes", JSON.stringify(payload));
     } else {
       // Otherwise, save general comment as simple text
       fd.set("notes", generalComment);
     }
+
+    // Store comma-separated flagged skills
+    const flaggedSkillValue = techActions.map((ta) => ta.action).filter(Boolean).join(", ");
+    fd.set("flaggedSkill", flaggedSkillValue);
 
     startTransition(async () => {
       setError(null);
@@ -401,14 +587,13 @@ function QuickEvalForm({
     <form onSubmit={handleSubmit} className="space-y-5">
       <input type="hidden" name="traineeId" value={row.traineeId} />
       <input type="hidden" name="flaggedBodyPart" value={flaggedPart ?? ""} />
-      <input type="hidden" name="flaggedSkill" value={technicalAction} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Left Side: Effort & Body Part Selection */}
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Side: Effort & Inline Body Part Selection */}
+        <div className="space-y-5">
           {/* Effort Score Slider/Radio */}
-          <div>
-            <label className="mb-1 block text-xs font-bold text-muted-foreground uppercase tracking-wide">
+          <div className="bg-muted/10 p-3 rounded-lg border">
+            <label className="mb-2 block text-xs font-bold text-muted-foreground uppercase tracking-wide">
               {t("effortLabel")}
             </label>
             <div className="flex flex-wrap gap-1">
@@ -431,118 +616,148 @@ function QuickEvalForm({
             </div>
           </div>
 
-          {/* General Body Part Selector (Dropdown) */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide">
-              {locale === "ar" ? "عضو الجسم (تحديد عام):" : "Body Part (General Selection):"}
-            </label>
-            <div className="flex gap-2">
-              <select
-                value={flaggedPart ?? ""}
-                onChange={(e) => handleBodyPartChange((e.target.value as BodyPartKey) || null)}
-                className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
-              >
-                <option value="">
-                  {locale === "ar" ? "— اختر عضو الجسم (اختياري) —" : "— Select Body Part (Optional) —"}
-                </option>
-                {GENERAL_BODY_PARTS.map((gbp) => (
-                  <option key={gbp.key} value={gbp.key}>
-                    {locale === "ar" ? gbp.label.ar : gbp.label.en}
-                  </option>
-                ))}
-              </select>
-
-              {/* Anatomical Selector Button */}
-              {svgContent && (
-                <button
-                  type="button"
-                  onClick={() => setShowModal(true)}
-                  className="h-10 px-3 flex items-center justify-center gap-1.5 rounded-md border border-input bg-muted/40 hover:bg-muted text-foreground transition text-sm shrink-0"
-                  title={locale === "ar" ? "الخريطة التشريحية" : "Anatomical Map"}
-                >
-                  <span>🩻</span>
-                  <span className="hidden sm:inline">
-                    {locale === "ar" ? "تشريح تفصيلي" : "Anatomical Map"}
+          {/* Inline SVG Map Selector */}
+          {svgContent && (
+            <div className="border rounded-xl p-3 bg-muted/10 shadow-inner flex flex-col items-center">
+              <div className="w-full flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-muted-foreground uppercase">
+                  {locale === "ar" ? "تحديد العضو المصاب أو المتعب من الرسم:" : "Flag Trainee Muscle / Body Part:"}
+                </span>
+                {flaggedPart ? (
+                  <Badge variant="destructive" className="flex items-center gap-1.5 text-[10px] font-bold py-0.5 px-2.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0 animate-pulse" />
+                    {getBodyPartLabel(flaggedPart, locale)}
+                    <button
+                      type="button"
+                      onClick={() => handleBodyPartChange(null)}
+                      className="ml-1 text-white hover:text-red-200 transition font-bold"
+                    >
+                      ✕
+                    </button>
+                  </Badge>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground italic">
+                    {locale === "ar" ? "اضغط على عضو لتحديده" : "Click to select a part"}
                   </span>
-                </button>
-              )}
+                )}
+              </div>
+              <div
+                ref={inlineSvgRef}
+                className="w-full max-w-[280px] flex justify-center py-2"
+                dangerouslySetInnerHTML={{ __html: svgContent }}
+              />
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Side: Evaluation Form */}
-        <div className="space-y-4 border-t md:border-t-0 md:border-l pl-0 md:pl-4 pt-4 md:pt-0">
+        <div className="space-y-4 border-t md:border-t-0 md:border-l pl-0 md:pl-6 pt-4 md:pt-0">
           
-          {/* General muscle power evaluation (Visible always, acts as simple notes if no part) */}
-          <div className="space-y-2">
+          {/* General muscle power evaluation */}
+          <div className="space-y-2 bg-muted/10 p-3 rounded-lg border">
             <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center justify-between">
               <span>{locale === "ar" ? "تقييم قوة العضلة والحالة البدنية" : "General Muscle Power & Condition"}</span>
               {flaggedPart && <span className="text-red-500 font-bold">● {getBodyPartLabel(flaggedPart, locale)}</span>}
             </h4>
 
-            {flaggedPart && (
-              <div className="py-1">
-                <StarRating value={generalScore} onChange={setGeneralScore} />
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+              {/* Star Rating on the left */}
+              {flaggedPart && (
+                <div className="sm:col-span-5 flex items-center gap-1.5 py-1">
+                  <StarRating value={generalScore} onChange={setGeneralScore} />
+                </div>
+              )}
+              {/* Textarea on the right */}
+              <div className={flaggedPart ? "sm:col-span-7" : "sm:col-span-12"}>
+                <Textarea
+                  name="notes-placeholder"
+                  rows={2}
+                  className="min-h-[50px] resize-none text-xs"
+                  placeholder={
+                    flaggedPart
+                      ? (locale === "ar" ? "اكتب ملاحظات بدنية عن العضو المحدد..." : "Observations about this muscle power...")
+                      : t("notesPlaceholder")
+                  }
+                  value={generalComment}
+                  onChange={(e) => setGeneralComment(e.target.value)}
+                />
               </div>
-            )}
-
-            <Textarea
-              name="notes-placeholder"
-              rows={2}
-              placeholder={
-                flaggedPart
-                  ? (locale === "ar" ? "اكتب ملاحظات بدنية عن العضو المحدد..." : "Observations about this muscle power...")
-                  : t("notesPlaceholder")
-              }
-              value={generalComment}
-              onChange={(e) => setGeneralComment(e.target.value)}
-            />
+            </div>
           </div>
 
-          {/* Related technical action evaluation (Only visible if body part is flagged) */}
+          {/* Related technical actions (Multiple, dynamically added) */}
           {flaggedPart && (
-            <div className="space-y-2 border-t pt-3 animate-in fade-in slide-in-from-top-1 duration-150">
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
-                {locale === "ar" ? "الحركة الفنية الفنية المرتبطة" : "Related Technical Action"}
-              </h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Technical Action Dropdown */}
-                <select
-                  value={technicalAction}
-                  onChange={(e) => setTechnicalAction(e.target.value)}
-                  required={!!flaggedPart}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+            <div className="space-y-3 border-t pt-4 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  {locale === "ar" ? "المهارات الفنية والتقييمات" : "Technical Actions & Execution"}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addTechActionRow}
+                  className="h-7 text-[10px] border-csk-gold/40 text-csk-gold hover:bg-csk-gold/10 font-bold px-2 py-0"
                 >
-                  <option value="">
-                    {locale === "ar" ? "— الحركة الفنية —" : "— Technical Action —"}
-                  </option>
-                  {techOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Technical Score Stars */}
-                <div className="flex items-center justify-center sm:justify-start">
-                  <StarRating value={technicalScore} onChange={setTechnicalScore} />
-                </div>
+                  {locale === "ar" ? "+ إضافة حركة فنية" : "+ Add Technical Action"}
+                </Button>
               </div>
 
-              {/* Technical comments */}
-              {technicalAction && (
-                <Textarea
-                  rows={2}
-                  placeholder={
-                    locale === "ar"
-                      ? "اكتب ملاحظات عن الأداء الفني لهذه الحركة..."
-                      : "Observations about technical execution (e.g. speed, snap)..."
-                  }
-                  value={technicalComment}
-                  onChange={(e) => setTechnicalComment(e.target.value)}
-                  className="mt-2"
-                />
+              {techActions.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic bg-muted/5 p-3 rounded-md text-center border border-dashed">
+                  {locale === "ar" ? "لا توجد حركات مضافة بعد. اضغط على الزر بالأعلى لإضافة حركة فنية." : "No technical actions added yet. Click the button above to add one."}
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {techActions.map((row) => (
+                    <div
+                      key={row.id}
+                      className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-muted/20 p-2 rounded-md border border-dashed text-xs shadow-sm"
+                    >
+                      {/* Left: Dropdown */}
+                      <select
+                        value={row.action}
+                        onChange={(e) => updateTechActionRow(row.id, "action", e.target.value)}
+                        required
+                        className="flex h-9 w-full sm:w-[150px] rounded-md border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold shrink-0 font-medium"
+                      >
+                        <option value="">
+                          {locale === "ar" ? "— الحركة —" : "— Action —"}
+                        </option>
+                        {techOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Middle: Comment Text Input */}
+                      <Input
+                        type="text"
+                        placeholder={locale === "ar" ? "ملاحظات فنية..." : "Technical comments..."}
+                        value={row.comment}
+                        onChange={(e) => updateTechActionRow(row.id, "comment", e.target.value)}
+                        className="flex-1 h-9 text-xs"
+                      />
+
+                      {/* Right: Small-scale Stars Scoring */}
+                      <div className="flex items-center justify-between sm:justify-start gap-1 bg-background border px-2 py-1 rounded-md shrink-0">
+                        <CompactStarRating
+                          value={row.score}
+                          onChange={(val) => updateTechActionRow(row.id, "score", val)}
+                        />
+                        {/* Remove Row Button */}
+                        <button
+                          type="button"
+                          onClick={() => removeTechActionRow(row.id)}
+                          className="h-6 w-6 rounded-md hover:bg-destructive/10 text-destructive flex items-center justify-center transition font-bold"
+                          title={locale === "ar" ? "إزالة" : "Remove"}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}
@@ -561,214 +776,6 @@ function QuickEvalForm({
           {pending ? "..." : t("saveBtn")}
         </Button>
       </div>
-
-      {/* SVG Anatomical Map Selector Modal */}
-      {showModal && svgContent && (
-        <AnatomicalSelectorModal
-          svgContent={svgContent}
-          initialPart={flaggedPart}
-          locale={locale}
-          onSelect={(key) => {
-            handleBodyPartChange(key);
-            setShowModal(false);
-          }}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </form>
-  );
-}
-
-function AnatomicalSelectorModal({
-  svgContent,
-  initialPart,
-  locale,
-  onSelect,
-  onClose,
-}: {
-  svgContent: string;
-  initialPart: BodyPartKey | null;
-  locale: string;
-  onSelect: (key: BodyPartKey | null) => void;
-  onClose: () => void;
-}) {
-  const [selected, setSelected] = useState<BodyPartKey | null>(initialPart);
-  const [retryTrigger, setRetryTrigger] = useState(0);
-  const svgContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!svgContent || !svgContainerRef.current) return;
-
-    const svgElement = svgContainerRef.current.querySelector("svg");
-    if (!svgElement) return;
-
-    svgElement.setAttribute("width", "100%");
-    svgElement.setAttribute("height", "auto");
-    svgElement.style.maxWidth = "100%";
-    svgElement.style.maxHeight = "45vh";
-    svgElement.style.height = "auto";
-
-    const paths = svgContainerRef.current.querySelectorAll("path");
-    const svgRect = svgElement.getBoundingClientRect();
-
-    if (svgRect.width === 0) {
-      const timer = setTimeout(() => {
-        setRetryTrigger((p) => p + 1);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-
-    const pathKeysMap = new Map<SVGPathElement, BodyPartKey>();
-
-    paths.forEach((path) => {
-      const rect = path.getBoundingClientRect();
-      const relativeX = ((rect.left + rect.width / 2 - svgRect.left) / svgRect.width) * 407;
-      const relativeY = ((rect.top + rect.height / 2 - svgRect.top) / svgRect.height) * 354.4;
-
-      const key = getPartKey(relativeX, relativeY);
-      if (key) {
-        pathKeysMap.set(path, key);
-        path.style.cursor = "pointer";
-
-        const clickHandler = (e: Event) => {
-          e.preventDefault();
-          setSelected(key);
-        };
-        path.addEventListener("click", clickHandler);
-
-        const enterHandler = () => {
-          if (selected !== key) {
-            path.setAttribute(
-              "style",
-              "fill: #c5a880; fill-opacity: 0.45; stroke: #c5a880; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s;"
-            );
-          }
-        };
-
-        const leaveHandler = () => {
-          updatePathStyles();
-        };
-
-        path.addEventListener("mouseenter", enterHandler);
-        path.addEventListener("mouseleave", leaveHandler);
-      }
-    });
-
-    const updatePathStyles = () => {
-      paths.forEach((path) => {
-        const key = pathKeysMap.get(path);
-        if (!key) return;
-
-        const isSelected = selected === key;
-
-        let fill = "transparent";
-        let fillOpacity = "0.2";
-        let stroke = "transparent";
-        let strokeWidth = "0";
-
-        if (isSelected) {
-          fill = "#ef4444";
-          fillOpacity = "0.55";
-          stroke = "#dc2626";
-          strokeWidth = "2.5";
-        } else {
-          path.removeAttribute("style");
-          path.style.cursor = "pointer";
-          return;
-        }
-
-        path.setAttribute(
-          "style",
-          `fill: ${fill}; fill-opacity: ${fillOpacity}; stroke: ${stroke}; stroke-width: ${strokeWidth}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;`
-        );
-      });
-    };
-
-    updatePathStyles();
-
-    return () => {
-      paths.forEach((path) => {
-        path.removeAttribute("style");
-      });
-    };
-  }, [svgContent, retryTrigger, selected]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-background shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
-        
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b p-4">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              {locale === "ar" ? "تحديد العضو المصاب أو المتعب" : "Flag Trainee Muscle / Body Part"}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {locale === "ar"
-                ? "اضغط على أي جزء في الجسم لتحديده كعضو متأثر بالتدريب."
-                : "Select a muscle region on the anatomical map to flag it."}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted transition"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Modal Content */}
-        <div className="flex flex-col items-center justify-center p-4 overflow-y-auto grow">
-          <div
-            ref={svgContainerRef}
-            className="w-full max-w-[340px] bg-muted/5 border border-muted-foreground/10 rounded-xl p-3 shadow-inner"
-            dangerouslySetInnerHTML={{ __html: svgContent }}
-          />
-        </div>
-
-        {/* Modal Footer */}
-        <div className="border-t bg-muted/20 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {locale === "ar" ? "العضو المحدد:" : "Selected:"}
-            </span>
-            {selected ? (
-              <Badge variant="destructive" className="flex items-center gap-1.5 text-xs font-semibold animate-pulse">
-                <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0" />
-                {getBodyPartLabel(selected, locale)}
-              </Badge>
-            ) : (
-              <span className="text-xs text-muted-foreground">
-                {locale === "ar" ? "لم يتم تحديد أي عضو" : "None selected"}
-              </span>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              onClick={() => onSelect(selected)}
-              className="flex-1"
-              variant="default"
-            >
-              {locale === "ar" ? "تأكيد الاختيار" : "Confirm Selection"}
-            </Button>
-            {selected && (
-              <Button
-                type="button"
-                onClick={() => setSelected(null)}
-                variant="outline"
-                className="text-destructive hover:bg-destructive/10 border-destructive/20"
-              >
-                {locale === "ar" ? "إزالة" : "Clear"}
-              </Button>
-            )}
-            <Button type="button" onClick={onClose} variant="outline">
-              {locale === "ar" ? "إلغاء" : "Cancel"}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
