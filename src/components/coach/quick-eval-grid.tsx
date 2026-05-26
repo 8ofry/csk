@@ -80,58 +80,58 @@ export function getBodyPartLabel(key: string | null, locale: string): string {
 
 function getPartKey(relativeX: number, relativeY: number): BodyPartKey | null {
   if (relativeX < 203.5) {
-    // Front view
+    // Front view: Viewer's Left (< 100) is Trainee's Right (_r), Viewer's Right (>= 100) is Trainee's Left (_l)
     if (relativeY < 50) return "head_neck";
     if (relativeY >= 50 && relativeY < 95 && (relativeX < 75 || relativeX > 130)) {
-      return relativeX < 100 ? "shoulders_l" : "shoulders_r";
+      return relativeX < 100 ? "shoulders_r" : "shoulders_l";
     }
     if (relativeY >= 75 && relativeY < 140 && (relativeX < 65 || relativeX > 140)) {
-      return relativeX < 100 ? "upper_arms_l" : "upper_arms_r";
+      return relativeX < 100 ? "upper_arms_r" : "upper_arms_l";
     }
     if (relativeY >= 140 && relativeY < 200 && (relativeX < 60 || relativeX > 145)) {
-      return relativeX < 100 ? "forearms_l" : "forearms_r";
+      return relativeX < 100 ? "forearms_r" : "forearms_l";
     }
     if (relativeY >= 50 && relativeY < 110 && relativeX >= 65 && relativeX <= 140) return "chest";
     if (relativeY >= 110 && relativeY < 170 && relativeX >= 65 && relativeX <= 140) return "core_abs";
     if (relativeY >= 170 && relativeY < 200 && relativeX >= 65 && relativeX <= 140) return "hips";
     if (relativeY >= 200 && relativeY < 270) {
-      return relativeX < 100 ? "thighs_l" : "thighs_r";
+      return relativeX < 100 ? "thighs_r" : "thighs_l";
     }
     if (relativeY >= 270 && relativeY < 295) {
-      return relativeX < 100 ? "knees_l" : "knees_r";
+      return relativeX < 100 ? "knees_r" : "knees_l";
     }
     if (relativeY >= 295 && relativeY < 340) {
-      return relativeX < 100 ? "shins_l" : "shins_r";
+      return relativeX < 100 ? "shins_r" : "shins_l";
     }
     if (relativeY >= 340) {
-      return relativeX < 100 ? "feet_l" : "feet_r";
+      return relativeX < 100 ? "feet_r" : "feet_l";
     }
   } else {
-    // Back view
+    // Back view: Viewer's Left (< 305) is Trainee's Left (_l), Viewer's Right (>= 305) is Trainee's Right (_r)
     if (relativeY < 50) return "head_neck";
     if (relativeY >= 50 && relativeY < 95 && (relativeX < 280 || relativeX > 335)) {
-      return relativeX < 305 ? "shoulders_r" : "shoulders_l";
+      return relativeX < 305 ? "shoulders_l" : "shoulders_r";
     }
     if (relativeY >= 75 && relativeY < 140 && (relativeX < 270 || relativeX > 345)) {
-      return relativeX < 305 ? "upper_arms_r" : "upper_arms_l";
+      return relativeX < 305 ? "upper_arms_l" : "upper_arms_r";
     }
     if (relativeY >= 140 && relativeY < 200 && (relativeX < 265 || relativeX > 350)) {
-      return relativeX < 305 ? "forearms_r" : "forearms_l";
+      return relativeX < 305 ? "forearms_l" : "forearms_r";
     }
     if (relativeY >= 50 && relativeY < 110 && relativeX >= 270 && relativeX <= 345) return "upper_back";
     if (relativeY >= 110 && relativeY < 170 && relativeX >= 270 && relativeX <= 345) return "lower_back";
     if (relativeY >= 170 && relativeY < 200 && relativeX >= 270 && relativeX <= 345) return "hips";
     if (relativeY >= 200 && relativeY < 270) {
-      return relativeX < 305 ? "thighs_r" : "thighs_l";
+      return relativeX < 305 ? "thighs_l" : "thighs_r";
     }
     if (relativeY >= 270 && relativeY < 295) {
-      return relativeX < 305 ? "knees_r" : "knees_l";
+      return relativeX < 305 ? "knees_l" : "knees_r";
     }
     if (relativeY >= 295 && relativeY < 340) {
-      return relativeX < 305 ? "shins_r" : "shins_l";
+      return relativeX < 305 ? "shins_l" : "shins_r";
     }
     if (relativeY >= 340) {
-      return relativeX < 305 ? "feet_r" : "feet_l";
+      return relativeX < 305 ? "feet_l" : "feet_r";
     }
   }
   return null;
@@ -160,7 +160,7 @@ function StarRating({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5">
       {[0, 1, 2, 3, 4, 5].map((star) => {
         if (star === 0) return null; // 0 starts as default unselected
         return (
@@ -169,10 +169,10 @@ function StarRating({
             type="button"
             disabled={disabled}
             onClick={() => onChange(star)}
-            className="p-1 focus:outline-none focus:scale-110 transition shrink-0"
+            className="p-0.5 focus:outline-none focus:scale-110 transition shrink-0"
           >
             <svg
-              className={`h-7 w-7 transition-all ${
+              className={`h-5 w-5 transition-all ${
                 star <= value
                   ? "text-amber-500 fill-amber-500 drop-shadow-sm scale-105"
                   : "text-muted-foreground/30 hover:text-amber-500/40"
@@ -190,9 +190,6 @@ function StarRating({
           </button>
         );
       })}
-      <span className="ml-2 text-sm font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
-        {value}/5
-      </span>
     </div>
   );
 }
@@ -287,7 +284,7 @@ function CompactStarRating({
           className="p-0.5 focus:outline-none focus:scale-110 transition shrink-0"
         >
           <svg
-            className={`h-5 w-5 transition-all ${
+            className={`h-4 w-4 transition-all ${
               star <= value
                 ? "text-amber-500 fill-amber-500 drop-shadow-sm scale-105"
                 : "text-muted-foreground/30 hover:text-amber-500/40"
@@ -304,9 +301,6 @@ function CompactStarRating({
           </svg>
         </button>
       ))}
-      <span className="text-[10px] font-bold text-muted-foreground ml-1">
-        {value}/5
-      </span>
     </div>
   );
 }
@@ -393,88 +387,68 @@ function QuickEvalForm({
     svgElement.style.maxHeight = "250px";
     svgElement.style.height = "auto";
 
-    const paths = inlineSvgRef.current.querySelectorAll("path");
     const svgRect = svgElement.getBoundingClientRect();
-
     if (svgRect.width === 0) {
-      const timer = setTimeout(() => {
-        setRetryTrigger((p) => p + 1);
-      }, 100);
+      const timer = setTimeout(() => setRetryTrigger((p) => p + 1), 100);
       return () => clearTimeout(timer);
     }
 
-    const pathKeysMap = new Map<SVGPathElement, BodyPartKey>();
+    // --- Single click handler on the SVG itself ---
+    // We use click coordinates (clientX/Y) to determine the body part.
+    // This avoids double-firing from <path> + mirrored <use> both getting listeners.
+    const handleSvgClick = (e: MouseEvent) => {
+      const freshRect = svgElement.getBoundingClientRect();
+      const relX = ((e.clientX - freshRect.left) / freshRect.width) * 407;
+      const relY = ((e.clientY - freshRect.top) / freshRect.height) * 354.4;
+      const key = getPartKey(relX, relY);
+      if (key) handleBodyPartChange(key);
+    };
+    svgElement.addEventListener("click", handleSvgClick);
+    svgElement.style.cursor = "pointer";
 
-    paths.forEach((path) => {
-      const rect = path.getBoundingClientRect();
-      const relativeX = ((rect.left + rect.width / 2 - svgRect.left) / svgRect.width) * 407;
-      const relativeY = ((rect.top + rect.height / 2 - svgRect.top) / svgRect.height) * 354.4;
+    // --- Highlight selected body part paths ---
+    // Query all leaf graphic elements; use their RENDERED bounding box to map to keys.
+    // We must NOT query children inside <use> shadow DOM (those are inaccessible), 
+    // so we only query top-level paths and use elements.
+    const leafElements = inlineSvgRef.current.querySelectorAll<SVGGraphicsElement>(
+      "svg > g path, svg > g use"
+    );
 
-      const key = getPartKey(relativeX, relativeY);
-      if (key) {
-        pathKeysMap.set(path, key);
-        path.style.cursor = "pointer";
-
-        const clickHandler = (e: Event) => {
-          e.preventDefault();
-          handleBodyPartChange(key);
-        };
-        path.addEventListener("click", clickHandler);
-
-        const enterHandler = () => {
-          if (flaggedPart !== key) {
-            path.setAttribute(
-              "style",
-              "fill: #c5a880; fill-opacity: 0.45; stroke: #c5a880; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;"
-            );
-          }
-        };
-
-        const leaveHandler = () => {
-          updatePathStyles();
-        };
-
-        path.addEventListener("mouseenter", enterHandler);
-        path.addEventListener("mouseleave", leaveHandler);
+    const pathKeysMap = new Map<SVGGraphicsElement, BodyPartKey>();
+    leafElements.forEach((el) => {
+      // Skip elements that are contained inside a <use> shadow root (can't style them)
+      // Only process elements directly in the main DOM
+      try {
+        const elRect = el.getBoundingClientRect();
+        if (elRect.width === 0 && elRect.height === 0) return;
+        const cx = ((elRect.left + elRect.width / 2 - svgRect.left) / svgRect.width) * 407;
+        const cy = ((elRect.top + elRect.height / 2 - svgRect.top) / svgRect.height) * 354.4;
+        const key = getPartKey(cx, cy);
+        if (key) pathKeysMap.set(el, key);
+      } catch {
+        // skip elements that throw
       }
     });
 
     const updatePathStyles = () => {
-      paths.forEach((path) => {
-        const key = pathKeysMap.get(path);
-        if (!key) return;
-
-        const isSelected = flaggedPart === key;
-
-        let fill = "transparent";
-        let fillOpacity = "0.2";
-        let stroke = "transparent";
-        let strokeWidth = "0";
-
-        if (isSelected) {
-          fill = "#ef4444";
-          fillOpacity = "0.55";
-          stroke = "#dc2626";
-          strokeWidth = "2.5";
+      pathKeysMap.forEach((key, el) => {
+        if (flaggedPart && flaggedPart === key) {
+          el.setAttribute(
+            "style",
+            "fill: #ef4444; fill-opacity: 0.55; stroke: #dc2626; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;"
+          );
         } else {
-          path.removeAttribute("style");
-          path.style.cursor = "pointer";
-          return;
+          el.removeAttribute("style");
+          el.style.cursor = "pointer";
         }
-
-        path.setAttribute(
-          "style",
-          `fill: ${fill}; fill-opacity: ${fillOpacity}; stroke: ${stroke}; stroke-width: ${strokeWidth}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;`
-        );
       });
     };
 
     updatePathStyles();
 
     return () => {
-      paths.forEach((path) => {
-        path.removeAttribute("style");
-      });
+      svgElement.removeEventListener("click", handleSvgClick);
+      pathKeysMap.forEach((_, el) => el.removeAttribute("style"));
     };
   }, [svgContent, retryTrigger, flaggedPart]);
 
@@ -661,15 +635,15 @@ function QuickEvalForm({
               {flaggedPart && <span className="text-red-500 font-bold">● {getBodyPartLabel(flaggedPart, locale)}</span>}
             </h4>
 
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
               {/* Star Rating on the left */}
               {flaggedPart && (
-                <div className="sm:col-span-5 flex items-center gap-1.5 py-1">
+                <div className="shrink-0 flex items-center py-1">
                   <StarRating value={generalScore} onChange={setGeneralScore} />
                 </div>
               )}
               {/* Textarea on the right */}
-              <div className={flaggedPart ? "sm:col-span-7" : "sm:col-span-12"}>
+              <div className="flex-1 w-full">
                 <Textarea
                   name="notes-placeholder"
                   rows={2}
@@ -719,7 +693,7 @@ function QuickEvalForm({
                         value={row.action}
                         onChange={(e) => updateTechActionRow(row.id, "action", e.target.value)}
                         required
-                        className="flex h-9 w-full sm:w-[150px] rounded-md border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold shrink-0 font-medium"
+                        className="flex h-8 w-full sm:w-[130px] rounded-md border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold shrink-0 font-medium"
                       >
                         <option value="">
                           {locale === "ar" ? "— الحركة —" : "— Action —"}
@@ -737,11 +711,11 @@ function QuickEvalForm({
                         placeholder={locale === "ar" ? "ملاحظات فنية..." : "Technical comments..."}
                         value={row.comment}
                         onChange={(e) => updateTechActionRow(row.id, "comment", e.target.value)}
-                        className="flex-1 h-9 text-xs"
+                        className="flex-1 h-8 text-xs px-2"
                       />
 
-                      {/* Right: Small-scale Stars Scoring */}
-                      <div className="flex items-center justify-between sm:justify-start gap-1 bg-background border px-2 py-1 rounded-md shrink-0">
+                      {/* Right: Small-scale Stars Scoring & Remove */}
+                      <div className="flex items-center gap-1 shrink-0">
                         <CompactStarRating
                           value={row.score}
                           onChange={(val) => updateTechActionRow(row.id, "score", val)}
@@ -750,7 +724,7 @@ function QuickEvalForm({
                         <button
                           type="button"
                           onClick={() => removeTechActionRow(row.id)}
-                          className="h-6 w-6 rounded-md hover:bg-destructive/10 text-destructive flex items-center justify-center transition font-bold"
+                          className="h-8 w-8 rounded-md hover:bg-destructive/10 text-destructive flex items-center justify-center transition font-bold"
                           title={locale === "ar" ? "إزالة" : "Remove"}
                         >
                           ✕
