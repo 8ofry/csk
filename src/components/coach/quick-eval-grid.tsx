@@ -551,7 +551,11 @@ function QuickEvalForm({
       setError(null);
       const result = await upsertQuickEvalAction(sessionId, fd);
       if (result.error) setError(result.error);
-      else setSavedAt(new Date());
+      else {
+        setSavedAt(new Date());
+        // Auto-dismiss the confirmation after 4 seconds
+        setTimeout(() => setSavedAt(null), 4000);
+      }
     });
   };
 
@@ -742,12 +746,15 @@ function QuickEvalForm({
       <div className="flex items-center justify-between border-t pt-3 mt-4">
         <div className="flex items-center gap-2">
           {savedAt && (
-            <Badge variant="success">{tBadges("saved")}</Badge>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 px-3 py-1 text-xs font-semibold text-emerald-600 animate-in fade-in duration-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+              {locale === "ar" ? "تم الحفظ ✓" : `Saved ✓`}
+            </span>
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
         <Button type="submit" size="sm" disabled={pending} className="px-6">
-          {pending ? "..." : t("saveBtn")}
+          {pending ? "…" : t("saveBtn")}
         </Button>
       </div>
     </form>
