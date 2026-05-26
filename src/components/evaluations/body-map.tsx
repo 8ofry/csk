@@ -158,10 +158,11 @@ export function BodyMap({ scores = {}, comments = {}, onChange, readOnly, svgCon
     const svgElement = svgContainerRef.current.querySelector("svg");
     if (!svgElement) return;
 
+    // Size is controlled by the CSS container; only force width attribute here.
     svgElement.setAttribute("width", "100%");
-    svgElement.setAttribute("height", "auto");
-    svgElement.style.maxWidth = "100%";
-    svgElement.style.height = "auto";
+    svgElement.removeAttribute("height"); // let viewBox control aspect ratio
+    svgElement.style.display = "block";
+    svgElement.style.cursor = "pointer";
 
     const svgRect = svgElement.getBoundingClientRect();
     if (svgRect.width === 0) {
@@ -179,7 +180,6 @@ export function BodyMap({ scores = {}, comments = {}, onChange, readOnly, svgCon
       if (key) setActive(key);
     };
     svgElement.addEventListener("click", handleSvgClick);
-    svgElement.style.cursor = "pointer";
 
     // Build a path→key map for highlighting
     const leafElements = svgContainerRef.current.querySelectorAll<SVGGraphicsElement>(
@@ -199,50 +199,38 @@ export function BodyMap({ scores = {}, comments = {}, onChange, readOnly, svgCon
       }
     });
 
+    // Use individual style property setters — never wipe original SVG inline styles.
+    // Setting a property to "" removes our override, restoring the original value.
+    const applyStyle = (el: SVGGraphicsElement, fill: string, fillOpacity: string, stroke: string, strokeWidth: string) => {
+      el.style.fill = fill;
+      el.style.fillOpacity = fillOpacity;
+      el.style.stroke = stroke;
+      el.style.strokeWidth = strokeWidth;
+      el.style.transition = fill ? "all 0.2s" : "";
+    };
+    const resetStyle = (el: SVGGraphicsElement) => applyStyle(el, "", "", "", "");
+
     const updatePathStyles = () => {
       pathKeysMap.forEach((key, el) => {
         const isSelected = active === key;
         const score = scores[key];
 
         if (score == null && !isSelected) {
-          el.removeAttribute("style");
-          el.style.cursor = "pointer";
+          resetStyle(el);
           return;
         }
 
-        let fill = "transparent";
-        let fillOpacity = "0.2";
-        let stroke = "transparent";
-        let strokeWidth = "0";
-
         if (isSelected && score == null) {
-          fill = "#c5a880";
-          fillOpacity = "0.5";
-          stroke = "#c5a880";
-          strokeWidth = "2";
+          applyStyle(el, "#c5a880", "0.5", "#c5a880", "2");
         } else if (score != null) {
           if (score >= 8) {
-            fill = "#10b981";
-            fillOpacity = isSelected ? "0.6" : "0.35";
-            stroke = "#059669";
-            strokeWidth = isSelected ? "2.5" : "1.2";
+            applyStyle(el, "#10b981", isSelected ? "0.6" : "0.35", "#059669", isSelected ? "2.5" : "1.2");
           } else if (score >= 5) {
-            fill = "#f59e0b";
-            fillOpacity = isSelected ? "0.6" : "0.35";
-            stroke = "#d97706";
-            strokeWidth = isSelected ? "2.5" : "1.2";
+            applyStyle(el, "#f59e0b", isSelected ? "0.6" : "0.35", "#d97706", isSelected ? "2.5" : "1.2");
           } else {
-            fill = "#ef4444";
-            fillOpacity = isSelected ? "0.6" : "0.35";
-            stroke = "#dc2626";
-            strokeWidth = isSelected ? "2.5" : "1.2";
+            applyStyle(el, "#ef4444", isSelected ? "0.6" : "0.35", "#dc2626", isSelected ? "2.5" : "1.2");
           }
         }
-
-        el.setAttribute(
-          "style",
-          `fill: ${fill}; fill-opacity: ${fillOpacity}; stroke: ${stroke}; stroke-width: ${strokeWidth}; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;`
-        );
       });
     };
 

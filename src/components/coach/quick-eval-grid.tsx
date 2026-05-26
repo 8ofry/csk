@@ -162,17 +162,17 @@ function StarRating({
   return (
     <div className="flex items-center gap-0.5">
       {[0, 1, 2, 3, 4, 5].map((star) => {
-        if (star === 0) return null; // 0 starts as default unselected
+        if (star === 0) return null;
         return (
           <button
             key={star}
             type="button"
             disabled={disabled}
             onClick={() => onChange(star)}
-            className="p-0.5 focus:outline-none focus:scale-110 transition shrink-0"
+            className="p-0 focus:outline-none focus:scale-110 transition shrink-0"
           >
             <svg
-              className={`h-5 w-5 transition-all ${
+              className={`h-4 w-4 transition-all ${
                 star <= value
                   ? "text-amber-500 fill-amber-500 drop-shadow-sm scale-105"
                   : "text-muted-foreground/30 hover:text-amber-500/40"
@@ -274,17 +274,17 @@ function CompactStarRating({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
           disabled={disabled}
           onClick={() => onChange(star)}
-          className="p-0.5 focus:outline-none focus:scale-110 transition shrink-0"
+          className="p-0 focus:outline-none focus:scale-110 transition shrink-0"
         >
           <svg
-            className={`h-4 w-4 transition-all ${
+            className={`h-3 w-3 transition-all ${
               star <= value
                 ? "text-amber-500 fill-amber-500 drop-shadow-sm scale-105"
                 : "text-muted-foreground/30 hover:text-amber-500/40"
@@ -381,11 +381,12 @@ function QuickEvalForm({
     const svgElement = inlineSvgRef.current.querySelector("svg");
     if (!svgElement) return;
 
+    // Force SVG to fill container width; height is controlled by the CSS container.
+    // We only set attributes here — size constraints live on the CSS wrapper div.
     svgElement.setAttribute("width", "100%");
-    svgElement.setAttribute("height", "auto");
-    svgElement.style.maxWidth = "100%";
-    svgElement.style.maxHeight = "250px";
-    svgElement.style.height = "auto";
+    svgElement.removeAttribute("height"); // let aspect ratio flow from viewBox
+    svgElement.style.display = "block";
+    svgElement.style.cursor = "pointer";
 
     const svgRect = svgElement.getBoundingClientRect();
     if (svgRect.width === 0) {
@@ -393,9 +394,7 @@ function QuickEvalForm({
       return () => clearTimeout(timer);
     }
 
-    // --- Single click handler on the SVG itself ---
-    // We use click coordinates (clientX/Y) to determine the body part.
-    // This avoids double-firing from <path> + mirrored <use> both getting listeners.
+    // Single SVG-level click handler — use mouse coordinates to find body part.
     const handleSvgClick = (e: MouseEvent) => {
       const freshRect = svgElement.getBoundingClientRect();
       const relX = ((e.clientX - freshRect.left) / freshRect.width) * 407;
@@ -404,20 +403,13 @@ function QuickEvalForm({
       if (key) handleBodyPartChange(key);
     };
     svgElement.addEventListener("click", handleSvgClick);
-    svgElement.style.cursor = "pointer";
 
-    // --- Highlight selected body part paths ---
-    // Query all leaf graphic elements; use their RENDERED bounding box to map to keys.
-    // We must NOT query children inside <use> shadow DOM (those are inaccessible), 
-    // so we only query top-level paths and use elements.
+    // Build key map for visible leaf elements
     const leafElements = inlineSvgRef.current.querySelectorAll<SVGGraphicsElement>(
       "svg > g path, svg > g use"
     );
-
     const pathKeysMap = new Map<SVGGraphicsElement, BodyPartKey>();
     leafElements.forEach((el) => {
-      // Skip elements that are contained inside a <use> shadow root (can't style them)
-      // Only process elements directly in the main DOM
       try {
         const elRect = el.getBoundingClientRect();
         if (elRect.width === 0 && elRect.height === 0) return;
@@ -425,30 +417,35 @@ function QuickEvalForm({
         const cy = ((elRect.top + elRect.height / 2 - svgRect.top) / svgRect.height) * 354.4;
         const key = getPartKey(cx, cy);
         if (key) pathKeysMap.set(el, key);
-      } catch {
-        // skip elements that throw
-      }
+      } catch { /* skip */ }
     });
 
-    const updatePathStyles = () => {
-      pathKeysMap.forEach((key, el) => {
-        if (flaggedPart && flaggedPart === key) {
-          el.setAttribute(
-            "style",
-            "fill: #ef4444; fill-opacity: 0.55; stroke: #dc2626; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: all 0.2s; cursor: pointer;"
-          );
-        } else {
-          el.removeAttribute("style");
-          el.style.cursor = "pointer";
-        }
-      });
+    // Use individual style properties so we NEVER wipe the original SVG fill/stroke styles.
+    // Setting a property to "" removes our override and restores the original value.
+    const applyHighlight = (el: SVGGraphicsElement, active: boolean) => {
+      if (active) {
+        el.style.fill = "#ef4444";
+        el.style.fillOpacity = "0.6";
+        el.style.stroke = "#dc2626";
+        el.style.strokeWidth = "2";
+        el.style.transition = "all 0.2s";
+      } else {
+        el.style.fill = "";
+        el.style.fillOpacity = "";
+        el.style.stroke = "";
+        el.style.strokeWidth = "";
+        el.style.transition = "";
+      }
     };
 
-    updatePathStyles();
+    pathKeysMap.forEach((key, el) => {
+      applyHighlight(el, !!(flaggedPart && flaggedPart === key));
+    });
 
     return () => {
       svgElement.removeEventListener("click", handleSvgClick);
-      pathKeysMap.forEach((_, el) => el.removeAttribute("style"));
+      // Reset only our highlight properties — preserves original SVG inline styles
+      pathKeysMap.forEach((_, el) => applyHighlight(el, false));
     };
   }, [svgContent, retryTrigger, flaggedPart]);
 
@@ -616,11 +613,14 @@ function QuickEvalForm({
                   </span>
                 )}
               </div>
-              <div
-                ref={inlineSvgRef}
-                className="w-full max-w-[280px] flex justify-center py-2"
-                dangerouslySetInnerHTML={{ __html: svgContent }}
-              />
+              {/* Fixed-height container — SVG can never escape this box */}
+              <div className="w-full h-[220px] overflow-hidden flex items-center justify-center">
+                <div
+                  ref={inlineSvgRef}
+                  className="w-full max-w-[280px] h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
+                  dangerouslySetInnerHTML={{ __html: svgContent }}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -629,25 +629,19 @@ function QuickEvalForm({
         <div className="space-y-4 border-t md:border-t-0 md:border-l pl-0 md:pl-6 pt-4 md:pt-0">
           
           {/* General muscle power evaluation */}
-          <div className="space-y-2 bg-muted/10 p-3 rounded-lg border">
-            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center justify-between">
+          <div className="bg-muted/10 p-3 rounded-lg border">
+            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center justify-between mb-2">
               <span>{locale === "ar" ? "تقييم قوة العضلة والحالة البدنية" : "General Muscle Power & Condition"}</span>
-              {flaggedPart && <span className="text-red-500 font-bold">● {getBodyPartLabel(flaggedPart, locale)}</span>}
+              {flaggedPart && <span className="text-red-500 font-bold text-[10px]">● {getBodyPartLabel(flaggedPart, locale)}</span>}
             </h4>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              {/* Star Rating on the left */}
-              {flaggedPart && (
-                <div className="shrink-0 flex items-center py-1">
-                  <StarRating value={generalScore} onChange={setGeneralScore} />
-                </div>
-              )}
-              {/* Textarea on the right */}
-              <div className="flex-1 w-full">
+            {/* Comment LEFT (flex-1), Stars RIGHT (shrink-0) — consistent with technical action rows */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
                 <Textarea
                   name="notes-placeholder"
                   rows={2}
-                  className="min-h-[50px] resize-none text-xs"
+                  className="min-h-[48px] resize-none text-xs w-full"
                   placeholder={
                     flaggedPart
                       ? (locale === "ar" ? "اكتب ملاحظات بدنية عن العضو المحدد..." : "Observations about this muscle power...")
@@ -657,6 +651,12 @@ function QuickEvalForm({
                   onChange={(e) => setGeneralComment(e.target.value)}
                 />
               </div>
+              {flaggedPart && (
+                <div className="shrink-0 flex flex-col items-center gap-0.5">
+                  <StarRating value={generalScore} onChange={setGeneralScore} />
+                  <span className="text-[9px] text-muted-foreground">{generalScore}/5</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -682,18 +682,18 @@ function QuickEvalForm({
                   {locale === "ar" ? "لا توجد حركات مضافة بعد. اضغط على الزر بالأعلى لإضافة حركة فنية." : "No technical actions added yet. Click the button above to add one."}
                 </p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {techActions.map((row) => (
                     <div
                       key={row.id}
-                      className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-muted/20 p-2 rounded-md border border-dashed text-xs shadow-sm"
+                      className="flex items-center gap-1.5 bg-muted/20 px-2 py-1.5 rounded-md border border-dashed text-xs shadow-sm"
                     >
-                      {/* Left: Dropdown */}
+                      {/* Left: Dropdown (fixed width) */}
                       <select
                         value={row.action}
                         onChange={(e) => updateTechActionRow(row.id, "action", e.target.value)}
                         required
-                        className="flex h-8 w-full sm:w-[130px] rounded-md border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold shrink-0 font-medium"
+                        className="h-7 w-[110px] rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-csk-gold shrink-0 font-medium"
                       >
                         <option value="">
                           {locale === "ar" ? "— الحركة —" : "— Action —"}
@@ -705,26 +705,25 @@ function QuickEvalForm({
                         ))}
                       </select>
 
-                      {/* Middle: Comment Text Input */}
+                      {/* Middle: Comment (flex-1, takes all remaining space) */}
                       <Input
                         type="text"
                         placeholder={locale === "ar" ? "ملاحظات فنية..." : "Technical comments..."}
                         value={row.comment}
                         onChange={(e) => updateTechActionRow(row.id, "comment", e.target.value)}
-                        className="flex-1 h-8 text-xs px-2"
+                        className="flex-1 h-7 text-xs px-2 min-w-0"
                       />
 
-                      {/* Right: Small-scale Stars Scoring & Remove */}
-                      <div className="flex items-center gap-1 shrink-0">
+                      {/* Right: Stars + Remove (compact, shrink-0) */}
+                      <div className="flex items-center gap-0.5 shrink-0">
                         <CompactStarRating
                           value={row.score}
                           onChange={(val) => updateTechActionRow(row.id, "score", val)}
                         />
-                        {/* Remove Row Button */}
                         <button
                           type="button"
                           onClick={() => removeTechActionRow(row.id)}
-                          className="h-8 w-8 rounded-md hover:bg-destructive/10 text-destructive flex items-center justify-center transition font-bold"
+                          className="h-6 w-6 rounded hover:bg-destructive/10 text-destructive/70 hover:text-destructive flex items-center justify-center transition text-xs"
                           title={locale === "ar" ? "إزالة" : "Remove"}
                         >
                           ✕
