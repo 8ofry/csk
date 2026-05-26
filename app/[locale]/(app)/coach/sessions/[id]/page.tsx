@@ -6,12 +6,12 @@ import { getSessionForCoach } from "@/application/sessions/service";
 import { listTrainingUnits } from "@/application/training-units/service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AttendanceRoster } from "@/components/coach/attendance-roster";
-import { QuickEvalGrid } from "@/components/coach/quick-eval-grid";
+import { SessionInteractionPanel } from "@/components/coach/session-interaction-panel";
 import { EndSessionButton } from "@/components/coach/end-session-button";
 import { ComposeReportButton } from "@/components/coach/compose-report-button";
 import { getDailyReportBySessionId } from "@/application/daily-reports/service";
 import type { AttendanceMark } from "@/application/attendance/service";
+import { prisma } from "@/infrastructure/db/prisma";
 import fs from "fs";
 import path from "path";
 
@@ -38,9 +38,6 @@ export default async function SessionDetailPage({
   ]);
 
   const trainees = session.group.enrollments.map((e) => e.trainee);
-  const attendanceMap = new Map(session.attendances.map((a) => [a.traineeId, a.status]));
-  const evalMap = new Map(session.quickEvaluations.map((q) => [q.traineeId, q]));
-
   const planUnits = (session.plan?.unitsSequence as unknown as UnitItemRaw[] | undefined) ?? [];
   const unitDirectory =
     planUnits.length > 0
@@ -56,6 +53,53 @@ export default async function SessionDetailPage({
   } catch (err) {
     console.error("Failed to read Muscles_front_and_back.svg:", err);
   }
+
+  // Fetch all active trainees in the system for external attendance search
+  const allSystemTrainees = await prisma.user.findMany({
+    where: { role: "TRAINEE", status: "ACTIVE" },
+    select: { id: true, fullNameEn: true, fullNameAr: true }
+  });
+
+  // Query actual session attendance records including trainee details
+  const sessionAttendances = await prisma.attendance.findMany({
+    where: { sessionId: session.id },
+    include: {
+      trainee: {
+        select: { id: true, fullNameEn: true, fullNameAr: true }
+      }
+    }
+  });
+
+  // Assemble the initial list of roster trainees (group enrollees + any external trainees with existing marks)
+  const groupTraineeIds = new Set(trainees.map((t) => t.id));
+  const attendanceMap = new Map(sessionAttendances.map((a) => [a.traineeId, a.status]));
+  
+  const rosterTrainees = [
+    ...trainees.map((t) => ({
+      id: t.id,
+      fullNameEn: t.fullNameEn,
+      fullNameAr: t.fullNameAr,
+      isExternal: false,
+      current: attendanceMap.get(t.id),
+    })),
+    ...sessionAttendances
+      .filter((a) => !groupTraineeIds.has(a.traineeId))
+      .map((a) => ({
+        id: a.traineeId,
+        fullNameEn: a.trainee.fullNameEn,
+        fullNameAr: a.trainee.fullNameAr,
+        isExternal: true,
+        current: a.status,
+      }))
+  ];
+
+  const initialQuickEvals = session.quickEvaluations.map((q) => ({
+    traineeId: q.traineeId,
+    effortScore: q.effortScore,
+    notes: q.notes,
+    flaggedBodyPart: q.flaggedBodyPart,
+    flaggedSkill: q.flaggedSkill,
+  }));
 
   return (
     <div className="space-y-6">
@@ -88,50 +132,13 @@ export default async function SessionDetailPage({
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("attendanceTitle", { count: trainees.length })}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AttendanceRoster
-            sessionId={session.id}
-            trainees={trainees.map((t) => ({
-              id: t.id,
-              fullNameEn: t.fullNameEn,
-              fullNameAr: t.fullNameAr,
-              current: attendanceMap.get(t.id) as AttendanceMark | undefined,
-            }))}
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("quickEvalTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <QuickEvalGrid
-            sessionId={session.id}
-            svgContent={svgContent}
-            trainees={trainees.map((t) => {
-              const e = evalMap.get(t.id);
-              return {
-                traineeId: t.id,
-                fullNameEn: t.fullNameEn,
-                fullNameAr: t.fullNameAr,
-                current: e
-                  ? {
-                      effortScore: e.effortScore,
-                      notes: e.notes,
-                      flaggedBodyPart: e.flaggedBodyPart,
-                      flaggedSkill: e.flaggedSkill,
-                    }
-                  : undefined,
-              };
-            })}
-          />
-        </CardContent>
-      </Card>
+      <SessionInteractionPanel
+        sessionId={session.id}
+        groupTrainees={rosterTrainees}
+        allSystemTrainees={allSystemTrainees}
+        initialQuickEvals={initialQuickEvals}
+        svgContent={svgContent}
+      />
 
       {planUnits.length > 0 && (
         <Card>

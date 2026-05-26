@@ -8,7 +8,7 @@ export const quickEvalSchema = z.object({
   sessionId: z.string().min(1),
   traineeId: z.string().min(1),
   effortScore: z.coerce.number().int().min(1).max(10),
-  notes: z.string().max(280).optional(),
+  notes: z.string().max(2000).optional(),
   flaggedBodyPart: z.string().max(40).optional(),
   flaggedSkill: z.string().max(40).optional(),
 });

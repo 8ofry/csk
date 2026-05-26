@@ -123,17 +123,8 @@ export async function startSession(opts: {
   }
 
   const schedule = group.schedule as unknown as WeeklySchedule | null;
-  if (!schedule || !scheduledOccurrence(schedule, scheduledStart)) {
-    throw new SessionStartError("This date/time is not on the group's recurring schedule");
-  }
-
-  const expected = scheduledOccurrence(schedule, scheduledStart);
-  if (
-    !expected ||
-    expected.start.getTime() !== scheduledStart.getTime()
-  ) {
-    throw new SessionStartError("scheduledStart does not match the schedule's start time for that day");
-  }
+  const expected = schedule ? scheduledOccurrence(schedule, scheduledStart) : null;
+  const expectedEnd = expected ? expected.end : new Date(scheduledStart.getTime() + 90 * 60 * 1000); // 90 mins default
 
   // Find an APPROVED plan for this group on this date (window of the calendar day)
   const dayStart = new Date(scheduledStart);
@@ -165,7 +156,7 @@ export async function startSession(opts: {
           internId: group.interns[0]?.internId ?? null,
           planId: plan?.id ?? null,
           scheduledStart,
-          scheduledEnd: expected.end,
+          scheduledEnd: expectedEnd,
           actualStart: new Date(),
           status: "IN_PROGRESS",
         },

@@ -41,6 +41,8 @@ describe("groupInputSchema", () => {
     name: "Boxing Beginners — Mon/Wed",
     locationId: "loc-1",
     disciplineId: "disc-1",
+    levelBands: ["N"],
+    coaches: [{ coachId: "coach-1", levels: ["N"] }],
     schedule: { days: ["mon", "wed"], startTime: "18:00", endTime: "19:30" },
     capacity: 20,
     active: true,

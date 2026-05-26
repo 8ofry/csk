@@ -52,6 +52,20 @@ const BODY_PART_LABELS: Record<BodyPartKey, { en: string; ar: string }> = {
   feet_r: { en: "Right Foot", ar: "القدم اليمنى" },
 };
 
+// General body parts list for simple selector
+const GENERAL_BODY_PARTS: { key: BodyPartKey; label: { en: string; ar: string } }[] = [
+  { key: "head_neck", label: { en: "Head / Neck", ar: "الرأس / الرقبة" } },
+  { key: "chest", label: { en: "Chest", ar: "الصدر" } },
+  { key: "core_abs", label: { en: "Core / Abs", ar: "البطن / الجذع" } },
+  { key: "upper_back", label: { en: "Upper Back", ar: "أعلى الظهر" } },
+  { key: "lower_back", label: { en: "Lower Back", ar: "أسفل الظهر" } },
+  { key: "hips", label: { en: "Hips", ar: "الحوض" } },
+  { key: "upper_arms_l", label: { en: "Left Arm / Hand", ar: "الذراع الأيسر / اليد" } },
+  { key: "upper_arms_r", label: { en: "Right Arm / Hand", ar: "الذراع الأيمن / اليد" } },
+  { key: "thighs_l", label: { en: "Left Leg / Foot", ar: "الرجل اليسرى / القدم" } },
+  { key: "thighs_r", label: { en: "Right Leg / Foot", ar: "الرجل اليمنى / القدم" } },
+];
+
 export function getBodyPartLabel(key: string | null, locale: string): string {
   if (!key) return "";
   const label = BODY_PART_LABELS[key as BodyPartKey];
@@ -134,6 +148,54 @@ interface EvalRow {
   };
 }
 
+// 0-5 Star Rating Component
+function StarRating({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: number;
+  onChange: (val: number) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      {[0, 1, 2, 3, 4, 5].map((star) => {
+        if (star === 0) return null; // 0 starts as default unselected
+        return (
+          <button
+            key={star}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(star)}
+            className="p-1 focus:outline-none focus:scale-110 transition shrink-0"
+          >
+            <svg
+              className={`h-7 w-7 transition-all ${
+                star <= value
+                  ? "text-amber-500 fill-amber-500 drop-shadow-sm scale-105"
+                  : "text-muted-foreground/30 hover:text-amber-500/40"
+              }`}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </button>
+        );
+      })}
+      <span className="ml-2 text-sm font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
+        {value}/5
+      </span>
+    </div>
+  );
+}
+
 export function QuickEvalGrid({
   sessionId,
   trainees,
@@ -143,14 +205,64 @@ export function QuickEvalGrid({
   trainees: EvalRow[];
   svgContent?: string;
 }) {
+  const locale = useLocale();
+  const [selectedTraineeId, setSelectedTraineeId] = useState<string>("");
+
+  // Update selected trainee when roster changes
+  useEffect(() => {
+    if (trainees.length > 0 && !trainees.some((t) => t.traineeId === selectedTraineeId)) {
+      setSelectedTraineeId(trainees[0]?.traineeId ?? "");
+    }
+  }, [trainees, selectedTraineeId]);
+
+  const activeTrainee = trainees.find((t) => t.traineeId === selectedTraineeId);
+
+  if (trainees.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground bg-muted/5">
+        {locale === "ar"
+          ? "لم يحضر أي متدربين بعد للتقييم. يرجى تحضيرهم في كشف الحضور أولاً."
+          : "No attended trainees available to evaluate. Please check them in first."}
+      </div>
+    );
+  }
+
   return (
-    <ul className="space-y-3">
-      {trainees.map((t) => (
-        <li key={t.traineeId} className="rounded-md border p-3">
-          <QuickEvalForm sessionId={sessionId} row={t} svgContent={svgContent} />
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-6">
+      {/* Trainee Selector Search/Combobox */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20 p-3 rounded-lg border">
+        <label className="text-sm font-bold text-foreground">
+          {locale === "ar" ? "اختر المتدرب للتقييم:" : "Select Trainee to Evaluate:"}
+        </label>
+        <select
+          value={selectedTraineeId}
+          onChange={(e) => setSelectedTraineeId(e.target.value)}
+          className="flex h-10 w-full sm:max-w-xs rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+        >
+          {trainees.map((t) => (
+            <option key={t.traineeId} value={t.traineeId}>
+              {locale === "ar" ? t.fullNameAr : t.fullNameEn}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Render the evaluation form of the selected trainee */}
+      {activeTrainee && (
+        <div className="rounded-lg border bg-background p-4 shadow-sm animate-in fade-in duration-200">
+          <div className="border-b pb-2 mb-4">
+            <h3 className="text-base font-bold text-foreground">{activeTrainee.fullNameEn}</h3>
+            <p className="text-xs text-muted-foreground">{activeTrainee.fullNameAr}</p>
+          </div>
+          <QuickEvalForm
+            key={activeTrainee.traineeId}
+            sessionId={sessionId}
+            row={activeTrainee}
+            svgContent={svgContent}
+          />
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -170,135 +282,294 @@ function QuickEvalForm({
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [pending, startTransition] = useTransition();
 
+  // Parse structured JSON notes if exists
+  let initialGeneralScore = 0;
+  let initialGeneralComment = "";
+  let initialTechnicalAction = "";
+  let initialTechnicalScore = 0;
+  let initialTechnicalComment = "";
+
+  if (row.current?.notes) {
+    try {
+      const data = JSON.parse(row.current.notes);
+      initialGeneralScore = data.generalScore ?? 0;
+      initialGeneralComment = data.generalComment ?? "";
+      initialTechnicalAction = data.technicalAction ?? "";
+      initialTechnicalScore = data.technicalScore ?? 0;
+      initialTechnicalComment = data.technicalComment ?? "";
+    } catch {
+      // Fallback if notes is plain text
+      initialGeneralComment = row.current.notes;
+    }
+  }
+
   const [flaggedPart, setFlaggedPart] = useState<BodyPartKey | null>(
     row.current?.flaggedBodyPart as BodyPartKey | null
   );
   const [showModal, setShowModal] = useState(false);
 
+  // Star rating states
+  const [generalScore, setGeneralScore] = useState(initialGeneralScore);
+  const [generalComment, setGeneralComment] = useState(initialGeneralComment);
+
+  const [technicalAction, setTechnicalAction] = useState(initialTechnicalAction);
+  const [technicalScore, setTechnicalScore] = useState(initialTechnicalScore);
+  const [technicalComment, setTechnicalComment] = useState(initialTechnicalComment);
+
+  // Trigger evaluation reset when selecting a new body part to auto-load related options
+  const handleBodyPartChange = (part: BodyPartKey | null) => {
+    setFlaggedPart(part);
+    // Auto reset technical action if the body part type changes
+    setTechnicalAction("");
+    setTechnicalScore(0);
+    setTechnicalComment("");
+  };
+
+  // Determine list of technical actions based on body parts
+  const getTechnicalActions = (part: BodyPartKey | null): { value: string; label: string }[] => {
+    if (!part) return [];
+    
+    // Arm/Hand/Shoulder
+    if (
+      part.includes("shoulder") ||
+      part.includes("upper_arm") ||
+      part.includes("forearm")
+    ) {
+      return [
+        { value: "JAB", label: locale === "ar" ? "جاب / لكمة مستقيمة" : "Jab" },
+        { value: "CROSS", label: locale === "ar" ? "كروس / لكمة مستقيمة خلفية" : "Cross" },
+        { value: "HOOK", label: locale === "ar" ? "هوك / لكمة خطافية" : "Hook" },
+        { value: "UPPERCUT", label: locale === "ar" ? "أبركوت / لكمة صاعدة" : "Uppercut" },
+        { value: "BACK_FIST", label: locale === "ar" ? "باك فيست / لكمة خلفية" : "Back Fist" },
+      ];
+    }
+
+    // Leg/Foot/Knee
+    if (
+      part.includes("thigh") ||
+      part.includes("knee") ||
+      part.includes("shin") ||
+      part.includes("feet")
+    ) {
+      return [
+        { value: "FRONT_KICK", label: locale === "ar" ? "ركلة أمامية" : "Front Kick" },
+        { value: "ROUNDHOUSE_KICK", label: locale === "ar" ? "ركلة دائرية" : "Roundhouse Kick" },
+        { value: "SIDE_KICK", label: locale === "ar" ? "ركلة جانبية" : "Side Kick" },
+        { value: "KNEE_STRIKE", label: locale === "ar" ? "ضربة ركبة" : "Knee Strike" },
+      ];
+    }
+
+    // Core/Back/Head
+    return [
+      { value: "DEFENSE", label: locale === "ar" ? "الدفاع" : "Defense" },
+      { value: "HEAD_MOVEMENT", label: locale === "ar" ? "حركة الرأس" : "Head Movement" },
+      { value: "FOOTWORK", label: locale === "ar" ? "تحركات القدمين" : "Footwork" },
+    ];
+  };
+
+  const techOptions = getTechnicalActions(flaggedPart);
+
+  // Form submission: serialize notes to JSON string
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+
+    // If a body part is flagged, we package the evaluations as JSON
+    if (flaggedPart) {
+      const payload = {
+        generalScore,
+        generalComment,
+        technicalAction,
+        technicalScore,
+        technicalComment,
+      };
+      fd.set("notes", JSON.stringify(payload));
+    } else {
+      // Otherwise, save general comment as simple text
+      fd.set("notes", generalComment);
+    }
+
+    startTransition(async () => {
+      setError(null);
+      const result = await upsertQuickEvalAction(sessionId, fd);
+      if (result.error) setError(result.error);
+      else setSavedAt(new Date());
+    });
+  };
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        startTransition(async () => {
-          setError(null);
-          const result = await upsertQuickEvalAction(sessionId, fd);
-          if (result.error) setError(result.error);
-          else setSavedAt(new Date());
-        });
-      }}
-      className="space-y-3"
-    >
+    <form onSubmit={handleSubmit} className="space-y-5">
       <input type="hidden" name="traineeId" value={row.traineeId} />
       <input type="hidden" name="flaggedBodyPart" value={flaggedPart ?? ""} />
+      <input type="hidden" name="flaggedSkill" value={technicalAction} />
 
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="font-medium">{row.fullNameEn}</div>
-          <div className="text-xs text-muted-foreground">{row.fullNameAr}</div>
-        </div>
-        {savedAt && <Badge variant="success">{tBadges("saved")}</Badge>}
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">
-          {t("effortLabel")}
-        </label>
-        <div className="flex flex-wrap gap-1">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-            <label
-              key={n}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border text-sm font-medium has-[:checked]:border-csk-gold has-[:checked]:bg-csk-gold/20 has-[:checked]:text-csk-gold transition-all duration-200"
-            >
-              <input
-                type="radio"
-                name="effortScore"
-                value={n}
-                defaultChecked={row.current?.effortScore === n}
-                required
-                className="sr-only"
-              />
-              {n}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Left Side: Effort & Body Part Selection */}
+        <div className="space-y-4">
+          {/* Effort Score Slider/Radio */}
+          <div>
+            <label className="mb-1 block text-xs font-bold text-muted-foreground uppercase tracking-wide">
+              {t("effortLabel")}
             </label>
-          ))}
-        </div>
-      </div>
-
-      <Textarea
-        name="notes"
-        rows={2}
-        placeholder={t("notesPlaceholder")}
-        defaultValue={row.current?.notes ?? ""}
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Flagged Body Part (Anatomical SVG Trigger) */}
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            {locale === "ar" ? "العضو المصاب/المتعب" : "Flagged Muscle/Part"}
-          </label>
-          {flaggedPart ? (
-            <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/5 p-1.5 pl-3 shadow-sm select-none">
-              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-              <span className="text-sm font-medium text-red-500 truncate grow">
-                {getBodyPartLabel(flaggedPart, locale)}
-              </span>
-              <button
-                type="button"
-                onClick={() => setFlaggedPart(null)}
-                className="flex h-7 w-7 items-center justify-center rounded-md border border-red-500/20 text-red-500 hover:bg-red-500/10 transition shrink-0"
-                title={locale === "ar" ? "إلغاء التحديد" : "Clear selection"}
-              >
-                ✕
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowModal(true)}
-                className="flex h-7 w-7 items-center justify-center rounded-md border border-input text-muted-foreground hover:bg-muted transition shrink-0"
-                title={locale === "ar" ? "تعديل" : "Edit"}
-              >
-                ✏️
-              </button>
+            <div className="flex flex-wrap gap-1">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                <label
+                  key={n}
+                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md border text-sm font-semibold has-[:checked]:border-csk-gold has-[:checked]:bg-csk-gold/20 has-[:checked]:text-csk-gold transition"
+                >
+                  <input
+                    type="radio"
+                    name="effortScore"
+                    value={n}
+                    defaultChecked={row.current?.effortScore === n}
+                    required
+                    className="sr-only"
+                  />
+                  {n}
+                </label>
+              ))}
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowModal(true)}
-              className="flex w-full h-10 items-center justify-center gap-2 rounded-lg border border-dashed border-input bg-background px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-            >
-              <span>🩻</span>
-              <span>{locale === "ar" ? "خريطة الجسم التفاعلية" : "Interactive Body Map"}</span>
-            </button>
+          </div>
+
+          {/* General Body Part Selector (Dropdown) */}
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide">
+              {locale === "ar" ? "عضو الجسم (تحديد عام):" : "Body Part (General Selection):"}
+            </label>
+            <div className="flex gap-2">
+              <select
+                value={flaggedPart ?? ""}
+                onChange={(e) => handleBodyPartChange((e.target.value as BodyPartKey) || null)}
+                className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+              >
+                <option value="">
+                  {locale === "ar" ? "— اختر عضو الجسم (اختياري) —" : "— Select Body Part (Optional) —"}
+                </option>
+                {GENERAL_BODY_PARTS.map((gbp) => (
+                  <option key={gbp.key} value={gbp.key}>
+                    {locale === "ar" ? gbp.label.ar : gbp.label.en}
+                  </option>
+                ))}
+              </select>
+
+              {/* Anatomical Selector Button */}
+              {svgContent && (
+                <button
+                  type="button"
+                  onClick={() => setShowModal(true)}
+                  className="h-10 px-3 flex items-center justify-center gap-1.5 rounded-md border border-input bg-muted/40 hover:bg-muted text-foreground transition text-sm shrink-0"
+                  title={locale === "ar" ? "الخريطة التشريحية" : "Anatomical Map"}
+                >
+                  <span>🩻</span>
+                  <span className="hidden sm:inline">
+                    {locale === "ar" ? "تشريح تفصيلي" : "Anatomical Map"}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Evaluation Form */}
+        <div className="space-y-4 border-t md:border-t-0 md:border-l pl-0 md:pl-4 pt-4 md:pt-0">
+          
+          {/* General muscle power evaluation (Visible always, acts as simple notes if no part) */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center justify-between">
+              <span>{locale === "ar" ? "تقييم قوة العضلة والحالة البدنية" : "General Muscle Power & Condition"}</span>
+              {flaggedPart && <span className="text-red-500 font-bold">● {getBodyPartLabel(flaggedPart, locale)}</span>}
+            </h4>
+
+            {flaggedPart && (
+              <div className="py-1">
+                <StarRating value={generalScore} onChange={setGeneralScore} />
+              </div>
+            )}
+
+            <Textarea
+              name="notes-placeholder"
+              rows={2}
+              placeholder={
+                flaggedPart
+                  ? (locale === "ar" ? "اكتب ملاحظات بدنية عن العضو المحدد..." : "Observations about this muscle power...")
+                  : t("notesPlaceholder")
+              }
+              value={generalComment}
+              onChange={(e) => setGeneralComment(e.target.value)}
+            />
+          </div>
+
+          {/* Related technical action evaluation (Only visible if body part is flagged) */}
+          {flaggedPart && (
+            <div className="space-y-2 border-t pt-3 animate-in fade-in slide-in-from-top-1 duration-150">
+              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                {locale === "ar" ? "الحركة الفنية الفنية المرتبطة" : "Related Technical Action"}
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Technical Action Dropdown */}
+                <select
+                  value={technicalAction}
+                  onChange={(e) => setTechnicalAction(e.target.value)}
+                  required={!!flaggedPart}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+                >
+                  <option value="">
+                    {locale === "ar" ? "— الحركة الفنية —" : "— Technical Action —"}
+                  </option>
+                  {techOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Technical Score Stars */}
+                <div className="flex items-center justify-center sm:justify-start">
+                  <StarRating value={technicalScore} onChange={setTechnicalScore} />
+                </div>
+              </div>
+
+              {/* Technical comments */}
+              {technicalAction && (
+                <Textarea
+                  rows={2}
+                  placeholder={
+                    locale === "ar"
+                      ? "اكتب ملاحظات عن الأداء الفني لهذه الحركة..."
+                      : "Observations about technical execution (e.g. speed, snap)..."
+                  }
+                  value={technicalComment}
+                  onChange={(e) => setTechnicalComment(e.target.value)}
+                  className="mt-2"
+                />
+              )}
+            </div>
           )}
         </div>
-
-        {/* Flagged Skill */}
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            {t("skillPlaceholder")}
-          </label>
-          <Input
-            name="flaggedSkill"
-            placeholder={t("skillPlaceholder")}
-            defaultValue={row.current?.flaggedSkill ?? ""}
-            className="h-10"
-          />
-        </div>
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {/* Form Controls */}
+      <div className="flex items-center justify-between border-t pt-3 mt-4">
+        <div className="flex items-center gap-2">
+          {savedAt && (
+            <Badge variant="success">{tBadges("saved")}</Badge>
+          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <Button type="submit" size="sm" disabled={pending} className="px-6">
+          {pending ? "..." : t("saveBtn")}
+        </Button>
+      </div>
 
-      <Button type="submit" size="sm" disabled={pending} className="w-full sm:w-auto">
-        {pending ? "..." : t("saveBtn")}
-      </Button>
-
+      {/* SVG Anatomical Map Selector Modal */}
       {showModal && svgContent && (
         <AnatomicalSelectorModal
           svgContent={svgContent}
           initialPart={flaggedPart}
           locale={locale}
           onSelect={(key) => {
-            setFlaggedPart(key);
+            handleBodyPartChange(key);
             setShowModal(false);
           }}
           onClose={() => setShowModal(false)}
