@@ -129,6 +129,19 @@ enum PaymentMethod {
   ONLINE
 }
 
+enum ExpenseCategory {
+  RENT
+  SALARIES
+  COACH_PAYOUT
+  UTILITIES
+  EQUIPMENT
+  MARKETING
+  MAINTENANCE
+  SUPPLIES
+  TAXES
+  OTHER
+}
+
 enum PaymentIntentStatus {
   PENDING     // created, gateway URL handed back to client
   PROCESSING  // user redirected to gateway, awaiting webhook
@@ -288,6 +301,8 @@ model User {
   // Financial
   paymentsPaid       Payment[]      @relation("PaymentPayer")
   paymentsLogged     Payment[]      @relation("PaymentLogger")
+  expensesLogged     Expense[]      @relation("ExpenseLogger")
+  expensesReceived   Expense[]      @relation("ExpenseRecipient")
   revenueSplits      RevenueSplit[]
   merchandiseSold    MerchandiseSale[] @relation("MerchSeller")
   merchandiseBought  MerchandiseSale[] @relation("MerchCustomer")
@@ -817,6 +832,41 @@ model PaymentIntent {
   @@index([status, createdAt])
   @@index([payerUserId])
   @@index([providerOrderId])
+}
+
+model Expense {
+  id             String          @id @default(cuid())
+  category       ExpenseCategory
+  amount         Decimal         @db.Decimal(12, 2)
+  currency       String          @default("EGP")
+  method         PaymentMethod
+  description    String?
+  paidAt         DateTime        @default(now())
+  loggedById     String
+  loggedBy       User            @relation("ExpenseLogger", fields: [loggedById], references: [id])
+  recipientUserId String?
+  recipientUser   User?           @relation("ExpenseRecipient", fields: [recipientUserId], references: [id], onDelete: SetNull)
+  recurringExpenseId String?
+  recurringExpense   RecurringExpense? @relation(fields: [recurringExpenseId], references: [id], onDelete: SetNull)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([category, paidAt])
+}
+
+model RecurringExpense {
+  id             String          @id @default(cuid())
+  category       ExpenseCategory
+  amount         Decimal         @db.Decimal(12, 2)
+  currency       String          @default("EGP")
+  method         PaymentMethod   @default(CASH)
+  description    String?
+  dayOfMonth     Int             @default(1)
+  active         Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  expenses       Expense[]
 }
 
 // §10.3: splits must sum to 100% — enforced in application service layer

@@ -118,6 +118,7 @@ export default async function SubscriptionsPage() {
                         traineePhone={s.trainee.phone}
                         groupName={s.group.name}
                         locationName={s.location.nameEn}
+                        isPaid={s.paymentStatus === "PAID"}
                       />
                     </TableCell>
                   </TableRow>

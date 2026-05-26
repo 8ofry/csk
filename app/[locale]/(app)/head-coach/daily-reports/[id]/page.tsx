@@ -5,7 +5,7 @@ import { prisma } from "@/infrastructure/db/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DailyReportActions } from "@/components/head-coach/daily-report-actions";
-import { getBodyPartLabel } from "@/components/coach/quick-eval-grid";
+import { getBodyPartLabel } from "@/lib/body-parts";
 
 export default async function HeadCoachDailyReportPage({
   params,
@@ -154,8 +154,29 @@ export default async function HeadCoachDailyReportPage({
                         )}
                       </div>
 
-                      {/* Technical Action */}
-                      {parsed.technicalAction && (
+                      {/* Technical Actions — new multi-action array format */}
+                      {parsed.technicalActions && parsed.technicalActions.length > 0 && (
+                        <div className="space-y-1.5">
+                          <span className="font-bold text-muted-foreground uppercase tracking-wide">
+                            {locale === "ar" ? "الأداء الفني للحركات" : "Technical Actions Performance"}
+                          </span>
+                          {parsed.technicalActions.map((ta, idx) => (
+                            <div key={idx} className="flex items-center gap-2 bg-muted/20 p-2 rounded border border-dashed">
+                              <Badge variant="secondary" className="text-[10px] font-bold py-0 px-2 bg-csk-gold/15 text-foreground border border-csk-gold/20 shrink-0">
+                                {getTechnicalActionLabel(ta.action, locale)}
+                              </Badge>
+                              <div className="flex items-center gap-1 shrink-0">
+                                {renderStars(ta.score)}
+                                <span className="text-[10px] font-bold text-muted-foreground">({ta.score}/5)</span>
+                              </div>
+                              {ta.comment && <p className="text-[11px] text-foreground truncate flex-1">{ta.comment}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Legacy single technical action format */}
+                      {!parsed.technicalActions && parsed.technicalAction && (
                         <div className="space-y-1.5 bg-muted/20 p-2.5 rounded border border-dashed">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-muted-foreground uppercase tracking-wide">
@@ -166,7 +187,7 @@ export default async function HeadCoachDailyReportPage({
                             </Badge>
                           </div>
                           <div className="flex items-center gap-1.5 py-0.5">
-                            {renderStars(parsed.technicalScore)}
+                            {renderStars(parsed.technicalScore ?? 0)}
                             <span className="text-[10px] font-bold text-muted-foreground">({parsed.technicalScore}/5)</span>
                           </div>
                           {parsed.technicalComment && (
@@ -238,7 +259,18 @@ function getTechnicalActionLabel(action: string, locale: string) {
   return locale === "ar" ? labelObj.ar : labelObj.en;
 }
 
-function parseStructuredNotes(notes: string | null) {
+interface StructuredNote {
+  generalScore: number;
+  generalComment: string;
+  // Legacy single-action format
+  technicalAction?: string;
+  technicalScore?: number;
+  technicalComment?: string;
+  // New multi-action array format
+  technicalActions?: Array<{ action: string; score: number; comment: string }>;
+}
+
+function parseStructuredNotes(notes: string | null): StructuredNote | null {
   if (!notes) return null;
   try {
     const data = JSON.parse(notes);
@@ -246,13 +278,22 @@ function parseStructuredNotes(notes: string | null) {
       return {
         generalScore: typeof data.generalScore === "number" ? data.generalScore : 0,
         generalComment: typeof data.generalComment === "string" ? data.generalComment : "",
-        technicalAction: typeof data.technicalAction === "string" ? data.technicalAction : "",
-        technicalScore: typeof data.technicalScore === "number" ? data.technicalScore : 0,
-        technicalComment: typeof data.technicalComment === "string" ? data.technicalComment : "",
+        // Legacy
+        technicalAction: typeof data.technicalAction === "string" ? data.technicalAction : undefined,
+        technicalScore: typeof data.technicalScore === "number" ? data.technicalScore : undefined,
+        technicalComment: typeof data.technicalComment === "string" ? data.technicalComment : undefined,
+        // New array
+        technicalActions: Array.isArray(data.technicalActions)
+          ? data.technicalActions.map((ta: { action?: string; score?: number; comment?: string }) => ({
+              action: ta.action ?? "",
+              score: ta.score ?? 0,
+              comment: ta.comment ?? "",
+            }))
+          : undefined,
       };
     }
   } catch {
-    // Fallback if notes is plain text
+    // Plain text fallback
   }
   return null;
 }

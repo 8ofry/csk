@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { dashboardPathFor } from "@/lib/rbac";
+import Image from "next/image";
 
 interface NavItem {
   href: string;
@@ -27,7 +28,8 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { href: "/head-coach/coaches", labelKey: "coaches" },
     { href: "/head-coach/groups", labelKey: "groups" },
     { href: "/head-coach/subscriptions", labelKey: "subscriptions" },
-    { href: "/admin/financial/payments", labelKey: "payments" },
+    { href: "/head-coach/merchandise", labelKey: "merchandise" },
+    { href: "/admin/financial", labelKey: "financial" },
     { href: "/head-coach/training-units", labelKey: "trainingUnits" },
     { href: "/head-coach/championships", labelKey: "championships" },
     { href: "/head-coach/medical", labelKey: "medical" },
@@ -75,10 +77,16 @@ export async function AppShell({
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-40 border-b bg-csk-black text-white">
         <div className="container flex h-16 items-center justify-between">
-          <Link href={dashboardPathFor(role)} className="flex items-center gap-2 font-bold">
-            <span className="text-csk-gold">⚔</span>
-            <span>CSK</span>
-            <span className="ms-2 rounded bg-csk-gold/20 px-2 py-0.5 text-xs font-medium text-csk-gold">
+          <Link href={dashboardPathFor(role)} className="flex items-center gap-3">
+            <Image
+              src="/images/logo.png"
+              alt="CSK Academy"
+              width={72}
+              height={36}
+              className="object-contain"
+              priority
+            />
+            <span className="ms-1 rounded bg-csk-gold/20 px-2 py-0.5 text-xs font-medium text-csk-gold">
               {tRoles(role.toLowerCase())}
             </span>
           </Link>

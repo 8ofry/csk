@@ -16,11 +16,11 @@ export default async function CoachSessionsPage() {
   const todayEnd = new Date(today);
   todayEnd.setHours(23, 59, 59, 999);
 
-  // Past: last 30 days (excluding today)
+  // Past: last 30 days INCLUDING today (so completed today sessions are always visible)
   const pastStart = new Date(todayStart);
   pastStart.setDate(pastStart.getDate() - 30);
-  const pastEnd = new Date(todayStart);
-  pastEnd.setMilliseconds(pastEnd.getMilliseconds() - 1);
+  // pastEnd = end of today — sessions completed today appear in both sections
+  const pastEnd = new Date(todayEnd);
 
   const [t, tBadges, locale, todayOccurrences, allGroups, pastSessions] = await Promise.all([
     getTranslations("coachToday"),

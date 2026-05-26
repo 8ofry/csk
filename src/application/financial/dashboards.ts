@@ -62,6 +62,8 @@ export interface OwnerSnapshot {
   byLocation: { locationId: string; locationName: string; gross: number; csk: number }[];
   byStream: ByStream[];
   outstandingReceivables: { count: number; total: number };
+  totalExpenses: number;
+  netProfit: number;
 }
 
 export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> {
@@ -155,6 +157,13 @@ export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> 
     };
   });
 
+  const expensesRow = await prisma.expense.aggregate({
+    where: { paidAt: { gte: window.from, lte: window.to } },
+    _sum: { amount: true },
+  });
+  const totalExpenses = Number(expensesRow._sum.amount ?? 0);
+  const netProfit = cskShare - totalExpenses;
+
   const overdue = await prisma.subscription.aggregate({
     where: { paymentStatus: { in: ["DUE", "OVERDUE"] }, active: true },
     _count: { _all: true },
@@ -173,5 +182,7 @@ export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> 
       count: overdue._count._all,
       total: Number(overdue._sum.monthlyFee ?? 0),
     },
+    totalExpenses,
+    netProfit,
   };
 }

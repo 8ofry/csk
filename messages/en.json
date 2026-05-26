@@ -235,6 +235,7 @@
     "title": "Financial — Owner dashboard",
     "subtitle": "FR-FIN-11 · {from} – {to}",
     "allPayments": "All payments",
+    "allExpenses": "All expenses",
     "exportCsv": "Export CSV",
     "from": "From",
     "to": "To",
@@ -242,7 +243,9 @@
       "totalRevenue": "Total revenue",
       "cskShare": "CSK net share",
       "venuePayouts": "Venue payouts",
-      "coachPayouts": "Coach payouts"
+      "coachPayouts": "Coach payouts",
+      "totalExpenses": "Total expenses",
+      "netProfit": "Net profit"
     },
     "byStreamTitle": "By revenue stream",
     "byStreamEmpty": "No payments in window.",
@@ -258,6 +261,75 @@
       "location": "Location",
       "gross": "Gross",
       "csk": "CSK share"
+    }
+  },
+  "adminExpenses": {
+    "title": "Expenses",
+    "subtitle": "Track and record academy expenses (FR-FIN).",
+    "recordExpense": "Record Expense",
+    "category": "Category",
+    "amount": "Amount",
+    "method": "Payment Method",
+    "description": "Description",
+    "paidAt": "Paid Date",
+    "submit": "Record Expense",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this expense?",
+    "empty": "No expenses in this period.",
+    "kpi": {
+      "totalExpenses": "Total Expenses"
+    },
+    "table": {
+      "date": "Date",
+      "category": "Category",
+      "description": "Description",
+      "method": "Method",
+      "amount": "Amount (EGP)",
+      "loggedBy": "Logged By",
+      "actions": "Actions"
+    },
+    "categories": {
+      "RENT": "Rent",
+      "SALARIES": "Salaries",
+      "UTILITIES": "Utilities",
+      "EQUIPMENT": "Equipment",
+      "MARKETING": "Marketing",
+      "MAINTENANCE": "Maintenance",
+      "SUPPLIES": "Supplies",
+      "TAXES": "Taxes",
+      "OTHER": "Other",
+      "COACH_PAYOUT": "Coach Payout"
+    },
+    "coach": "Coach",
+    "selectCoach": "Select Coach",
+    "tabs": {
+      "logged": "Expenses Log",
+      "payouts": "Coach Payouts",
+      "recurring": "Recurring Dues"
+    },
+    "payouts": {
+      "title": "Coach Payouts (MTD)",
+      "coach": "Coach",
+      "accrued": "MTD Accrued Split",
+      "paid": "MTD Paid Payouts",
+      "due": "Net Due Balance",
+      "pay": "Pay Coach",
+      "noCoaches": "No coaches found."
+    },
+    "recurring": {
+      "title": "Active Recurring Expenses",
+      "duesTitle": "Monthly Recurring Status (Dues)",
+      "category": "Category",
+      "amount": "Amount",
+      "day": "Due Day of Month",
+      "status": "Status",
+      "paid": "Paid",
+      "due": "Due",
+      "pay": "Record Payment",
+      "addRecurring": "Add Recurring Expense Rule",
+      "dayOfMonth": "Day of Month (1-31)",
+      "create": "Create Rule",
+      "deleteRule": "Delete Rule"
     }
   },
   "appNav": {
@@ -287,7 +359,8 @@
     "evaluations": "Evaluations",
     "reports": "Reports",
     "payments": "Payments",
-    "subscriptions": "Subscriptions"
+    "subscriptions": "Subscriptions",
+    "merchandise": "Merchandise"
   },
   "publicSite": {
     "footer": {

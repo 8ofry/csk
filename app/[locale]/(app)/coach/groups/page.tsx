@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { listGroups } from "@/application/groups/service";
 import { requireRole } from "@/lib/auth-guard";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
 import {
   Table,
   TableBody,
@@ -48,7 +49,12 @@ export default async function CoachGroupsPage() {
             return (
               <TableRow key={g.id}>
                 <TableCell>
-                  <div className="font-medium">{g.name}</div>
+                  <Link
+                    href={`/coach/groups/${g.id}`}
+                    className="font-medium text-csk-gold hover:underline"
+                  >
+                    {g.name}
+                  </Link>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {g.levelBands.map((lvl) => (
                       <Badge key={lvl} variant="outline">

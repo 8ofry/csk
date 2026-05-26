@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logSubscriptionPaymentAction } from "@/app/actions/payments";
 
+import { useTranslations } from "next-intl";
+
 export function LogPaymentInline({
   subscriptionId,
   payerUserId,
@@ -14,6 +16,7 @@ export function LogPaymentInline({
   traineePhone,
   groupName,
   locationName,
+  isPaid,
 }: {
   subscriptionId: string;
   payerUserId: string;
@@ -22,8 +25,10 @@ export function LogPaymentInline({
   traineePhone?: string | null;
   groupName: string;
   locationName: string;
+  isPaid: boolean;
 }) {
   const router = useRouter();
+  const tBadges = useTranslations("badges");
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -172,6 +177,14 @@ export function LogPaymentInline({
           </Button>
         </div>
       </div>
+    );
+  }
+
+  if (isPaid && !receipt) {
+    return (
+      <span className="text-xs text-emerald-600 font-semibold flex items-center justify-end gap-1 select-none">
+        ✓ {tBadges("paid")}
+      </span>
     );
   }
 

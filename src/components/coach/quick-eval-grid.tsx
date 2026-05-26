@@ -7,76 +7,14 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { upsertQuickEvalAction } from "@/app/actions/sessions";
 
-export type BodyPartKey =
-  | "head_neck"
-  | "shoulders_l"
-  | "shoulders_r"
-  | "upper_arms_l"
-  | "upper_arms_r"
-  | "forearms_l"
-  | "forearms_r"
-  | "chest"
-  | "core_abs"
-  | "upper_back"
-  | "lower_back"
-  | "hips"
-  | "thighs_l"
-  | "thighs_r"
-  | "knees_l"
-  | "knees_r"
-  | "shins_l"
-  | "shins_r"
-  | "feet_l"
-  | "feet_r";
-
-const BODY_PART_LABELS: Record<BodyPartKey, { en: string; ar: string }> = {
-  head_neck: { en: "Head / Neck", ar: "الرأس / الرقبة" },
-  shoulders_l: { en: "Left Shoulder", ar: "الكتف الأيسر" },
-  shoulders_r: { en: "Right Shoulder", ar: "الكتف الأيمن" },
-  upper_arms_l: { en: "Left Upper Arm", ar: "العضد الأيسر" },
-  upper_arms_r: { en: "Right Upper Arm", ar: "العضد الأيمن" },
-  forearms_l: { en: "Left Forearm", ar: "الساعد الأيسر" },
-  forearms_r: { en: "Right Forearm", ar: "الساعد الأيمن" },
-  chest: { en: "Chest", ar: "الصدر" },
-  core_abs: { en: "Core / Abs", ar: "البطن / الجذع" },
-  upper_back: { en: "Upper Back", ar: "أعلى الظهر" },
-  lower_back: { en: "Lower Back", ar: "أسفل الظهر" },
-  hips: { en: "Hips", ar: "الحوض" },
-  thighs_l: { en: "Left Thigh", ar: "الفخذ الأيسر" },
-  thighs_r: { en: "Right Thigh", ar: "الفخذ الأيمن" },
-  knees_l: { en: "Left Knee", ar: "الركبة اليسرى" },
-  knees_r: { en: "Right Knee", ar: "الركبة اليمنى" },
-  shins_l: { en: "Left Shin", ar: "الساق اليسرى" },
-  shins_r: { en: "Right Shin", ar: "الساق اليمنى" },
-  feet_l: { en: "Left Foot", ar: "القدم اليسرى" },
-  feet_r: { en: "Right Foot", ar: "القدم اليمنى" },
-};
-// General body parts list for simple selector (commented out as unused to prevent build warning)
-/*
-const GENERAL_BODY_PARTS: { key: BodyPartKey; label: { en: string; ar: string } }[] = [
-  { key: "head_neck", label: { en: "Head / Neck", ar: "الرأس / الرقبة" } },
-  { key: "chest", label: { en: "Chest", ar: "الصدر" } },
-  { key: "core_abs", label: { en: "Core / Abs", ar: "البطن / الجذع" } },
-  { key: "upper_back", label: { en: "Upper Back", ar: "أعلى الظهر" } },
-  { key: "lower_back", label: { en: "Lower Back", ar: "أسفل الظهر" } },
-  { key: "hips", label: { en: "Hips", ar: "الحوض" } },
-  { key: "upper_arms_l", label: { en: "Left Arm / Hand", ar: "الذراع الأيسر / اليد" } },
-  { key: "upper_arms_r", label: { en: "Right Arm / Hand", ar: "الذراع الأيمن / اليد" } },
-  { key: "thighs_l", label: { en: "Left Leg / Foot", ar: "الرجل اليسرى / القدم" } },
-  { key: "thighs_r", label: { en: "Right Leg / Foot", ar: "الرجل اليمنى / القدم" } },
-];
-*/
-
-export function getBodyPartLabel(key: string | null, locale: string): string {
-  if (!key) return "";
-  const label = BODY_PART_LABELS[key as BodyPartKey];
-  if (!label) {
-    return key
-      .replace(/_/g, " ")
-      .replace(/\b(\w)/g, (m) => m.toUpperCase());
-  }
-  return locale === "ar" ? label.ar : label.en;
-}
+// Body part data lives in a shared pure lib so server components can also import it.
+import {
+  type BodyPartKey,
+  getBodyPartLabel as _getBodyPartLabel,
+} from "@/lib/body-parts";
+export type { BodyPartKey };
+// Re-export for backward compat (server pages that imported this before the split)
+export { _getBodyPartLabel as getBodyPartLabel };
 
 function getPartKey(relativeX: number, relativeY: number): BodyPartKey | null {
   if (relativeX < 203.5) {
@@ -322,7 +260,6 @@ function QuickEvalForm({
   svgContent?: string;
 }) {
   const t = useTranslations("coachQuickEval");
-  const tBadges = useTranslations("badges");
   const locale = useLocale();
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -602,7 +539,7 @@ function QuickEvalForm({
                 {flaggedPart ? (
                   <Badge variant="destructive" className="flex items-center gap-1.5 text-[10px] font-bold py-0.5 px-2.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-white shrink-0 animate-pulse" />
-                    {getBodyPartLabel(flaggedPart, locale)}
+                    {_getBodyPartLabel(flaggedPart, locale)}
                     <button
                       type="button"
                       onClick={() => handleBodyPartChange(null)}
@@ -636,7 +573,7 @@ function QuickEvalForm({
           <div className="bg-muted/10 p-3 rounded-lg border">
             <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center justify-between mb-2">
               <span>{locale === "ar" ? "تقييم قوة العضلة والحالة البدنية" : "General Muscle Power & Condition"}</span>
-              {flaggedPart && <span className="text-red-500 font-bold text-[10px]">● {getBodyPartLabel(flaggedPart, locale)}</span>}
+              {flaggedPart && <span className="text-red-500 font-bold text-[10px]">● {_getBodyPartLabel(flaggedPart, locale)}</span>}
             </h4>
 
             {/* Comment LEFT (flex-1), Stars RIGHT (shrink-0) — consistent with technical action rows */}

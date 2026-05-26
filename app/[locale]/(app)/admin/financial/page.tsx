@@ -19,7 +19,7 @@ export default async function AdminFinancialPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
-  await requireRole("ADMIN");
+  await requireRole("HEAD_COACH");
   const sp = await searchParams;
   const now = new Date();
   const defaultFrom = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -53,6 +53,16 @@ export default async function AdminFinancialPage({
               }}
             >
               {t("allPayments")}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link
+              href={{
+                pathname: "/admin/financial/expenses",
+                query: { from: from.toISOString(), to: to.toISOString() },
+              }}
+            >
+              {t("allExpenses")}
             </Link>
           </Button>
           <Button asChild variant="outline">
@@ -93,9 +103,11 @@ export default async function AdminFinancialPage({
         </Button>
       </form>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <KpiCard label={t("kpi.totalRevenue")} value={snapshot.totalRevenue} highlight />
         <KpiCard label={t("kpi.cskShare")} value={snapshot.cskShare} highlight />
+        <KpiCard label={t("kpi.totalExpenses")} value={snapshot.totalExpenses} />
+        <KpiCard label={t("kpi.netProfit")} value={snapshot.netProfit} highlight />
         <KpiCard label={t("kpi.venuePayouts")} value={snapshot.venueShare} />
         <KpiCard label={t("kpi.coachPayouts")} value={snapshot.coachShare} />
       </div>

@@ -235,6 +235,7 @@
     "title": "المالية — لوحة المالك",
     "subtitle": "FR-FIN-11 · {from} – {to}",
     "allPayments": "كل المدفوعات",
+    "allExpenses": "كل المصاريف",
     "exportCsv": "تصدير CSV",
     "from": "من",
     "to": "إلى",
@@ -242,7 +243,9 @@
       "totalRevenue": "إجمالي الإيراد",
       "cskShare": "صافي حصة CSK",
       "venuePayouts": "مدفوعات الشركاء",
-      "coachPayouts": "مدفوعات المدربين"
+      "coachPayouts": "مدفوعات المدربين",
+      "totalExpenses": "إجمالي المصاريف",
+      "netProfit": "صافي الربح"
     },
     "byStreamTitle": "حسب مصدر الإيراد",
     "byStreamEmpty": "لا توجد مدفوعات في هذه الفترة.",
@@ -258,6 +261,75 @@
       "location": "الموقع",
       "gross": "الإجمالي",
       "csk": "حصة CSK"
+    }
+  },
+  "adminExpenses": {
+    "title": "المصاريف",
+    "subtitle": "تتبع وتسجيل مصاريف الأكاديمية (FR-FIN).",
+    "recordExpense": "تسجيل مصروف",
+    "category": "الفئة",
+    "amount": "المبلغ",
+    "method": "طريقة الدفع",
+    "description": "الوصف",
+    "paidAt": "تاريخ الدفع",
+    "submit": "تسجيل المصروف",
+    "delete": "حذف",
+    "deleteConfirm": "هل أنت متأكد من رغبتك في حذف هذا المصروف؟",
+    "empty": "لا توجد مصاريف في هذه الفترة.",
+    "kpi": {
+      "totalExpenses": "إجمالي المصاريف"
+    },
+    "table": {
+      "date": "التاريخ",
+      "category": "الفئة",
+      "description": "الوصف",
+      "method": "طريقة الدفع",
+      "amount": "المبلغ (ج.م)",
+      "loggedBy": "سجّله",
+      "actions": "الإجراءات"
+    },
+    "categories": {
+      "RENT": "إيجار",
+      "SALARIES": "رواتب",
+      "UTILITIES": "خدمات (كهرباء/مياه/إنترنت)",
+      "EQUIPMENT": "معدات وأدوات",
+      "MARKETING": "تسويق",
+      "MAINTENANCE": "صيانة",
+      "SUPPLIES": "مستلزمات",
+      "TAXES": "ضرائب ورسوم",
+      "OTHER": "أخرى",
+      "COACH_PAYOUT": "دفعة للمدرب"
+    },
+    "coach": "المدرب",
+    "selectCoach": "اختر المدرب",
+    "tabs": {
+      "logged": "سجل المصاريف",
+      "payouts": "مستحقات المدربين",
+      "recurring": "الالتزامات الدورية"
+    },
+    "payouts": {
+      "title": "مستحقات المدربين (الشهر الحالي)",
+      "coach": "المدرب",
+      "accrued": "المستحق المتراكم",
+      "paid": "المدفوع المدون",
+      "due": "صافي المستحق",
+      "pay": "دفع للمدرب",
+      "noCoaches": "لا يوجد مدربين."
+    },
+    "recurring": {
+      "title": "المصاريف الدورية النشطة",
+      "duesTitle": "حالة الالتزامات الدورية للشهر",
+      "category": "الفئة",
+      "amount": "المبلغ",
+      "day": "يوم الاستحقاق",
+      "status": "الحالة",
+      "paid": "مدفوع",
+      "due": "مستحق",
+      "pay": "تسجيل الدفع",
+      "addRecurring": "إضافة قاعدة مصروف دوري",
+      "dayOfMonth": "يوم في الشهر (1-31)",
+      "create": "إنشاء قاعدة",
+      "deleteRule": "حذف القاعدة"
     }
   },
   "appNav": {
@@ -287,7 +359,8 @@
     "evaluations": "التقييمات",
     "reports": "التقارير",
     "payments": "المدفوعات",
-    "subscriptions": "الاشتراكات"
+    "subscriptions": "الاشتراكات",
+    "merchandise": "البضائع"
   },
   "publicSite": {
     "footer": {
