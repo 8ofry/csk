@@ -1043,6 +1043,172 @@ async function seedDemoData(refs: SeedRefs) {
     },
     update: {},
   });
+
+  // ─────────────────────────────────────────────────────────────────
+  // SEED THE SPECIAL GROUP: النادي الساعة 9
+  // ─────────────────────────────────────────────────────────────────
+  console.log("→ Seeding target group النادي الساعة 9 (cmplzzcce0001b82aduql3nfn)…");
+  const specialGroupId = "cmplzzcce0001b82aduql3nfn";
+  
+  // Clean up existing assignments for idempotency
+  await prisma.groupCoachAssignment.deleteMany({ where: { groupId: specialGroupId } });
+  await prisma.groupInternAssignment.deleteMany({ where: { groupId: specialGroupId } });
+
+  await prisma.group.upsert({
+    where: { id: specialGroupId },
+    create: {
+      id: specialGroupId,
+      name: "النادي الساعة 9",
+      locationId: "seed-loc-benha-sports-club",
+      disciplineId: "seed-disc-kickboxing",
+      levelBands: ["N", "A", "B", "C"],
+      schedule: {
+        days: ["sun", "mon", "tue", "wed", "thu", "fri", "sat"],
+        startTime: "21:00",
+        endTime: "22:30"
+      },
+      capacity: 30,
+      active: true,
+      coaches: {
+        create: [
+          { coachId: refs.coachMohamedId, levels: ["N", "A", "B", "C"] }
+        ]
+      }
+    },
+    update: {
+      name: "النادي الساعة 9",
+      locationId: "seed-loc-benha-sports-club",
+      disciplineId: "seed-disc-kickboxing",
+      levelBands: ["N", "A", "B", "C"],
+      schedule: {
+        days: ["sun", "mon", "tue", "wed", "thu", "fri", "sat"],
+        startTime: "21:00",
+        endTime: "22:30"
+      },
+      capacity: 30,
+      active: true,
+    }
+  });
+
+  // Seed the 18 trainees
+  const specialTrainees = [
+    { nameAr: "يوسف أحمد عفيفي", nameEn: "Yousef Ahmed Afify", phone: "01108712497", dob: new Date("2006-01-01") },
+    { nameAr: "عبد الرحمن إكرامي السيد", nameEn: "Abd el Rahman Ekramy el Sayed", phone: "01553231823", dob: new Date("2008-01-01") },
+    { nameAr: "عمر حازم", nameEn: "Omar Hazem", phone: "01080774880", dob: new Date("2019-01-01") },
+    { nameAr: "آسر حازم", nameEn: "Aser Hazem", phone: null, dob: new Date("2021-01-01") },
+    { nameAr: "السيد مصطفى السيد", nameEn: "El Sayed Mostafa El Sayed", phone: "01090334444", dob: new Date("2013-01-01") },
+    { nameAr: "عبد الرحمن أحمد إبراهيم", nameEn: "Abd el Rahman Ahmed Ibrahim", phone: "01144350961", dob: new Date("2017-01-01") },
+    { nameAr: "علي أحمد النساج", nameEn: "Aly Ahmed El Nassag", phone: "01140696960", dob: new Date("2020-01-01") },
+    { nameAr: "عبد الباري محمد محمد", nameEn: "Abd el Bary Mohamed Mohamed", phone: "01558246968", dob: new Date("2009-01-01") },
+    { nameAr: "يوسف أيمن مهدي", nameEn: "Yossef Ayman Mahdy", phone: "01150167646", dob: new Date("2004-01-01") },
+    { nameAr: "محمد مختار محمد", nameEn: "Mohamed Mokhtar Mohamed", phone: "0106064122", dob: new Date("2019-01-01") },
+    { nameAr: "إسلام السيد حسن", nameEn: "Eslam El Sayed Hassan", phone: "01060031307", dob: new Date("2003-01-01") },
+    { nameAr: "يوسف تامر رمضان", nameEn: "Yossef Tamer Ramadan", phone: "01220450250", dob: new Date("2011-01-01") },
+    { nameAr: "عبد الله محمد مصطفى", nameEn: "Abdullah Mohamed Mostafa", phone: "01204570774", dob: new Date("2009-01-01") },
+    { nameAr: "أحمد محمد أحمد", nameEn: "Ahmed Mohamed Ahmed", phone: "01004227393", dob: new Date("2018-01-01") },
+    { nameAr: "ميرا مجدي ماهر", nameEn: "Mira Magdy Maher", phone: "01555474217", dob: new Date("2009-01-01") },
+    { nameAr: "آية حسين نور الدين", nameEn: "Aya Hussein Nour El Din", phone: "01240799650", dob: new Date("2012-01-01") },
+    { nameAr: "سارة حسين نور الدين", nameEn: "Sara Hussein Nour El Din", phone: "01105031493", dob: new Date("2011-01-01") },
+    { nameAr: "ردينا سعيد أحمد", nameEn: "Rodina Saeed Ahmed", phone: "01280389995", dob: new Date("2004-01-01") }
+  ];
+
+  const pwHash = await hash(SEED_PASSWORD);
+
+  for (const t of specialTrainees) {
+    const emailPrefix = t.nameEn.toLowerCase().replace(/[^a-z0-9]/g, ".");
+    const email = `${emailPrefix}@csk.local`;
+
+    const user = await prisma.user.upsert({
+      where: { email },
+      create: {
+        role: "TRAINEE",
+        email,
+        phone: t.phone,
+        passwordHash: pwHash,
+        fullNameAr: t.nameAr,
+        fullNameEn: t.nameEn,
+        dob: t.dob,
+        status: "ACTIVE",
+        emailVerifiedAt: new Date(),
+        preferredLocale: "AR"
+      },
+      update: {
+        phone: t.phone,
+        fullNameAr: t.nameAr,
+        fullNameEn: t.nameEn,
+        dob: t.dob,
+        status: "ACTIVE"
+      }
+    });
+
+    const subId = `sub-auto-${user.id.substring(0, 10)}-${specialGroupId.substring(0, 10)}`;
+    await prisma.subscription.upsert({
+      where: { id: subId },
+      create: {
+        id: subId,
+        traineeId: user.id,
+        groupId: specialGroupId,
+        locationId: "seed-loc-benha-sports-club",
+        disciplineId: "seed-disc-kickboxing",
+        monthlyFee: 1000,
+        sessionsPerMonth: 12,
+        currentPeriodStart: periodStart,
+        currentPeriodEnd: periodEnd,
+        paymentStatus: "DUE",
+        active: true
+      },
+      update: {}
+    });
+
+    const existingEnrollment = await prisma.enrollment.findFirst({
+      where: {
+        traineeId: user.id,
+        groupId: specialGroupId,
+        status: "ACTIVE"
+      }
+    });
+
+    if (!existingEnrollment) {
+      await prisma.enrollment.create({
+        data: {
+          traineeId: user.id,
+          groupId: specialGroupId,
+          subscriptionId: subId,
+          status: "ACTIVE"
+        }
+      });
+    }
+  }
+
+  // Seed the live active session today
+  const specialSessionTodayId = "cmpm049ip000ub82aem7j55j5";
+  const todayStart = new Date(now);
+  todayStart.setHours(21, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setHours(22, 30, 0, 0);
+
+  await prisma.session.upsert({
+    where: { id: specialSessionTodayId },
+    create: {
+      id: specialSessionTodayId,
+      groupId: specialGroupId,
+      locationId: "seed-loc-benha-sports-club",
+      coachId: refs.coachMohamedId,
+      scheduledStart: todayStart,
+      scheduledEnd: todayEnd,
+      status: "IN_PROGRESS"
+    },
+    update: {
+      groupId: specialGroupId,
+      locationId: "seed-loc-benha-sports-club",
+      coachId: refs.coachMohamedId,
+      scheduledStart: todayStart,
+      scheduledEnd: todayEnd,
+      status: "IN_PROGRESS"
+    }
+  });
+
+  console.log("  ✓ Special group, 18 trainees, and session today seeded successfully!");
 }
 
 // ─────────────────────────────────────────────────────────────────
