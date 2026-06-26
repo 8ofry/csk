@@ -144,18 +144,57 @@ async function main() {
   console.log(`  ✓ ${locations.length} locations + default split rules`);
 
   console.log("→ Seeding sample users…");
+  const sysadminId = "seed-user-sysadmin";
   const adminId = "seed-user-admin";
-  const headCoachId = "seed-user-head-coach";
+  const headCoachId = "seed-user-head-coach"; // Saied Ibrahim
+  const managingCoachId = "seed-user-managing-coach"; // Mariam Amr
   const coachId = "seed-user-coach";
   const traineeId = "seed-user-trainee";
 
+  // 1. System Administrator (Controls the whole system)
+  await prisma.user.upsert({
+    where: { id: sysadminId },
+    create: {
+      id: sysadminId,
+      role: "ADMIN",
+      email: "sysadmin@csk.local",
+      phone: "+201000000000",
+      passwordHash: await hash(SEED_PASSWORD),
+      fullNameAr: "مدير النظام",
+      fullNameEn: "System Administrator",
+      status: "ACTIVE",
+      emailVerifiedAt: new Date(),
+      preferredLocale: "AR",
+    },
+    update: {},
+  });
+
+  // 2. Operations Admin (Manages attendance, allocating users, payment followups)
   await prisma.user.upsert({
     where: { id: adminId },
     create: {
       id: adminId,
       role: "ADMIN",
-      email: "captain@csk.local",
+      email: "admin@csk.local",
       phone: "+201000000001",
+      passwordHash: await hash(SEED_PASSWORD),
+      fullNameAr: "مسؤول العمليات",
+      fullNameEn: "Operations Admin",
+      status: "ACTIVE",
+      emailVerifiedAt: new Date(),
+      preferredLocale: "AR",
+    },
+    update: {},
+  });
+
+  // 3. Head Coach (Saied Ibrahim)
+  await prisma.user.upsert({
+    where: { id: headCoachId },
+    create: {
+      id: headCoachId,
+      role: "HEAD_COACH",
+      email: "saied@csk.local",
+      phone: "+201000000002",
       passwordHash: await hash(SEED_PASSWORD),
       fullNameAr: "كابتن سعيد ابراهيم",
       fullNameEn: "Cap. Saied Ibrahim",
@@ -166,13 +205,14 @@ async function main() {
     update: {},
   });
 
+  // 4. Managing Coach (Mariam Amr)
   await prisma.user.upsert({
-    where: { id: headCoachId },
+    where: { id: managingCoachId },
     create: {
-      id: headCoachId,
+      id: managingCoachId,
       role: "HEAD_COACH",
-      email: "head.coach@csk.local",
-      phone: "+201000000002",
+      email: "mariam@csk.local",
+      phone: "+201000000005",
       passwordHash: await hash(SEED_PASSWORD),
       fullNameAr: "كابتن مريم عمرو",
       fullNameEn: "Cap. Mariam Amr",
@@ -183,6 +223,7 @@ async function main() {
     update: {},
   });
 
+  // 5. Coach (Ahmed Khallaf)
   await prisma.user.upsert({
     where: { id: coachId },
     create: {
@@ -200,6 +241,7 @@ async function main() {
     update: {},
   });
 
+  // 6. Trainee
   await prisma.user.upsert({
     where: { id: traineeId },
     create: {
@@ -217,7 +259,7 @@ async function main() {
     update: {},
   });
 
-  console.log("  ✓ 4 baseline users (password: " + SEED_PASSWORD + ")");
+  console.log("  ✓ baseline users seeded (password: " + SEED_PASSWORD + ")");
 
   await seedDemoData({
     coachMohamedId: coachId,
@@ -227,8 +269,10 @@ async function main() {
 
   console.log("\nSeed complete.");
   console.log("Login at /en/login or /ar/login with:");
-  console.log("  captain@csk.local      → ADMIN");
-  console.log("  head.coach@csk.local   → HEAD_COACH");
+  console.log("  sysadmin@csk.local     → SYSTEM ADMIN (ADMIN)");
+  console.log("  admin@csk.local        → OPERATIONS ADMIN (ADMIN)");
+  console.log("  saied@csk.local        → HEAD COACH (HEAD_COACH)");
+  console.log("  mariam@csk.local       → MANAGING COACH (HEAD_COACH)");
   console.log("  coach@csk.local        → COACH");
   console.log("  trainee@csk.local      → TRAINEE");
 }

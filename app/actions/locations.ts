@@ -28,7 +28,7 @@ export async function createLocationAction(
   formData: FormData,
 ): Promise<{ ok?: true; id?: string; error?: string }> {
   try {
-    const user = await requireRole("ADMIN");
+    const user = await requireRole("HEAD_COACH");
     const data = parseFormData(formData);
     const created = await createLocation(data, user.id);
     revalidatePath("/admin/locations");
@@ -43,7 +43,7 @@ export async function updateLocationAction(
   formData: FormData,
 ): Promise<{ ok?: true; error?: string }> {
   try {
-    const user = await requireRole("ADMIN");
+    const user = await requireRole("HEAD_COACH");
     const data = parseFormData(formData);
     await updateLocation(id, data, user.id);
     revalidatePath("/admin/locations");
@@ -56,7 +56,7 @@ export async function updateLocationAction(
 
 export async function archiveLocationAction(id: string): Promise<{ ok?: true; error?: string }> {
   try {
-    const user = await requireRole("ADMIN");
+    const user = await requireRole("HEAD_COACH");
     await archiveLocation(id, user.id);
     revalidatePath("/admin/locations");
     return { ok: true };

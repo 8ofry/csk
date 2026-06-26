@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth-guard";
+import { Link } from "@/i18n/navigation";
 import { listUsers } from "@/application/users/service";
 import type { AccountStatus, UserRole } from "@/domain/users/promotion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,7 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ role?: string; status?: string; search?: string }>;
 }) {
-  await requireRole("ADMIN");
+  await requireRole("HEAD_COACH");
   const sp = await searchParams;
   const filters = {
     role: ROLES.includes(sp.role as UserRole) ? (sp.role as UserRole) : undefined,
@@ -42,9 +43,14 @@ export default async function AdminUsersPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
+        </div>
+        <Button asChild>
+          <Link href="/admin/users/new">{t("newUser")}</Link>
+        </Button>
       </div>
 
       <form className="flex flex-wrap items-end gap-3">
@@ -143,7 +149,12 @@ export default async function AdminUsersPage({
                     {u.lastLoginAt?.toLocaleDateString() ?? t("table.never")}
                   </TableCell>
                   <TableCell className="text-end">
-                    <UserRowActions userId={u.id} role={u.role} status={u.status} />
+                    <div className="flex items-center justify-end gap-2">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/admin/users/${u.id}`}>{t("form.editButton")}</Link>
+                      </Button>
+                      <UserRowActions userId={u.id} role={u.role} status={u.status} />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

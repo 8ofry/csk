@@ -675,7 +675,30 @@
       "lastLogin": "Last login",
       "never": "never"
     },
-    "noResults": "No users match filters."
+    "noResults": "No users match filters.",
+    "newUser": "+ New User",
+    "addUserPage": {
+      "title": "Add User",
+      "subtitle": "Create a new user profile manually."
+    },
+    "editUserPage": {
+      "title": "Edit User",
+      "subtitle": "Modify user profile information."
+    },
+    "form": {
+      "fullNameAr": "Full Name (Arabic)",
+      "fullNameEn": "Full Name (English)",
+      "phone": "Phone",
+      "email": "Email (Optional)",
+      "role": "Role",
+      "status": "Status",
+      "parentManaged": "Parent-managed account (minor trainee)",
+      "submitCreate": "Create User",
+      "submitEdit": "Save Changes",
+      "cancel": "Cancel",
+      "emailHint": "Leave blank to generate phone placeholder email.",
+      "editButton": "Edit"
+    }
   },
   "hcGroups": {
     "title": "Groups",
@@ -1482,5 +1505,46 @@
     "summaryComment": "Summary comment",
     "saveEval": "Save evaluation",
     "cancel": "Cancel"
+  },
+  "championshipSignup": {
+    "title": "CSK Championship Open Onboarding",
+    "subtitle": "Register your Academy and Coach account to allocate fighters and manage registrations.",
+    "academySection": "Academy Information",
+    "coachSection": "Coach Account Info",
+    "academyNameAr": "Academy Name (Arabic)",
+    "academyNameEn": "Academy Name (English)",
+    "fullNameAr": "Coach Name (Arabic)",
+    "fullNameEn": "Coach Name (English)",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "password": "Password (min 8 characters)",
+    "submit": "Register & Log In",
+    "success": "Registration successful! Loading your dashboard...",
+    "error": "Error: {message}"
+  },
+  "coachChampionships": {
+    "title": "Championship Registrations",
+    "subtitle": "Register fighters from your academy, view their ID cards, and submit payment references.",
+    "registerFighter": "Register Trainee / Fighter",
+    "noFighters": "No fighters registered yet.",
+    "listHeader": "Fighter Roster",
+    "fighterName": "Fighter Name",
+    "fightClass": "Class / Division",
+    "weight": "Weight",
+    "status": "Status",
+    "idCard": "ID Card",
+    "payment": "Payment Details",
+    "submitPayment": "Submit InstaPay Ref",
+    "receipt": "Receipt",
+    "phone": "Phone",
+    "gender": "Gender",
+    "dob": "Date of Birth",
+    "photo": "Photo",
+    "instapayRef": "InstaPay Reference",
+    "instapayNotice": "Transfer the registration fee to csk@instapay and provide the reference number + screenshot below.",
+    "downloadCard": "Download ID Card",
+    "paid": "Paid",
+    "pending": "Pending Verification",
+    "coachConfirmed": "Confirmed - Awaiting Payment"
   }
 }

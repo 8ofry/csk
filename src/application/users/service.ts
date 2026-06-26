@@ -9,6 +9,8 @@ import {
   type UserRole,
 } from "@/domain/users/promotion";
 import { dispatchNotification } from "@/application/notifications/service";
+import argon2 from "argon2";
+import { UserCreateInput, UserUpdateInput } from "./schemas";
 
 export interface UserFilters {
   role?: UserRole;
@@ -181,3 +183,113 @@ export async function promoteInternToCoach(userId: string, actorId: string) {
     return updated;
   });
 }
+
+export async function createUser(data: UserCreateInput, actorId: string) {
+  const email = data.email || `${data.phone.replace(/[^0-9]/g, "")}@phone.csk.local`;
+
+  // Check unique constraints
+  const existingPhone = await prisma.user.findUnique({
+    where: { phone: data.phone },
+  });
+  if (existingPhone) {
+    throw new Error("A user with this phone number already exists.");
+  }
+
+  const existingEmail = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  });
+  if (existingEmail) {
+    throw new Error("A user with this email address already exists.");
+  }
+
+  const passwordHash = data.password ? await argon2.hash(data.password) : "";
+
+  const created = await prisma.user.create({
+    data: {
+      role: data.role,
+      email: email.toLowerCase(),
+      phone: data.phone,
+      passwordHash,
+      fullNameAr: data.fullNameAr,
+      fullNameEn: data.fullNameEn,
+      status: data.status,
+      parentManaged: data.parentManaged,
+      emailVerifiedAt: data.email ? new Date() : null,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId,
+      action: "user.create",
+      entityType: "User",
+      entityId: created.id,
+      changes: { role: data.role, status: data.status },
+    },
+  });
+
+  return created;
+}
+
+export async function updateUser(userId: string, data: UserUpdateInput, actorId: string) {
+  const email = data.email || `${data.phone.replace(/[^0-9]/g, "")}@phone.csk.local`;
+
+  // Check unique constraints for phone
+  const existingPhone = await prisma.user.findFirst({
+    where: { phone: data.phone, NOT: { id: userId } },
+  });
+  if (existingPhone) {
+    throw new Error("A user with this phone number already exists.");
+  }
+
+  // Check unique constraints for email
+  const existingEmail = await prisma.user.findFirst({
+    where: { email: email.toLowerCase(), NOT: { id: userId } },
+  });
+  if (existingEmail) {
+    throw new Error("A user with this email address already exists.");
+  }
+
+  const updateData: any = {
+    role: data.role,
+    email: email.toLowerCase(),
+    phone: data.phone,
+    fullNameAr: data.fullNameAr,
+    fullNameEn: data.fullNameEn,
+    status: data.status,
+    parentManaged: data.parentManaged,
+  };
+
+  // Auto-verify email if it is changed/supplied
+  if (data.email) {
+    const current = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { emailVerifiedAt: true },
+    });
+    if (!current?.emailVerifiedAt) {
+      updateData.emailVerifiedAt = new Date();
+    }
+  }
+
+  if (data.password) {
+    updateData.passwordHash = await argon2.hash(data.password);
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId,
+      action: "user.update",
+      entityType: "User",
+      entityId: userId,
+      changes: { role: data.role, status: data.status },
+    },
+  });
+
+  return updated;
+}
+

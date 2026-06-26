@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { MatchVideoPlayer } from "@/components/public/match-video-player";
 
 function outcomeBadge(o: string) {
   switch (o) {
@@ -154,14 +155,7 @@ export default async function FighterProfilePage({
                     </TableCell>
                     <TableCell>
                       {f.videoUrl ? (
-                        <a
-                          href={f.videoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-csk-gold hover:underline"
-                        >
-                          Watch
-                        </a>
+                        <MatchVideoPlayer videoUrl={f.videoUrl} opponentName={f.opponentName} />
                       ) : (
                         "—"
                       )}

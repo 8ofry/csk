@@ -162,6 +162,7 @@ enum SplitRecipientType {
 enum ChampRegistrationStatus {
   OPTED_IN
   COACH_CONFIRMED
+  PENDING_VERIFICATION
   PAID
   WITHDREW
 }
@@ -244,6 +245,9 @@ model User {
   preferredLocale  Locale        @default(AR)
   timezone         String        @default("Africa/Cairo")
   status           AccountStatus @default(PENDING)
+  isExternal       Boolean       @default(false)
+  academyId        String?
+  academy          Academy?      @relation(fields: [academyId], references: [id], onDelete: SetNull)
   // FR-NOT-04: per-user opt-outs from non-critical notification channels.
   // Stored as a string array of NotificationChannel values, e.g. ["WHATSAPP"].
   notificationOptOuts String[]   @default([])
@@ -964,29 +968,39 @@ model Championship {
   updatedAt            DateTime                   @updatedAt
 
   registrations        ChampionshipRegistration[]
+  matches              Match[]
 
   @@index([startDate])
 }
 
 model ChampionshipRegistration {
-  id                String                  @id @default(cuid())
-  championshipId    String
-  championship      Championship            @relation(fields: [championshipId], references: [id], onDelete: Cascade)
-  traineeId         String
-  trainee           User                    @relation(fields: [traineeId], references: [id], onDelete: Cascade)
-  weightKg          Decimal?                @db.Decimal(5, 2)
-  ageAtRegistration Int?
-  isAmateur         Boolean                 @default(true)
-  level             LevelBand?
-  targetWeightClass String?
-  weightCutNotes    String?
-  status            ChampRegistrationStatus @default(OPTED_IN)
-  confirmedAt       DateTime?
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
+  id                 String                  @id @default(cuid())
+  championshipId     String
+  championship       Championship            @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  traineeId          String
+  trainee            User                    @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  weightKg           Decimal?                @db.Decimal(5, 2)
+  ageAtRegistration  Int?
+  isAmateur          Boolean                 @default(true)
+  fightClass         FightClass?
+  level              LevelBand?
+  targetWeightClass  String?
+  weightCutNotes     String?
+  status             ChampRegistrationStatus @default(OPTED_IN)
+  confirmedAt        DateTime?
+  photoUrl           String?
+  paymentReceiptUrl  String?
+  instapayRef        String?
+  registrationNumber String?
+  isProfilePublic    Boolean                 @default(false)
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
 
-  payments          Payment[]
-  fightResults      FightResult[]
+  payments           Payment[]
+  fightResults       FightResult[]
+  matchesAsFighter1  Match[]                 @relation("Fighter1")
+  matchesAsFighter2  Match[]                 @relation("Fighter2")
+  matchesWon         Match[]                 @relation("Winner")
 
   @@unique([championshipId, traineeId])
   @@index([traineeId])
@@ -1204,3 +1218,48 @@ model AuditLog {
   @@index([actorId, createdAt])
   @@index([entityType, entityId])
 }
+
+enum FightClass {
+  AMATEUR
+  SEMI_PRO
+  PROFESSIONAL
+}
+
+model Academy {
+  id        String   @id @default(cuid())
+  nameEn    String
+  nameAr    String
+  logoUrl   String?
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Match {
+  id              String                   @id @default(cuid())
+  championshipId  String
+  championship    Championship             @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  fighter1Id      String
+  fighter1        ChampionshipRegistration @relation("Fighter1", fields: [fighter1Id], references: [id], onDelete: Cascade)
+  fighter2Id      String
+  fighter2        ChampionshipRegistration @relation("Fighter2", fields: [fighter2Id], references: [id], onDelete: Cascade)
+  gender          Gender
+  fightClass      FightClass
+  weightClass     String?
+  round           Int?
+  outcome         FightOutcome?
+  method          FightMethod?
+  timeInRound     String?
+  videoUrl        String?
+  notes           String?
+  winnerId        String?
+  winner          ChampionshipRegistration? @relation("Winner", fields: [winnerId], references: [id], onDelete: SetNull)
+  scheduledTime   DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([championshipId])
+  @@index([fighter1Id])
+  @@index([fighter2Id])
+}
+

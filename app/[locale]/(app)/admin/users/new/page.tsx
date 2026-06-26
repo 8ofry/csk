@@ -1,11 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth-guard";
-import { LocationForm } from "@/components/admin/location-form";
-import { createLocationAction } from "@/app/actions/locations";
+import { UserForm } from "@/components/admin/user-form";
+import { createUserAction } from "@/app/actions/users";
 
-export default async function NewLocationPage() {
+export default async function NewUserPage() {
   await requireRole("HEAD_COACH");
-  const t = await getTranslations("adminLocations.newPage");
+  const t = await getTranslations("adminUsers.addUserPage");
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -13,7 +13,7 @@ export default async function NewLocationPage() {
         <h1 className="text-3xl font-bold">{t("title")}</h1>
         <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
-      <LocationForm onSubmit={createLocationAction} submitLabel={t("submit")} />
+      <UserForm onSubmit={createUserAction} submitLabel={t("title")} />
     </div>
   );
 }
