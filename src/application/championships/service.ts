@@ -9,7 +9,8 @@ import { aggregateFightRecord, type FightRow } from "@/domain/championships/figh
 import { dispatchNotification } from "@/application/notifications/service";
 import argon2 from "argon2";
 import type { Match } from "@prisma/client";
-import type { ExternalSignupInput, FighterRegisterInput, InstapayPaymentInput, MatchResultInput } from "./schemas";
+import type { ExternalSignupInput, FighterRegisterInput, InstapayPaymentInput, MatchResultInput, IndividualFighterRegisterInput } from "./schemas";
+import { individualFighterRegisterSchema } from "./schemas";
 
 export const championshipInputSchema = z.object({
   name: z.string().min(2),
@@ -369,6 +370,74 @@ export async function registerExternalFighter(input: FighterRegisterInput, coach
       data: {
         actorId: coachId,
         action: "fighter.register",
+        entityType: "ChampionshipRegistration",
+        entityId: reg.id,
+      },
+    });
+
+    return { fighter, reg };
+  });
+}
+
+export async function registerIndividualExternalFighter(input: IndividualFighterRegisterInput) {
+  const data = individualFighterRegisterSchema.parse(input);
+  const passwordHash = await argon2.hash(data.password);
+
+  // Check if email already exists
+  const existing = await prisma.user.findUnique({
+    where: { email: data.email.toLowerCase() },
+  });
+  if (existing) {
+    throw new Error("Email already registered in the system");
+  }
+
+  // Generate unique registration number
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}`;
+  const count = await prisma.championshipRegistration.count({
+    where: { championshipId: data.championshipId },
+  });
+  const registrationNumber = `CSK-IND-${dateStr}-${String(count + 1).padStart(4, "0")}`;
+
+  return prisma.$transaction(async (tx) => {
+    // 1. Create Trainee User
+    const fighter = await tx.user.create({
+      data: {
+        role: "TRAINEE",
+        email: data.email.toLowerCase(),
+        phone: data.phone,
+        passwordHash,
+        fullNameAr: data.fullNameAr,
+        fullNameEn: data.fullNameEn,
+        gender: data.gender,
+        dob: data.dob,
+        status: "ACTIVE",
+        isExternal: true,
+        emailVerifiedAt: new Date(),
+        preferredLocale: "EN",
+      },
+    });
+
+    // 2. Create Championship Registration (with PENDING_VERIFICATION since they uploaded InstaPay reference)
+    const reg = await tx.championshipRegistration.create({
+      data: {
+        championshipId: data.championshipId,
+        traineeId: fighter.id,
+        weightKg: data.weightKg,
+        fightClass: data.fightClass,
+        photoUrl: data.photoUrl ?? null,
+        registrationNumber,
+        status: "PENDING_VERIFICATION",
+        instapayRef: data.instapayRef,
+        paymentReceiptUrl: data.paymentReceiptUrl ?? null,
+        confirmedAt: new Date(), // Individual registration automatically skips coach confirmation
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: fighter.id,
+        action: "fighter.register-individual",
         entityType: "ChampionshipRegistration",
         entityId: reg.id,
       },

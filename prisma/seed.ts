@@ -860,7 +860,7 @@ async function seedDemoData(refs: SeedRefs) {
       outcome: "WIN",
       method: "KO",
       timeInRound: "1:45",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
       winnerId: regKhaledId,
       notes: "CSK MMA Cup Semifinal Bout",
     },
@@ -870,7 +870,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "KO",
       round: 2,
       timeInRound: "1:45",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
     },
   });
 
@@ -884,7 +884,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "KO",
       round: 2,
       timeInRound: "1:45",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
       recordedById: refs.coachMohamedId,
     },
     update: {
@@ -906,7 +906,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "KO",
       round: 2,
       timeInRound: "1:45",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
       recordedById: refs.coachMohamedId,
     },
     update: {
@@ -934,7 +934,7 @@ async function seedDemoData(refs: SeedRefs) {
       outcome: "WIN",
       method: "DECISION",
       timeInRound: "5:00",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
       winnerId: regSaraId,
       notes: "CSK MMA Cup Female division bout",
     },
@@ -944,7 +944,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "DECISION",
       round: 3,
       timeInRound: "5:00",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
     },
   });
 
@@ -958,7 +958,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "DECISION",
       round: 3,
       timeInRound: "5:00",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
       recordedById: refs.coachMohamedId,
     },
     update: {
@@ -980,7 +980,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "DECISION",
       round: 3,
       timeInRound: "5:00",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
       recordedById: refs.coachMohamedId,
     },
     update: {

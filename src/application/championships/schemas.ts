@@ -47,3 +47,22 @@ export const matchResultSchema = z.object({
 });
 
 export type MatchResultInput = z.infer<typeof matchResultSchema>;
+
+export const individualFighterRegisterSchema = z.object({
+  championshipId: z.string().min(1),
+  fullNameAr: z.string().min(2, "الاسم بالعربي مطلوب"),
+  fullNameEn: z.string().min(2, "English name required"),
+  phone: z.string().min(7, "Phone number required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  gender: z.nativeEnum(Gender),
+  dob: z.coerce.date(),
+  weightKg: z.coerce.number().min(20, "Invalid weight").max(200),
+  fightClass: z.nativeEnum(FightClass),
+  photoUrl: z.string().optional().nullable(),
+  instapayRef: z.string().min(3, "Reference number required"),
+  paymentReceiptUrl: z.string().optional().nullable(),
+});
+
+export type IndividualFighterRegisterInput = z.infer<typeof individualFighterRegisterSchema>;
+

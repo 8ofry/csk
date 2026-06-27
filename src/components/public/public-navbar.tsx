@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
@@ -9,6 +9,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 const NAV_LINKS = [
   { label: "Home", href: "#home" },
   { label: "Disciplines", href: "#disciplines" },
+  { label: "Championships", href: "/championships" },
+  { label: "Fighters & Rankings", href: "/champions" },
   { label: "About", href: "#about" },
   { label: "Coaches", href: "#coaches" },
   { label: "Locations", href: "#locations" },
@@ -19,6 +21,8 @@ const NAV_LINKS = [
 export function PublicNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -29,8 +33,12 @@ export function PublicNavbar() {
   const handleNav = (href: string) => {
     setMobileOpen(false);
     if (href.startsWith("#")) {
-      const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      if (pathname === "/") {
+        const el = document.querySelector(href);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      } else {
+        router.push(`/${href}` as Parameters<typeof router.push>[0]);
+      }
     }
   };
 
@@ -59,13 +67,23 @@ export function PublicNavbar() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 lg:flex">
           {NAV_LINKS.map((link) => (
-            <button
-              key={link.label}
-              onClick={() => handleNav(link.href)}
-              className="nav-link px-3 py-2 text-xs font-bold uppercase tracking-widest"
-            >
-              {link.label}
-            </button>
+            link.href.startsWith("#") ? (
+              <button
+                key={link.label}
+                onClick={() => handleNav(link.href)}
+                className="nav-link px-3 py-2 text-xs font-bold uppercase tracking-widest"
+              >
+                {link.label}
+              </button>
+            ) : (
+              <Link
+                key={link.label}
+                href={link.href as Parameters<typeof Link>[0]["href"]}
+                className="nav-link px-3 py-2 text-xs font-bold uppercase tracking-widest"
+              >
+                {link.label}
+              </Link>
+            )
           ))}
         </nav>
 
@@ -95,13 +113,24 @@ export function PublicNavbar() {
         <div className="border-t border-white/10 bg-[#050505]/98 backdrop-blur-xl lg:hidden">
           <nav className="container mx-auto flex flex-col gap-1 px-4 py-4">
             {NAV_LINKS.map((link) => (
-              <button
-                key={link.label}
-                onClick={() => handleNav(link.href)}
-                className="w-full rounded-lg px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-csk-gold"
-              >
-                {link.label}
-              </button>
+              link.href.startsWith("#") ? (
+                <button
+                  key={link.label}
+                  onClick={() => handleNav(link.href)}
+                  className="w-full rounded-lg px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-csk-gold"
+                >
+                  {link.label}
+                </button>
+              ) : (
+                <Link
+                  key={link.label}
+                  href={link.href as Parameters<typeof Link>[0]["href"]}
+                  onClick={() => setMobileOpen(false)}
+                  className="w-full rounded-lg px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-csk-gold"
+                >
+                  {link.label}
+                </Link>
+              )
             ))}
             <div className="mt-3 border-t border-white/10 pt-3">
               <Link

@@ -49,73 +49,73 @@ export function RecordMatchResultForm({ match, onSuccess }: RecordMatchResultFor
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 text-white">
       <div>
-        <Label htmlFor="winnerId">Winner</Label>
+        <Label htmlFor="winnerId" className="text-neutral-200">Winner</Label>
         <select
           id="winnerId"
           name="winnerId"
           required
-          className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+          className="mt-1 flex h-10 w-full rounded-md border border-neutral-700 bg-neutral-800 text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
         >
-          <option value="">— Pick Winner —</option>
-          <option value={match.fighter1Id}>{match.fighter1.trainee.fullNameEn}</option>
-          <option value={match.fighter2Id}>{match.fighter2.trainee.fullNameEn}</option>
-          <option value="draw">Draw / No Winner</option>
+          <option value="" className="bg-neutral-850 text-neutral-300">— Pick Winner —</option>
+          <option value={match.fighter1Id} className="bg-neutral-850 text-white">{match.fighter1.trainee.fullNameEn}</option>
+          <option value={match.fighter2Id} className="bg-neutral-850 text-white">{match.fighter2.trainee.fullNameEn}</option>
+          <option value="draw" className="bg-neutral-850 text-white">Draw / No Winner</option>
         </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="outcome">Outcome</Label>
+          <Label htmlFor="outcome" className="text-neutral-200">Outcome</Label>
           <select
             id="outcome"
             name="outcome"
             required
-            className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+            className="mt-1 flex h-10 w-full rounded-md border border-neutral-700 bg-neutral-800 text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
           >
-            <option value="WIN">WIN/LOSS</option>
-            <option value="DRAW">DRAW</option>
-            <option value="NO_CONTEST">NO CONTEST</option>
+            <option value="WIN" className="bg-neutral-850 text-white">WIN/LOSS</option>
+            <option value="DRAW" className="bg-neutral-850 text-white">DRAW</option>
+            <option value="NO_CONTEST" className="bg-neutral-850 text-white">NO CONTEST</option>
           </select>
         </div>
         <div>
-          <Label htmlFor="method">Method</Label>
+          <Label htmlFor="method" className="text-neutral-200">Method</Label>
           <select
             id="method"
             name="method"
-            className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+            className="mt-1 flex h-10 w-full rounded-md border border-neutral-700 bg-neutral-800 text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
           >
-            <option value="">—</option>
-            <option value="KO">KO</option>
-            <option value="TKO">TKO</option>
-            <option value="DECISION">DECISION</option>
-            <option value="SUBMISSION">SUBMISSION</option>
-            <option value="DQ">DQ</option>
-            <option value="OTHER">OTHER</option>
+            <option value="" className="bg-neutral-850 text-neutral-300">—</option>
+            <option value="KO" className="bg-neutral-850 text-white">KO</option>
+            <option value="TKO" className="bg-neutral-850 text-white">TKO</option>
+            <option value="DECISION" className="bg-neutral-850 text-white">DECISION</option>
+            <option value="SUBMISSION" className="bg-neutral-850 text-white">SUBMISSION</option>
+            <option value="DQ" className="bg-neutral-850 text-white">DQ</option>
+            <option value="OTHER" className="bg-neutral-850 text-white">OTHER</option>
           </select>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="round">Round</Label>
-          <Input id="round" name="round" type="number" min={1} max={10} className="mt-1" />
+          <Label htmlFor="round" className="text-neutral-200">Round</Label>
+          <Input id="round" name="round" type="number" min={1} max={10} className="mt-1 bg-neutral-800 text-white border-neutral-700 placeholder:text-neutral-500 focus-visible:ring-csk-gold" />
         </div>
         <div>
-          <Label htmlFor="timeInRound">Time in Round</Label>
-          <Input id="timeInRound" name="timeInRound" placeholder="e.g. 1:45" className="mt-1" />
+          <Label htmlFor="timeInRound" className="text-neutral-200">Time in Round</Label>
+          <Input id="timeInRound" name="timeInRound" placeholder="e.g. 1:45" className="mt-1 bg-neutral-800 text-white border-neutral-700 placeholder:text-neutral-500 focus-visible:ring-csk-gold" />
         </div>
       </div>
 
       <div>
-        <Label htmlFor="videoUrl">Match Video URL (YouTube/Vimeo)</Label>
-        <Input id="videoUrl" name="videoUrl" type="url" placeholder="https://youtube.com/watch?v=..." className="mt-1" />
+        <Label htmlFor="videoUrl" className="text-neutral-200">Match Video URL (YouTube/Vimeo)</Label>
+        <Input id="videoUrl" name="videoUrl" type="url" placeholder="https://youtube.com/watch?v=..." className="mt-1 bg-neutral-800 text-white border-neutral-700 placeholder:text-neutral-500 focus-visible:ring-csk-gold" />
       </div>
 
       <div>
-        <Label htmlFor="notes">Notes</Label>
-        <Input id="notes" name="notes" placeholder="Optional notes" className="mt-1" />
+        <Label htmlFor="notes" className="text-neutral-200">Notes</Label>
+        <Input id="notes" name="notes" placeholder="Optional notes" className="mt-1 bg-neutral-800 text-white border-neutral-700 placeholder:text-neutral-500 focus-visible:ring-csk-gold" />
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

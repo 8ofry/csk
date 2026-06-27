@@ -17,12 +17,14 @@ import {
   verifyInstapayPayment,
   runAutomatedMatchmaking,
   recordMatchResult,
+  registerIndividualExternalFighter,
 } from "@/application/championships/service";
 import {
   externalSignupSchema,
   fighterRegisterSchema,
   instapayPaymentSchema,
   matchResultSchema,
+  individualFighterRegisterSchema,
 } from "@/application/championships/schemas";
 import { requireRole } from "@/lib/auth-guard";
 import { auth, signIn } from "@/auth";
@@ -224,6 +226,82 @@ export async function registerFighterAction(
     await registerExternalFighter(data, user.id);
     revalidatePath("/coach");
     revalidatePath(`/coach/championships/${data.championshipId}`);
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Unknown error" };
+  }
+}
+
+export async function registerIndividualFighterAction(
+  formData: FormData,
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    // 1. Upload photo if present
+    const photoFile = formData.get("photo") as File | null;
+    let photoUrl: string | null = null;
+    if (photoFile && photoFile.size > 0) {
+      const bytes = await photoFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const extension = photoFile.name.split(".").pop() || "";
+      const cleanName = photoFile.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[^A-Za-z0-9_-]/g, "");
+      const key = `${Date.now()}-photo-${cleanName}.${extension}`.replace(/[^A-Za-z0-9._-]/g, "");
+      const stored = await storage.put({
+        scope: "profile-photo",
+        key,
+        contentType: photoFile.type,
+        data: buffer,
+      });
+      photoUrl = stored.url;
+    }
+
+    // 2. Upload payment receipt if present
+    const receiptFile = formData.get("receipt") as File | null;
+    let paymentReceiptUrl: string | null = null;
+    if (receiptFile && receiptFile.size > 0) {
+      const bytes = await receiptFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const extension = receiptFile.name.split(".").pop() || "";
+      const cleanName = receiptFile.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[^A-Za-z0-9_-]/g, "");
+      const key = `${Date.now()}-receipt-${cleanName}.${extension}`.replace(/[^A-Za-z0-9._-]/g, "");
+      const stored = await storage.put({
+        scope: "medical-document",
+        key,
+        contentType: receiptFile.type,
+        data: buffer,
+      });
+      paymentReceiptUrl = stored.url;
+    }
+
+    const data = individualFighterRegisterSchema.parse({
+      championshipId: formData.get("championshipId"),
+      fullNameAr: formData.get("fullNameAr"),
+      fullNameEn: formData.get("fullNameEn"),
+      phone: formData.get("phone"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      gender: formData.get("gender"),
+      dob: formData.get("dob"),
+      weightKg: formData.get("weightKg"),
+      fightClass: formData.get("fightClass"),
+      photoUrl: photoUrl || null,
+      instapayRef: formData.get("instapayRef"),
+      paymentReceiptUrl: paymentReceiptUrl || null,
+    });
+
+    await registerIndividualExternalFighter(data);
+
+    // Auto sign-in
+    await signIn("credentials", {
+      identifier: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    revalidatePath("/trainee/championships");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

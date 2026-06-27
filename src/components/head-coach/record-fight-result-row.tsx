@@ -45,10 +45,10 @@ export function RecordFightResultRow({
           id="registrationId"
           name="registrationId"
           required
-          className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+          className="mt-1 flex h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
         >
           {registrations.map((r) => (
-            <option key={r.id} value={r.id}>
+            <option key={r.id} value={r.id} className="text-neutral-900 dark:text-white">
               {r.label}
             </option>
           ))}
@@ -56,7 +56,19 @@ export function RecordFightResultRow({
       </div>
       <div>
         <Label htmlFor="opponentName">{t("opponent")}</Label>
-        <Input id="opponentName" name="opponentName" required className="mt-1" />
+        <select
+          id="opponentName"
+          name="opponentName"
+          required
+          className="mt-1 flex h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+        >
+          <option value="" className="text-neutral-500">— Pick Opponent —</option>
+          {registrations.map((r) => (
+            <option key={r.id} value={r.label} className="text-neutral-900 dark:text-white">
+              {r.label}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <Label htmlFor="outcome">{t("outcome")}</Label>
@@ -64,12 +76,12 @@ export function RecordFightResultRow({
           id="outcome"
           name="outcome"
           required
-          className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+          className="mt-1 flex h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
         >
-          <option value="WIN">{t("outcomes.win")}</option>
-          <option value="LOSS">{t("outcomes.loss")}</option>
-          <option value="DRAW">{t("outcomes.draw")}</option>
-          <option value="NO_CONTEST">{t("outcomes.noContest")}</option>
+          <option value="WIN" className="text-neutral-900 dark:text-white">{t("outcomes.win")}</option>
+          <option value="LOSS" className="text-neutral-900 dark:text-white">{t("outcomes.loss")}</option>
+          <option value="DRAW" className="text-neutral-900 dark:text-white">{t("outcomes.draw")}</option>
+          <option value="NO_CONTEST" className="text-neutral-900 dark:text-white">{t("outcomes.noContest")}</option>
         </select>
       </div>
       <div>
@@ -77,36 +89,36 @@ export function RecordFightResultRow({
         <select
           id="method"
           name="method"
-          className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
+          className="mt-1 flex h-10 w-full rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-csk-gold"
         >
-          <option value="">—</option>
-          <option value="KO">{t("methods.ko")}</option>
-          <option value="TKO">{t("methods.tko")}</option>
-          <option value="DECISION">{t("methods.decision")}</option>
-          <option value="SUBMISSION">{t("methods.submission")}</option>
-          <option value="DQ">{t("methods.dq")}</option>
-          <option value="OTHER">{t("methods.other")}</option>
+          <option value="" className="text-neutral-500">—</option>
+          <option value="KO" className="text-neutral-900 dark:text-white">{t("methods.ko")}</option>
+          <option value="TKO" className="text-neutral-900 dark:text-white">{t("methods.tko")}</option>
+          <option value="DECISION" className="text-neutral-900 dark:text-white">{t("methods.decision")}</option>
+          <option value="SUBMISSION" className="text-neutral-900 dark:text-white">{t("methods.submission")}</option>
+          <option value="DQ" className="text-neutral-900 dark:text-white">{t("methods.dq")}</option>
+          <option value="OTHER" className="text-neutral-900 dark:text-white">{t("methods.other")}</option>
         </select>
       </div>
       <div>
         <Label htmlFor="round">{t("round")}</Label>
-        <Input id="round" name="round" type="number" min={1} max={20} className="mt-1" />
+        <Input id="round" name="round" type="number" min={1} max={20} className="mt-1 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-200 dark:border-neutral-700 focus-visible:ring-csk-gold" />
       </div>
       <div>
         <Label htmlFor="timeInRound">{t("time")}</Label>
-        <Input id="timeInRound" name="timeInRound" placeholder="2:34" className="mt-1" />
+        <Input id="timeInRound" name="timeInRound" placeholder="2:34" className="mt-1 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-200 dark:border-neutral-700 focus-visible:ring-csk-gold" />
       </div>
       <div>
         <Label htmlFor="videoUrl">{t("videoUrl")}</Label>
-        <Input id="videoUrl" name="videoUrl" type="url" className="mt-1" />
+        <Input id="videoUrl" name="videoUrl" type="url" className="mt-1 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-200 dark:border-neutral-700 focus-visible:ring-csk-gold" />
       </div>
       <div className="md:col-span-3">
         <Label htmlFor="notes">{t("notes")}</Label>
-        <Input id="notes" name="notes" className="mt-1" />
+        <Input id="notes" name="notes" className="mt-1 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-200 dark:border-neutral-700 focus-visible:ring-csk-gold" />
       </div>
       {error && <p className="md:col-span-3 text-sm text-destructive">{error}</p>}
       <div className="md:col-span-3">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} className="bg-csk-gold text-csk-black hover:bg-csk-goldLight font-bold">
           {pending ? "..." : t("record")}
         </Button>
       </div>
