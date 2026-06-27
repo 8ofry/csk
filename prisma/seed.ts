@@ -293,15 +293,15 @@ async function seedDemoData(refs: SeedRefs) {
   console.log("→ Seeding demo coaches + trainees…");
 
   const extraUsers = [
-    { id: "seed-user-coach-tarek", role: "COACH" as const, email: "tarek@csk.local", phone: "+201000000010", nameEn: "Cap. Nada", nameAr: "كابتن ندى" },
-    { id: "seed-user-coach-ali", role: "COACH" as const, email: "ali@csk.local", phone: "+201000000011", nameEn: "Coach Ali", nameAr: "كوتش علي" },
-    { id: "seed-user-coach-karim", role: "COACH" as const, email: "karim@csk.local", phone: "+201000000012", nameEn: "Coach Karim", nameAr: "كوتش كريم" },
-    { id: "seed-user-intern-omar", role: "INTERN" as const, email: "omar@csk.local", phone: "+201000000020", nameEn: "Intern Omar", nameAr: "عمر متدرب مدرب" },
-    { id: "seed-user-trainee-khaled", role: "TRAINEE" as const, email: "khaled@csk.local", phone: "+201000000030", nameEn: "Trainee Khaled", nameAr: "خالد متدرب" },
-    { id: "seed-user-trainee-yara", role: "TRAINEE" as const, email: "yara@csk.local", phone: "+201000000031", nameEn: "Trainee Yara", nameAr: "يارا متدربة" },
-    { id: "seed-user-trainee-sara", role: "TRAINEE" as const, email: "sara@csk.local", phone: "+201000000032", nameEn: "Trainee Sara", nameAr: "سارة متدربة" },
-    { id: "seed-user-trainee-hassan", role: "TRAINEE" as const, email: "hassan@csk.local", phone: "+201000000033", nameEn: "Trainee Hassan", nameAr: "حسن متدرب" },
-    { id: "seed-user-trainee-layla", role: "TRAINEE" as const, email: "layla@csk.local", phone: "+201000000034", nameEn: "Trainee Layla", nameAr: "ليلى متدربة" },
+    { id: "seed-user-coach-tarek", role: "COACH" as const, email: "tarek@csk.local", phone: "+201000000010", nameEn: "Cap. Nada", nameAr: "كابتن ندى", gender: "FEMALE" as const, dob: new Date("1993-04-12") },
+    { id: "seed-user-coach-ali", role: "COACH" as const, email: "ali@csk.local", phone: "+201000000011", nameEn: "Coach Ali", nameAr: "كوتش علي", gender: "MALE" as const, dob: new Date("1992-09-18") },
+    { id: "seed-user-coach-karim", role: "COACH" as const, email: "karim@csk.local", phone: "+201000000012", nameEn: "Coach Karim", nameAr: "كوتش كريم", gender: "MALE" as const, dob: new Date("1995-07-22") },
+    { id: "seed-user-intern-omar", role: "INTERN" as const, email: "omar@csk.local", phone: "+201000000020", nameEn: "Intern Omar", nameAr: "عمر متدرب مدرب", gender: "MALE" as const, dob: new Date("2001-12-05") },
+    { id: "seed-user-trainee-khaled", role: "TRAINEE" as const, email: "khaled@csk.local", phone: "+201000000030", nameEn: "Trainee Khaled", nameAr: "خالد متدرب", gender: "MALE" as const, dob: new Date("1996-05-12") },
+    { id: "seed-user-trainee-yara", role: "TRAINEE" as const, email: "yara@csk.local", phone: "+201000000031", nameEn: "Trainee Yara", nameAr: "يارا متدربة", gender: "FEMALE" as const, dob: new Date("1999-08-20") },
+    { id: "seed-user-trainee-sara", role: "TRAINEE" as const, email: "sara@csk.local", phone: "+201000000032", nameEn: "Trainee Sara", nameAr: "سارة متدربة", gender: "FEMALE" as const, dob: new Date("2000-02-14") },
+    { id: "seed-user-trainee-hassan", role: "TRAINEE" as const, email: "hassan@csk.local", phone: "+201000000033", nameEn: "Trainee Hassan", nameAr: "حسن متدرب", gender: "MALE" as const, dob: new Date("1995-11-30") },
+    { id: "seed-user-trainee-layla", role: "TRAINEE" as const, email: "layla@csk.local", phone: "+201000000034", nameEn: "Trainee Layla", nameAr: "ليلى متدربة", gender: "FEMALE" as const, dob: new Date("2002-04-05") },
   ];
   for (const u of extraUsers) {
     await prisma.user.upsert({
@@ -314,11 +314,16 @@ async function seedDemoData(refs: SeedRefs) {
         passwordHash: await hash(SEED_PASSWORD),
         fullNameAr: u.nameAr,
         fullNameEn: u.nameEn,
+        gender: u.gender,
+        dob: u.dob,
         status: "ACTIVE",
         emailVerifiedAt: new Date(),
         preferredLocale: "AR",
       },
-      update: {},
+      update: {
+        gender: u.gender,
+        dob: u.dob,
+      },
     });
   }
   console.log(`  ✓ ${extraUsers.length} extra users`);
@@ -654,7 +659,7 @@ async function seedDemoData(refs: SeedRefs) {
   });
   console.log("  ✓ Khaled fully medically cleared");
 
-  console.log("→ Seeding championship + result…");
+  console.log("→ Seeding championship + results + matchups…");
   const champId = "seed-champ-mma-cup";
   const champStart = new Date(now);
   champStart.setMonth(champStart.getMonth() + 1);
@@ -678,36 +683,333 @@ async function seedDemoData(refs: SeedRefs) {
     },
     update: {},
   });
-  const regId = "seed-reg-khaled-mma";
+
+  // 1. Khaled (PAID, Public)
+  const regKhaledId = "seed-reg-khaled-mma";
   await prisma.championshipRegistration.upsert({
-    where: { id: regId },
+    where: { id: regKhaledId },
     create: {
-      id: regId,
+      id: regKhaledId,
       championshipId: champId,
       traineeId: "seed-user-trainee-khaled",
       weightKg: 70,
       level: "B",
+      fightClass: "AMATEUR",
+      isAmateur: true,
+      status: "PAID",
+      confirmedAt: new Date(),
+      instapayRef: "TXN987654",
+      paymentReceiptUrl: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&auto=format&fit=crop&q=60",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-001",
+    },
+    update: {
+      status: "PAID",
+      fightClass: "AMATEUR",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-001",
+    },
+  });
+
+  // 2. Hassan (PAID, Public)
+  const regHassanId = "seed-reg-hassan-mma";
+  await prisma.championshipRegistration.upsert({
+    where: { id: regHassanId },
+    create: {
+      id: regHassanId,
+      championshipId: champId,
+      traineeId: "seed-user-trainee-hassan",
+      weightKg: 72,
+      level: "B",
+      fightClass: "AMATEUR",
+      isAmateur: true,
+      status: "PAID",
+      confirmedAt: new Date(),
+      instapayRef: "TXN987655",
+      paymentReceiptUrl: "https://images.unsplash.com/photo-1555541865-c49b06830cc7?w=500&auto=format&fit=crop&q=60",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-002",
+    },
+    update: {
+      status: "PAID",
+      fightClass: "AMATEUR",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-002",
+    },
+  });
+
+  // 3. Yara (PENDING_VERIFICATION, Private)
+  const regYaraId = "seed-reg-yara-mma";
+  await prisma.championshipRegistration.upsert({
+    where: { id: regYaraId },
+    create: {
+      id: regYaraId,
+      championshipId: champId,
+      traineeId: "seed-user-trainee-yara",
+      weightKg: 62,
+      level: "B",
+      fightClass: "AMATEUR",
+      isAmateur: true,
+      status: "PENDING_VERIFICATION",
+      confirmedAt: new Date(),
+      instapayRef: "TXN987656",
+      paymentReceiptUrl: "https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?w=500&auto=format&fit=crop&q=60",
+      isProfilePublic: false,
+      registrationNumber: "CSK-CH-003",
+    },
+    update: {
+      status: "PENDING_VERIFICATION",
+      fightClass: "AMATEUR",
+      isProfilePublic: false,
+      registrationNumber: "CSK-CH-003",
+    },
+  });
+
+  // 4. Sara (PAID, Public)
+  const regSaraId = "seed-reg-sara-mma";
+  await prisma.championshipRegistration.upsert({
+    where: { id: regSaraId },
+    create: {
+      id: regSaraId,
+      championshipId: champId,
+      traineeId: "seed-user-trainee-sara",
+      weightKg: 64,
+      level: "B",
+      fightClass: "AMATEUR",
+      isAmateur: true,
+      status: "PAID",
+      confirmedAt: new Date(),
+      instapayRef: "TXN987657",
+      paymentReceiptUrl: "https://images.unsplash.com/photo-1555541865-c49b06830cc7?w=500&auto=format&fit=crop&q=60",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-004",
+    },
+    update: {
+      status: "PAID",
+      fightClass: "AMATEUR",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-004",
+    },
+  });
+
+  // 5. Layla (COACH_CONFIRMED, Private)
+  const regLaylaId = "seed-reg-layla-mma";
+  await prisma.championshipRegistration.upsert({
+    where: { id: regLaylaId },
+    create: {
+      id: regLaylaId,
+      championshipId: champId,
+      traineeId: "seed-user-trainee-layla",
+      weightKg: 61,
+      level: "B",
+      fightClass: "AMATEUR",
       isAmateur: true,
       status: "COACH_CONFIRMED",
       confirmedAt: new Date(),
+      isProfilePublic: false,
+      registrationNumber: "CSK-CH-005",
     },
-    update: {},
+    update: {
+      status: "COACH_CONFIRMED",
+      fightClass: "AMATEUR",
+      isProfilePublic: false,
+      registrationNumber: "CSK-CH-005",
+    },
   });
+
+  // 6. Trainee Ahmed (PAID, Public)
+  const regAhmedId = "seed-reg-ahmed-mma";
+  await prisma.championshipRegistration.upsert({
+    where: { id: regAhmedId },
+    create: {
+      id: regAhmedId,
+      championshipId: champId,
+      traineeId: refs.traineeAhmedId,
+      weightKg: 71,
+      level: "B",
+      fightClass: "AMATEUR",
+      isAmateur: true,
+      status: "PAID",
+      confirmedAt: new Date(),
+      instapayRef: "TXN987658",
+      paymentReceiptUrl: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&auto=format&fit=crop&q=60",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-006",
+    },
+    update: {
+      status: "PAID",
+      fightClass: "AMATEUR",
+      isProfilePublic: true,
+      registrationNumber: "CSK-CH-006",
+    },
+  });
+
+  // Match 1: Khaled vs Ahmed (Completed, Khaled wins)
+  const match1Id = "seed-match-khaled-ahmed";
+  await prisma.match.upsert({
+    where: { id: match1Id },
+    create: {
+      id: match1Id,
+      championshipId: champId,
+      fighter1Id: regKhaledId,
+      fighter2Id: regAhmedId,
+      gender: "MALE",
+      fightClass: "AMATEUR",
+      weightClass: "71 kg",
+      round: 2,
+      outcome: "WIN",
+      method: "KO",
+      timeInRound: "1:45",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      winnerId: regKhaledId,
+      notes: "CSK MMA Cup Semifinal Bout",
+    },
+    update: {
+      winnerId: regKhaledId,
+      outcome: "WIN",
+      method: "KO",
+      round: 2,
+      timeInRound: "1:45",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    },
+  });
+
   await prisma.fightResult.upsert({
     where: { id: "seed-fight-khaled-1" },
     create: {
       id: "seed-fight-khaled-1",
-      registrationId: regId,
-      opponentName: "Mahmoud Sayed",
+      registrationId: regKhaledId,
+      opponentName: "Trainee Ahmed",
+      outcome: "WIN",
+      method: "KO",
+      round: 2,
+      timeInRound: "1:45",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      recordedById: refs.coachMohamedId,
+    },
+    update: {
+      opponentName: "Trainee Ahmed",
+      outcome: "WIN",
+      method: "KO",
+      round: 2,
+      timeInRound: "1:45",
+    },
+  });
+
+  await prisma.fightResult.upsert({
+    where: { id: "seed-fight-ahmed-1" },
+    create: {
+      id: "seed-fight-ahmed-1",
+      registrationId: regAhmedId,
+      opponentName: "Trainee Khaled",
+      outcome: "LOSS",
+      method: "KO",
+      round: 2,
+      timeInRound: "1:45",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      recordedById: refs.coachMohamedId,
+    },
+    update: {
+      opponentName: "Trainee Khaled",
+      outcome: "LOSS",
+      method: "KO",
+      round: 2,
+      timeInRound: "1:45",
+    },
+  });
+
+  // Match 2: Sara vs Yara (Completed, Sara wins)
+  const match2Id = "seed-match-sara-yara";
+  await prisma.match.upsert({
+    where: { id: match2Id },
+    create: {
+      id: match2Id,
+      championshipId: champId,
+      fighter1Id: regSaraId,
+      fighter2Id: regYaraId,
+      gender: "FEMALE",
+      fightClass: "AMATEUR",
+      weightClass: "63 kg",
+      round: 3,
+      outcome: "WIN",
+      method: "DECISION",
+      timeInRound: "5:00",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      winnerId: regSaraId,
+      notes: "CSK MMA Cup Female division bout",
+    },
+    update: {
+      winnerId: regSaraId,
       outcome: "WIN",
       method: "DECISION",
       round: 3,
       timeInRound: "5:00",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    },
+  });
+
+  await prisma.fightResult.upsert({
+    where: { id: "seed-fight-sara-1" },
+    create: {
+      id: "seed-fight-sara-1",
+      registrationId: regSaraId,
+      opponentName: "Trainee Yara",
+      outcome: "WIN",
+      method: "DECISION",
+      round: 3,
+      timeInRound: "5:00",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       recordedById: refs.coachMohamedId,
+    },
+    update: {
+      opponentName: "Trainee Yara",
+      outcome: "WIN",
+      method: "DECISION",
+      round: 3,
+      timeInRound: "5:00",
+    },
+  });
+
+  await prisma.fightResult.upsert({
+    where: { id: "seed-fight-yara-1" },
+    create: {
+      id: "seed-fight-yara-1",
+      registrationId: regYaraId,
+      opponentName: "Trainee Sara",
+      outcome: "LOSS",
+      method: "DECISION",
+      round: 3,
+      timeInRound: "5:00",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      recordedById: refs.coachMohamedId,
+    },
+    update: {
+      opponentName: "Trainee Sara",
+      outcome: "LOSS",
+      method: "DECISION",
+      round: 3,
+      timeInRound: "5:00",
+    },
+  });
+
+  // Match 3: Hassan vs Ahmed (Active/Scheduled, no winner yet)
+  const match3Id = "seed-match-hassan-ahmed";
+  await prisma.match.upsert({
+    where: { id: match3Id },
+    create: {
+      id: match3Id,
+      championshipId: champId,
+      fighter1Id: regHassanId,
+      fighter2Id: regAhmedId,
+      gender: "MALE",
+      fightClass: "AMATEUR",
+      weightClass: "71.5 kg",
+      notes: "CSK MMA Cup Finals",
     },
     update: {},
   });
-  console.log("  ✓ championship + 1 confirmed registration + 1 win");
+
+  console.log("  ✓ championship + registrations + complete matchmaking cycle seeded");
 
   console.log("→ Seeding belt exam pass for Ahmed…");
   const examId = "seed-exam-boxing-1";
