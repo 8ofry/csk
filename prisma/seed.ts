@@ -893,6 +893,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "KO",
       round: 2,
       timeInRound: "1:45",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
     },
   });
 
@@ -915,6 +916,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "KO",
       round: 2,
       timeInRound: "1:45",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
     },
   });
 
@@ -967,6 +969,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "DECISION",
       round: 3,
       timeInRound: "5:00",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
     },
   });
 
@@ -989,6 +992,7 @@ async function seedDemoData(refs: SeedRefs) {
       method: "DECISION",
       round: 3,
       timeInRound: "5:00",
+      videoUrl: "https://www.youtube.com/watch?v=HViQL_A-cco",
     },
   });
 

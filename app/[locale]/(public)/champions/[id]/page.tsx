@@ -24,8 +24,8 @@ export default async function FighterProfilePage({
       <div className="container max-w-5xl px-4">
         {/* Back Link */}
         <div className="mb-6">
-          <Link href="/champions" className="text-sm font-semibold text-csk-gold hover:text-csk-goldLight transition-colors flex items-center gap-1">
-            {isRtl ? "← العودة إلى قائمة المصنفين" : "← All Fighters / Rankings"}
+          <Link href="/fighters" className="text-sm font-semibold text-csk-gold hover:text-csk-goldLight transition-colors flex items-center gap-1">
+            {isRtl ? "← العودة إلى قائمة المقاتلين" : "← Back to Fighters List"}
           </Link>
         </div>
 

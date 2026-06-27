@@ -186,3 +186,77 @@ export async function publicPricing() {
     disciplines: await listPublicDisciplines(),
   };
 }
+
+export interface FighterPublicProfile {
+  id: string;
+  fullNameEn: string;
+  fullNameAr: string;
+  profilePhotoUrl: string | null;
+  gender: string | null;
+  dob: Date | null;
+  homeAddress: string | null;
+  homeLocationEn: string | null;
+  homeLocationAr: string | null;
+  latestWeightKg: number | null;
+  latestFightClass: string | null;
+  record: ReturnType<typeof aggregateFightRecord>;
+}
+
+export async function listPublicFighters(): Promise<FighterPublicProfile[]> {
+  const fighters = await prisma.user.findMany({
+    where: {
+      role: "TRAINEE",
+      championshipRegs: {
+        some: {}, // Registered in at least one championship
+      },
+    },
+    select: {
+      id: true,
+      fullNameEn: true,
+      fullNameAr: true,
+      profilePhotoUrl: true,
+      gender: true,
+      dob: true,
+      homeAddress: true,
+      enrollments: {
+        where: { status: "ACTIVE" },
+        select: { group: { select: { location: { select: { nameEn: true, nameAr: true } } } } },
+        take: 1,
+      },
+      championshipRegs: {
+        select: {
+          weightKg: true,
+          fightClass: true,
+          fightResults: { select: { outcome: true, method: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  return fighters.map((f) => {
+    const fights: FightRow[] = f.championshipRegs.flatMap((r) =>
+      r.fightResults.map((res) => ({ outcome: res.outcome, method: res.method })),
+    );
+    const record = aggregateFightRecord(fights);
+    const latestReg = f.championshipRegs[0];
+    const latestWeightKg = latestReg?.weightKg ? Number(latestReg.weightKg) : null;
+    const latestFightClass = latestReg?.fightClass ?? null;
+
+    return {
+      id: f.id,
+      fullNameEn: f.fullNameEn,
+      fullNameAr: f.fullNameAr,
+      profilePhotoUrl: f.profilePhotoUrl,
+      gender: f.gender,
+      dob: f.dob,
+      homeAddress: f.homeAddress,
+      homeLocationEn: f.enrollments[0]?.group.location.nameEn ?? null,
+      homeLocationAr: f.enrollments[0]?.group.location.nameAr ?? null,
+      latestWeightKg,
+      latestFightClass,
+      record,
+    };
+  });
+}
+

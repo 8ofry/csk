@@ -23,6 +23,7 @@ const cspDirectives = [
     : `script-src 'self' 'unsafe-inline'`,
   "connect-src 'self' https://cdn.jsdelivr.net",
   "form-action 'self'",
+  "frame-src 'self' https://www.youtube.com https://*.youtube.com https://player.vimeo.com https://*.vimeo.com",
 ];
 
 const securityHeaders: { key: string; value: string }[] = [

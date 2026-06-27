@@ -10,11 +10,8 @@ const NAV_LINKS = [
   { label: "Home", href: "#home" },
   { label: "Disciplines", href: "#disciplines" },
   { label: "Championships", href: "/championships" },
-  { label: "Fighters & Rankings", href: "/champions" },
-  { label: "About", href: "#about" },
-  { label: "Coaches", href: "#coaches" },
-  { label: "Locations", href: "#locations" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Fighters", href: "/fighters" },
+  { label: "Rankings", href: "/champions" },
   { label: "Contact", href: "#contact" },
 ];
 
