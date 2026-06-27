@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { prisma } from "@/infrastructure/db/prisma";
 import {
   championshipInputSchema,
   coachConfirmRegistration,
@@ -327,4 +328,35 @@ function parseList(raw: FormDataEntryValue | null): string[] {
     .split(/[\n,]+/)
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+export async function toggleProfilePublicAction(
+  registrationId: string,
+  isPublic: boolean,
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    const session = await auth();
+    if (!session?.user || session.user.role !== "TRAINEE") throw new Error("Trainees only");
+
+    // Make sure they own the registration
+    const reg = await prisma.championshipRegistration.findUnique({
+      where: { id: registrationId },
+      select: { traineeId: true },
+    });
+    if (!reg || reg.traineeId !== session.user.id) {
+      throw new Error("Unauthorized");
+    }
+
+    await prisma.championshipRegistration.update({
+      where: { id: registrationId },
+      data: { isProfilePublic: isPublic },
+    });
+
+    revalidatePath("/trainee/championships");
+    revalidatePath("/champions");
+    revalidatePath(`/champions/${session.user.id}`);
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Unknown error" };
+  }
 }

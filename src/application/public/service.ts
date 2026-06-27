@@ -120,7 +120,12 @@ export async function listPublicChampions(limit = 24): Promise<ChampionPublicPro
   const fighters = await prisma.user.findMany({
     where: {
       role: "TRAINEE",
-      championshipRegs: { some: { fightResults: { some: {} } } },
+      championshipRegs: {
+        some: {
+          isProfilePublic: true,
+          fightResults: { some: {} },
+        },
+      },
     },
     select: {
       id: true,

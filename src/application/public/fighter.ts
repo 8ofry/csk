@@ -82,6 +82,7 @@ export async function getPublicFighterProfile(
           status: true,
           weightKg: true,
           level: true,
+          isProfilePublic: true,
           championship: {
             select: {
               id: true,
@@ -117,9 +118,12 @@ export async function getPublicFighterProfile(
 
   if (!trainee || trainee.role !== "TRAINEE" || trainee.status !== "ACTIVE") return null;
 
+  const publicRegs = trainee.championshipRegs.filter((r) => r.isProfilePublic);
+  if (publicRegs.length === 0) return null;
+
   // Flatten fights with championship context
   const fights: PublicFightDetail[] = [];
-  for (const reg of trainee.championshipRegs) {
+  for (const reg of publicRegs) {
     for (const f of reg.fightResults) {
       fights.push({
         championshipName: reg.championship.name,
@@ -143,7 +147,7 @@ export async function getPublicFighterProfile(
     fights.map((f): FightRow => ({ outcome: f.outcome, method: f.method as FightRow["method"] })),
   );
 
-  const championships: PublicChampionshipEntry[] = trainee.championshipRegs.map((reg) => ({
+  const championships: PublicChampionshipEntry[] = publicRegs.map((reg) => ({
     id: reg.championship.id,
     name: reg.championship.name,
     startDate: reg.championship.startDate.toISOString().slice(0, 10),

@@ -46,6 +46,11 @@ export default async function ChampionshipDetailPage({
     orderBy: { createdAt: "desc" },
   });
 
+  // Counts by division class
+  const amateurCount = ch.registrations.filter((r) => r.fightClass === "AMATEUR").length;
+  const semiProCount = ch.registrations.filter((r) => r.fightClass === "SEMI_PRO").length;
+  const proCount = ch.registrations.filter((r) => r.fightClass === "PROFESSIONAL").length;
+
   return (
     <div className="space-y-6">
       <div>
@@ -58,6 +63,34 @@ export default async function ChampionshipDetailPage({
             fee: Number(ch.registrationFee).toFixed(2),
           })}
         </p>
+      </div>
+
+      {/* Division Allocation Stats */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <Card className="bg-neutral-900 border-neutral-800 text-white">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-black text-csk-gold">{ch.registrations.length}</div>
+            <p className="text-xs text-neutral-400 font-medium">Total Registered</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-neutral-900 border-neutral-800 text-white">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-black text-emerald-500">{amateurCount}</div>
+            <p className="text-xs text-neutral-400 font-medium">Amateur Division</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-neutral-900 border-neutral-800 text-white">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-black text-amber-500">{semiProCount}</div>
+            <p className="text-xs text-neutral-400 font-medium">Half-Pro Division</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-neutral-900 border-neutral-800 text-white">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-black text-rose-500">{proCount}</div>
+            <p className="text-xs text-neutral-400 font-medium">Professional Division</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Pending Payments Verification Section */}
