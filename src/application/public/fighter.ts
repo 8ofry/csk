@@ -44,6 +44,13 @@ export interface PublicFighterProfile {
   fullNameAr: string;
   profilePhotoUrl: string | null;
   homeLocationName: string | null;
+  gender: string | null;
+  dob: string | null;
+  age: number | null;
+  points: number;
+  winRate: number;
+  last6: ("W" | "L" | "D")[];
+  winsByKO: number;
   record: ReturnType<typeof aggregateFightRecord>;
   fights: PublicFightDetail[];
   championships: PublicChampionshipEntry[];
@@ -62,6 +69,8 @@ export async function getPublicFighterProfile(
       fullNameEn: true,
       fullNameAr: true,
       profilePhotoUrl: true,
+      gender: true,
+      dob: true,
       enrollments: {
         where: { status: "ACTIVE" },
         select: { group: { select: { location: { select: { nameEn: true } } } } },
@@ -159,12 +168,49 @@ export async function getPublicFighterProfile(
     });
   }
 
+  // Calculate age from dob
+  let age: number | null = null;
+  if (trainee.dob) {
+    const today = new Date();
+    const birthDate = new Date(trainee.dob);
+    age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+  }
+
+  // Calculate detailed stats
+  const points = record.wins * 50 + record.draws * 25 + record.losses * 5 + 500;
+  const winRate = record.total > 0 ? Math.round((record.wins / record.total) * 100) : 0;
+  
+  // Last 6 bouts in chronological order (oldest to newest of the last 6)
+  const last6 = fights
+    .slice(0, 6)
+    .map((f) => (f.outcome === "WIN" ? "W" as const : f.outcome === "LOSS" ? "L" as const : "D" as const))
+    .reverse();
+
+  // Wins by KO/TKO
+  const winsByKO = fights.filter(
+    (f) =>
+      f.outcome === "WIN" &&
+      f.method &&
+      (f.method.toUpperCase().includes("KO") || f.method.toUpperCase().includes("TKO")),
+  ).length;
+
   return {
     id: trainee.id,
     fullNameEn: trainee.fullNameEn,
     fullNameAr: trainee.fullNameAr,
     profilePhotoUrl: trainee.profilePhotoUrl,
     homeLocationName: trainee.enrollments[0]?.group.location.nameEn ?? null,
+    gender: trainee.gender,
+    dob: trainee.dob ? trainee.dob.toISOString().slice(0, 10) : null,
+    age,
+    points,
+    winRate,
+    last6,
+    winsByKO,
     record,
     fights,
     championships,

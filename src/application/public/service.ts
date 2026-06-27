@@ -107,6 +107,10 @@ export interface ChampionPublicProfile {
   fullNameEn: string;
   fullNameAr: string;
   profilePhotoUrl: string | null;
+  homeLocationEn: string | null;
+  homeLocationAr: string | null;
+  latestWeightKg: number | null;
+  latestFightClass: string | null;
   record: ReturnType<typeof aggregateFightRecord>;
 }
 
@@ -123,10 +127,18 @@ export async function listPublicChampions(limit = 24): Promise<ChampionPublicPro
       fullNameEn: true,
       fullNameAr: true,
       profilePhotoUrl: true,
+      enrollments: {
+        where: { status: "ACTIVE" },
+        select: { group: { select: { location: { select: { nameEn: true, nameAr: true } } } } },
+        take: 1,
+      },
       championshipRegs: {
         select: {
+          weightKg: true,
+          fightClass: true,
           fightResults: { select: { outcome: true, method: true } },
         },
+        orderBy: { createdAt: "desc" },
       },
     },
     take: limit,
@@ -138,11 +150,19 @@ export async function listPublicChampions(limit = 24): Promise<ChampionPublicPro
         r.fightResults.map((res) => ({ outcome: res.outcome, method: res.method })),
       );
       const record = aggregateFightRecord(fights);
+      const latestReg = f.championshipRegs[0];
+      const latestWeightKg = latestReg?.weightKg ? Number(latestReg.weightKg) : null;
+      const latestFightClass = latestReg?.fightClass ?? null;
+
       return {
         id: f.id,
         fullNameEn: f.fullNameEn,
         fullNameAr: f.fullNameAr,
         profilePhotoUrl: f.profilePhotoUrl,
+        homeLocationEn: f.enrollments[0]?.group.location.nameEn ?? null,
+        homeLocationAr: f.enrollments[0]?.group.location.nameAr ?? null,
+        latestWeightKg,
+        latestFightClass,
         record,
       };
     })
