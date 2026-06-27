@@ -8,8 +8,8 @@ import { isTraineeCleared } from "@/application/medical/service";
 import { aggregateFightRecord, type FightRow } from "@/domain/championships/fight-record";
 import { dispatchNotification } from "@/application/notifications/service";
 import argon2 from "argon2";
-import { Gender, FightClass } from "@prisma/client";
-import { ExternalSignupInput, FighterRegisterInput, InstapayPaymentInput, MatchResultInput } from "./schemas";
+import type { Match } from "@prisma/client";
+import type { ExternalSignupInput, FighterRegisterInput, InstapayPaymentInput, MatchResultInput } from "./schemas";
 
 export const championshipInputSchema = z.object({
   name: z.string().min(2),
@@ -439,7 +439,7 @@ export async function runAutomatedMatchmaking(championshipId: string, actorId: s
     groups[key]!.push(r);
   }
 
-  const createdMatches: any[] = [];
+  const createdMatches: Match[] = [];
 
   await prisma.$transaction(async (tx) => {
     // Delete any existing matches for this championship first to regenerate

@@ -6,21 +6,21 @@ interface FighterCardProps {
   fighter: {
     fullNameEn: string;
     fullNameAr: string;
-    gender: string;
-    dob: Date | string;
+    gender?: string | null;
+    dob?: Date | string | null;
     photoUrl?: string | null;
   };
   registration: {
-    registrationNumber: string;
-    fightClass: string;
-    weightKg: number | string;
+    registrationNumber?: string | null;
+    fightClass?: string | null;
+    weightKg?: number | string | { toString(): string } | null;
   };
   academyName: string;
 }
 
 export function FighterCard({ fighter, registration, academyName }: FighterCardProps) {
   const t = useTranslations("coachChampionships");
-  const dobStr = new Date(fighter.dob).toLocaleDateString();
+  const dobStr = fighter.dob ? new Date(fighter.dob).toLocaleDateString() : "—";
 
   const handlePrint = () => {
     const printContent = document.getElementById(`fighter-card-${registration.registrationNumber}`);
@@ -78,7 +78,7 @@ export function FighterCard({ fighter, registration, academyName }: FighterCardP
     <div className="flex flex-col items-center gap-4">
       {/* Visual Card Representation */}
       <div
-        id={`fighter-card-${registration.registrationNumber}`}
+        id={`fighter-card-${registration.registrationNumber || "temp"}`}
         className="relative border-4 bg-gradient-to-br from-neutral-950 to-neutral-900 text-white p-6 rounded-xl shadow-2xl w-80 h-[480px] flex flex-col justify-between border-csk-gold overflow-hidden select-none"
       >
         {/* Glow effect */}
@@ -123,16 +123,16 @@ export function FighterCard({ fighter, registration, academyName }: FighterCardP
             </div>
             <div>
               <div className="text-[10px] text-muted-foreground uppercase">Class / Division</div>
-              <div className="font-bold text-csk-gold uppercase">{registration.fightClass}</div>
+              <div className="font-bold text-csk-gold uppercase">{registration.fightClass || "—"}</div>
             </div>
             <div className="flex gap-4">
               <div>
                 <div className="text-[10px] text-muted-foreground uppercase">Weight</div>
-                <div className="font-semibold">{registration.weightKg} kg</div>
+                <div className="font-semibold">{registration.weightKg?.toString() || "—"} kg</div>
               </div>
               <div>
                 <div className="text-[10px] text-muted-foreground uppercase">Gender</div>
-                <div className="font-semibold uppercase">{fighter.gender}</div>
+                <div className="font-semibold uppercase">{fighter.gender || "—"}</div>
               </div>
             </div>
           </div>
@@ -141,7 +141,7 @@ export function FighterCard({ fighter, registration, academyName }: FighterCardP
         {/* Card Footer */}
         <div className="border-t border-csk-gold/20 pt-4 flex flex-col gap-1 text-[10px] text-muted-foreground">
           <div className="flex justify-between">
-            <span>REG ID: <strong className="text-white font-mono">{registration.registrationNumber}</strong></span>
+            <span>REG ID: <strong className="text-white font-mono">{registration.registrationNumber || "—"}</strong></span>
             <span>DOB: <strong className="text-white">{dobStr}</strong></span>
           </div>
           <div className="flex justify-between">

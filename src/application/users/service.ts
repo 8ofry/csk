@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/infrastructure/db/prisma";
+import { Prisma } from "@prisma/client";
 import {
   validatePromotion,
   validateStatusTransition,
@@ -10,7 +11,7 @@ import {
 } from "@/domain/users/promotion";
 import { dispatchNotification } from "@/application/notifications/service";
 import argon2 from "argon2";
-import { UserCreateInput, UserUpdateInput } from "./schemas";
+import type { UserCreateInput, UserUpdateInput } from "./schemas";
 
 export interface UserFilters {
   role?: UserRole;
@@ -250,7 +251,7 @@ export async function updateUser(userId: string, data: UserUpdateInput, actorId:
     throw new Error("A user with this email address already exists.");
   }
 
-  const updateData: any = {
+  const updateData: Prisma.UserUpdateInput = {
     role: data.role,
     email: email.toLowerCase(),
     phone: data.phone,

@@ -19,9 +19,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+interface Trainee {
+  fullNameAr: string;
+  fullNameEn: string;
+  gender?: string | null;
+  dob?: string | Date | null;
+  photoUrl?: string | null;
+}
+
+interface Registration {
+  id: string;
+  registrationNumber?: string | null;
+  weightKg?: number | string | { toString(): string } | null;
+  fightClass?: string | null;
+  status: string;
+  instapayRef?: string | null;
+  trainee: Trainee;
+}
+
+interface Championship {
+  id: string;
+  name: string;
+  organizer: string;
+  startDate: string | Date;
+  instapayLink?: string | null;
+}
+
 interface CoachChampionshipsClientProps {
-  championships: any[];
-  initialRegistrations: any[];
+  championships: Championship[];
+  initialRegistrations: Registration[];
   academy: { id: string; nameAr: string; nameEn: string };
   selectedId: string;
   locale: string;
@@ -38,8 +64,8 @@ export function CoachChampionshipsClient({
   const router = useRouter();
   const [selectedChampionshipId, setSelectedChampionshipId] = useState(selectedId);
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [activeFighterCard, setActiveFighterCard] = useState<any | null>(null);
-  const [activePaymentReg, setActivePaymentReg] = useState<any | null>(null);
+  const [activeFighterCard, setActiveFighterCard] = useState<Registration | null>(null);
+  const [activePaymentReg, setActivePaymentReg] = useState<Registration | null>(null);
 
   const [regError, setRegError] = useState<string | null>(null);
   const [payError, setPayError] = useState<string | null>(null);
@@ -260,7 +286,7 @@ export function CoachChampionshipsClient({
                             </div>
                           </TableCell>
                           <TableCell className="text-xs uppercase">{f.gender}</TableCell>
-                          <TableCell className="text-sm">{reg.weightKg} kg</TableCell>
+                          <TableCell className="text-sm">{reg.weightKg?.toString()} kg</TableCell>
                           <TableCell className="text-sm font-bold">{reg.fightClass}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className={statusColorMap[reg.status]}>
