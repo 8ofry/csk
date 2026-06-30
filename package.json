@@ -22,7 +22,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install chromium --with-deps",
-    "render-build": "npm ci --include=dev && npm run db:generate && npm run db:reset && npx prisma migrate deploy && npm run db:seed && npm run build",
+    "render-build": "npm ci --include=dev && npm run db:generate && npx prisma migrate deploy && npm run db:seed && npm run build",
     "prepare": "husky || true"
   },
   "dependencies": {
