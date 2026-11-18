@@ -193,8 +193,8 @@ export interface FighterPublicProfile {
   fullNameAr: string;
   profilePhotoUrl: string | null;
   gender: string | null;
-  dob: Date | null;
-  homeAddress: string | null;
+  age: number | null;
+  country: string;
   homeLocationEn: string | null;
   homeLocationAr: string | null;
   latestWeightKg: number | null;
@@ -202,12 +202,34 @@ export interface FighterPublicProfile {
   record: ReturnType<typeof aggregateFightRecord>;
 }
 
+function deriveCoarseCountry(homeAddress: string | null): string {
+  if (!homeAddress) return "Egypt";
+  const addr = homeAddress.toLowerCase();
+  if (addr.includes("jordan")) return "Jordan";
+  if (addr.includes("saudi") || addr.includes("ksa")) return "Saudi Arabia";
+  if (addr.includes("kuwait")) return "Kuwait";
+  if (addr.includes("emirates") || addr.includes("uae") || addr.includes("dubai")) return "UAE";
+  return "Egypt";
+}
+
+function deriveAge(dob: Date | null): number | null {
+  if (!dob) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 export async function listPublicFighters(): Promise<FighterPublicProfile[]> {
   const fighters = await prisma.user.findMany({
     where: {
       role: "TRAINEE",
+      status: "ACTIVE",
       championshipRegs: {
-        some: {}, // Registered in at least one championship
+        some: { isProfilePublic: true },
       },
     },
     select: {
@@ -224,6 +246,7 @@ export async function listPublicFighters(): Promise<FighterPublicProfile[]> {
         take: 1,
       },
       championshipRegs: {
+        where: { isProfilePublic: true },
         select: {
           weightKg: true,
           fightClass: true,
@@ -249,8 +272,8 @@ export async function listPublicFighters(): Promise<FighterPublicProfile[]> {
       fullNameAr: f.fullNameAr,
       profilePhotoUrl: f.profilePhotoUrl,
       gender: f.gender,
-      dob: f.dob,
-      homeAddress: f.homeAddress,
+      age: deriveAge(f.dob),
+      country: deriveCoarseCountry(f.homeAddress),
       homeLocationEn: f.enrollments[0]?.group.location.nameEn ?? null,
       homeLocationAr: f.enrollments[0]?.group.location.nameAr ?? null,
       latestWeightKg,

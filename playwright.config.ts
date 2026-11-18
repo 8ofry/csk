@@ -34,10 +34,5 @@ export default defineConfig({
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
-        env: {
-          ...process.env,
-          NEXT_PUBLIC_DEFAULT_LOCALE: "en",
-          E2E_TESTING: "true",
-        },
       },
 });

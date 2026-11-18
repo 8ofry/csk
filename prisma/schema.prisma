@@ -74,6 +74,12 @@ enum PaymentStatus {
   OVERDUE
 }
 
+enum SubscriptionBillingCycle {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
 enum SessionPlanStatus {
   DRAFT
   PENDING
@@ -117,6 +123,7 @@ enum MonthlyReportStatus {
 enum RevenueType {
   SUBSCRIPTION
   PRIVATE_SESSION
+  DROP_IN
   BELT_EXAM
   CHAMPIONSHIP
   MERCHANDISE
@@ -263,6 +270,11 @@ model User {
   parent        User?   @relation("ParentChildren", fields: [parentUserId], references: [id], onDelete: SetNull)
   children      User[]  @relation("ParentChildren")
 
+  // Growth & referral tracking
+  referralCode   String?  @unique
+  referredById   String?
+  trialCreditEgp Decimal? @db.Decimal(12, 2)
+
   // Disciplines this user "owns" (FR-LOC §5.1) — usually relevant for non-CSK disciplines
   ownedDisciplines Discipline[] @relation("DisciplineOwner")
 
@@ -320,9 +332,22 @@ model User {
   privateSessionsAsCoach   PrivateSession[] @relation("PrivateSessionCoach")
   coachEvaluationsAsTrainee CoachEvaluation[] @relation("CoachEvalTrainee")
   coachEvaluationsAsCoach   CoachEvaluation[] @relation("CoachEvalCoach")
+  passwordResetTokens       PasswordResetToken[]
 
   @@index([role, status])
   @@index([phone])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -503,8 +528,9 @@ model Subscription {
   discipline         Discipline     @relation(fields: [disciplineId], references: [id])
   locationId         String
   location           Location       @relation(fields: [locationId], references: [id])
-  monthlyFee         Decimal        @db.Decimal(12, 2)
-  sessionsPerMonth   Int            @default(12) // FR-FIN-01 default
+  monthlyFee         Decimal                  @db.Decimal(12, 2)
+  billingCycle       SubscriptionBillingCycle @default(MONTHLY)
+  sessionsPerMonth   Int                      @default(12) // FR-FIN-01 default
   discountPercent    Decimal?       @db.Decimal(5, 2)
   discountReason     String?
   currentPeriodStart DateTime
@@ -1010,6 +1036,7 @@ model FightResult {
   id             String                   @id @default(cuid())
   registrationId String
   registration   ChampionshipRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  matchId        String?
   opponentName   String
   outcome        FightOutcome
   method         FightMethod?
@@ -1022,6 +1049,7 @@ model FightResult {
   recordedAt     DateTime                 @default(now())
 
   @@index([registrationId])
+  @@index([matchId])
 }
 
 model BeltExam {

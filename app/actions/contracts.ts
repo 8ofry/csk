@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   archiveContract,
   contractInputSchema,
@@ -33,7 +33,7 @@ export async function createContractAction(
     const user = await requireRole("ADMIN");
     const data = parse(formData);
     const created = await createContract(data, user.id);
-    revalidatePath("/admin/contracts");
+    revalidateLocalized("/admin/contracts");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -48,8 +48,8 @@ export async function updateContractAction(
     const user = await requireRole("ADMIN");
     const data = parse(formData);
     await updateContract(id, data, user.id);
-    revalidatePath("/admin/contracts");
-    revalidatePath(`/admin/contracts/${id}`);
+    revalidateLocalized("/admin/contracts");
+    revalidateLocalized(`/admin/contracts/${id}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -62,7 +62,7 @@ export async function archiveContractAction(
   try {
     const user = await requireRole("ADMIN");
     await archiveContract(id, user.id);
-    revalidatePath("/admin/contracts");
+    revalidateLocalized("/admin/contracts");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

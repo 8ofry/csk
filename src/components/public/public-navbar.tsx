@@ -3,19 +3,20 @@
 import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
 const NAV_LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "Disciplines", href: "#disciplines" },
-  { label: "Championships", href: "/championships" },
-  { label: "Fighters", href: "/fighters" },
-  { label: "Rankings", href: "/champions" },
-  { label: "Contact", href: "#contact" },
-];
+  { key: "home", href: "#home" },
+  { key: "disciplines", href: "#disciplines" },
+  { key: "championships", href: "/championships" },
+  { key: "fighters", href: "/fighters" },
+  { key: "contact", href: "#contact" },
+] as const;
 
 export function PublicNavbar() {
+  const t = useTranslations("nav");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
@@ -66,19 +67,19 @@ export function PublicNavbar() {
           {NAV_LINKS.map((link) => (
             link.href.startsWith("#") ? (
               <button
-                key={link.label}
+                key={link.key}
                 onClick={() => handleNav(link.href)}
                 className="nav-link px-3 py-2 text-xs font-bold uppercase tracking-widest"
               >
-                {link.label}
+                {t(link.key)}
               </button>
             ) : (
               <Link
-                key={link.label}
+                key={link.key}
                 href={link.href as Parameters<typeof Link>[0]["href"]}
                 className="nav-link px-3 py-2 text-xs font-bold uppercase tracking-widest"
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             )
           ))}
@@ -92,7 +93,7 @@ export function PublicNavbar() {
             className="group relative hidden overflow-hidden rounded-full bg-csk-gold px-6 py-2.5 text-xs font-black uppercase tracking-wider text-csk-black transition-all hover:scale-105 hover:shadow-[0_0_20px_-5px_rgba(212,175,55,0.6)] sm:inline-flex items-center justify-center"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full" />
-            <span className="relative z-10">Member Login</span>
+            <span className="relative z-10">{t("login")}</span>
           </Link>
           {/* Mobile burger */}
           <button
@@ -112,20 +113,20 @@ export function PublicNavbar() {
             {NAV_LINKS.map((link) => (
               link.href.startsWith("#") ? (
                 <button
-                  key={link.label}
+                  key={link.key}
                   onClick={() => handleNav(link.href)}
                   className="w-full rounded-lg px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-csk-gold"
                 >
-                  {link.label}
+                  {t(link.key)}
                 </button>
               ) : (
                 <Link
-                  key={link.label}
+                  key={link.key}
                   href={link.href as Parameters<typeof Link>[0]["href"]}
                   onClick={() => setMobileOpen(false)}
                   className="w-full rounded-lg px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-white/70 transition-colors hover:bg-white/5 hover:text-csk-gold"
                 >
-                  {link.label}
+                  {t(link.key)}
                 </Link>
               )
             ))}
@@ -136,7 +137,7 @@ export function PublicNavbar() {
                 className="group relative block w-full overflow-hidden rounded-full bg-csk-gold px-6 py-3 text-center text-sm font-black uppercase tracking-wider text-csk-black transition-all"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full" />
-                <span className="relative z-10">Member Login</span>
+                <span className="relative z-10">{t("login")}</span>
               </Link>
             </div>
           </nav>

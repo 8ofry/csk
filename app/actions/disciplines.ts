@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   createDiscipline,
   disciplineInputSchema,
@@ -25,7 +25,7 @@ export async function createDisciplineAction(
     const user = await requireRole("ADMIN");
     const data = parseFormData(formData);
     const created = await createDiscipline(data, user.id);
-    revalidatePath("/admin/disciplines");
+    revalidateLocalized("/admin/disciplines");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -40,8 +40,8 @@ export async function updateDisciplineAction(
     const user = await requireRole("ADMIN");
     const data = parseFormData(formData);
     await updateDiscipline(id, data, user.id);
-    revalidatePath("/admin/disciplines");
-    revalidatePath(`/admin/disciplines/${id}`);
+    revalidateLocalized("/admin/disciplines");
+    revalidateLocalized(`/admin/disciplines/${id}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

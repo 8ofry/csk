@@ -55,22 +55,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const u = user as { id?: string; role: string; locale: string };
-        if (u.id) token.uid = u.id;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (token as any).role = u.role;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (token as any).locale = u.locale;
+        if (user.id) token.uid = user.id;
+        token.role = user.role;
+        token.locale = user.locale;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         if (typeof token.uid === "string") session.user.id = token.uid;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).role = (token as any).role;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).locale = (token as any).locale;
+        session.user.role = token.role;
+        session.user.locale = token.locale;
       }
       return session;
     },

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   beltExamInputSchema,
   beltResultInputSchema,
@@ -29,7 +29,7 @@ export async function createBeltExamAction(
       notes: formData.get("notes") || null,
     });
     const created = await createBeltExam(data, user.id);
-    revalidatePath("/head-coach/belt-exams");
+    revalidateLocalized("/head-coach/belt-exams");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -49,8 +49,8 @@ export async function recordBeltResultAction(
       newLevel: formData.get("newLevel") || null,
     });
     await recordBeltResult(data, user.id);
-    revalidatePath(`/head-coach/belt-exams/${data.examId}`);
-    revalidatePath("/head-coach/belt-exams");
+    revalidateLocalized(`/head-coach/belt-exams/${data.examId}`);
+    revalidateLocalized("/head-coach/belt-exams");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

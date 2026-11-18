@@ -127,67 +127,86 @@ export async function settlePaymentIntent(
   intentId: string,
   verified: { outcome: "SUCCESS" | "FAILED" | "PENDING" | "UNKNOWN"; raw: unknown },
 ) {
-  const intent = await prisma.paymentIntent.findUnique({
-    where: { id: intentId },
-    include: { payment: true },
-  });
-  if (!intent) throw new PaymentIntentError("Intent not found");
-  if (intent.status === "SUCCEEDED") return { status: "SUCCEEDED" as const, paymentId: intent.paymentId };
+  return prisma.$transaction(async (tx) => {
+    const intent = await tx.paymentIntent.findUnique({
+      where: { id: intentId },
+      include: { payment: true },
+    });
+    if (!intent) throw new PaymentIntentError("Intent not found");
+    if (intent.status === "SUCCEEDED") {
+      return { status: "SUCCEEDED" as const, paymentId: intent.paymentId };
+    }
 
-  if (verified.outcome !== "SUCCESS") {
-    await prisma.paymentIntent.update({
+    if (verified.outcome !== "SUCCESS") {
+      await tx.paymentIntent.update({
+        where: { id: intentId },
+        data: {
+          status: verified.outcome === "FAILED" ? "FAILED" : "PROCESSING",
+          providerData: appendRaw(intent.providerData, verified.raw),
+        },
+      });
+      logger.warn("Payment intent did not succeed", {
+        tags: { intentId, outcome: verified.outcome },
+      });
+      return {
+        status: verified.outcome === "FAILED" ? ("FAILED" as const) : ("PROCESSING" as const),
+      };
+    }
+
+    // Atomically claim the intent so concurrent webhooks cannot double-settle.
+    const claimed = await tx.paymentIntent.updateMany({
+      where: { id: intentId, status: { in: ["PENDING", "PROCESSING"] } },
+      data: { status: "PROCESSING" },
+    });
+    if (claimed.count === 0) {
+      const latest = await tx.paymentIntent.findUnique({
+        where: { id: intentId },
+        select: { status: true, paymentId: true },
+      });
+      return { status: "SUCCEEDED" as const, paymentId: latest?.paymentId ?? null };
+    }
+
+    const result = await logPayment(
+      {
+        revenueType: intent.revenueType,
+        payerUserId: intent.payerUserId,
+        amountGross: Number(intent.amount),
+        method: "ONLINE",
+        subscriptionId: intent.subscriptionId ?? undefined,
+        privateSessionId: intent.privateSessionId ?? undefined,
+        championshipRegistrationId: intent.championshipRegId ?? undefined,
+        beltExamResultId: intent.beltExamResultId ?? undefined,
+        merchandiseSaleId: intent.merchandiseSaleId ?? undefined,
+        locationId: intent.locationId ?? undefined,
+        coachUserId: intent.coachUserId ?? undefined,
+        disciplineId: intent.disciplineId ?? undefined,
+        notes: `Online payment via ${intent.provider}`,
+      },
+      intent.createdById,
+      tx,
+    );
+
+    await tx.paymentIntent.update({
       where: { id: intentId },
       data: {
-        status: verified.outcome === "FAILED" ? "FAILED" : "PROCESSING",
+        status: "SUCCEEDED",
+        paymentId: result.payment.id,
         providerData: appendRaw(intent.providerData, verified.raw),
       },
     });
-    logger.warn("Payment intent did not succeed", {
-      tags: { intentId, outcome: verified.outcome },
+
+    await tx.auditLog.create({
+      data: {
+        actorId: intent.createdById,
+        action: "payment-intent.settle",
+        entityType: "PaymentIntent",
+        entityId: intentId,
+        changes: { paymentId: result.payment.id, receipt: result.payment.receiptNumber },
+      },
     });
-    return { status: verified.outcome === "FAILED" ? ("FAILED" as const) : ("PROCESSING" as const) };
-  }
 
-  // Persist the real Payment + splits via the existing engine.
-  const result = await logPayment(
-    {
-      revenueType: intent.revenueType,
-      payerUserId: intent.payerUserId,
-      amountGross: Number(intent.amount),
-      method: "ONLINE",
-      subscriptionId: intent.subscriptionId ?? undefined,
-      privateSessionId: intent.privateSessionId ?? undefined,
-      championshipRegistrationId: intent.championshipRegId ?? undefined,
-      beltExamResultId: intent.beltExamResultId ?? undefined,
-      merchandiseSaleId: intent.merchandiseSaleId ?? undefined,
-      locationId: intent.locationId ?? undefined,
-      coachUserId: intent.coachUserId ?? undefined,
-      disciplineId: intent.disciplineId ?? undefined,
-      notes: `Online payment via ${intent.provider}`,
-    },
-    intent.createdById,
-  );
-
-  await prisma.paymentIntent.update({
-    where: { id: intentId },
-    data: {
-      status: "SUCCEEDED",
-      paymentId: result.payment.id,
-      providerData: appendRaw(intent.providerData, verified.raw),
-    },
+    return { status: "SUCCEEDED" as const, paymentId: result.payment.id };
   });
-
-  await prisma.auditLog.create({
-    data: {
-      actorId: intent.createdById,
-      action: "payment-intent.settle",
-      entityType: "PaymentIntent",
-      entityId: intentId,
-      changes: { paymentId: result.payment.id, receipt: result.payment.receiptNumber },
-    },
-  });
-
-  return { status: "SUCCEEDED" as const, paymentId: result.payment.id };
 }
 
 function appendRaw(existing: Prisma.JsonValue | null, addition: unknown): Prisma.InputJsonValue {

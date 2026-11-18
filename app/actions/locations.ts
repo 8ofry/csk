@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   archiveLocation,
   createLocation,
@@ -28,10 +28,10 @@ export async function createLocationAction(
   formData: FormData,
 ): Promise<{ ok?: true; id?: string; error?: string }> {
   try {
-    const user = await requireRole("HEAD_COACH");
+    const user = await requireRole("ADMIN");
     const data = parseFormData(formData);
     const created = await createLocation(data, user.id);
-    revalidatePath("/admin/locations");
+    revalidateLocalized("/admin/locations");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -43,11 +43,11 @@ export async function updateLocationAction(
   formData: FormData,
 ): Promise<{ ok?: true; error?: string }> {
   try {
-    const user = await requireRole("HEAD_COACH");
+    const user = await requireRole("ADMIN");
     const data = parseFormData(formData);
     await updateLocation(id, data, user.id);
-    revalidatePath("/admin/locations");
-    revalidatePath(`/admin/locations/${id}`);
+    revalidateLocalized("/admin/locations");
+    revalidateLocalized(`/admin/locations/${id}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -56,9 +56,9 @@ export async function updateLocationAction(
 
 export async function archiveLocationAction(id: string): Promise<{ ok?: true; error?: string }> {
   try {
-    const user = await requireRole("HEAD_COACH");
+    const user = await requireRole("ADMIN");
     await archiveLocation(id, user.id);
-    revalidatePath("/admin/locations");
+    revalidateLocalized("/admin/locations");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

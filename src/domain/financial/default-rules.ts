@@ -36,6 +36,19 @@ export const defaultSplitRules: Record<RevenueType, DefaultRuleSet> = {
     ],
   },
 
+  // Drop-in single session
+  DROP_IN: {
+    partnerVenue: [
+      { recipientType: "VENUE", percent: 50 },
+      { recipientType: "CSK", percent: 30 },
+      { recipientType: "COACH", percent: 20 },
+    ],
+    fightClub: [
+      { recipientType: "CSK", percent: 80 },
+      { recipientType: "COACH", percent: 20 },
+    ],
+  },
+
   // Belt exam — venue takes nothing; same rule everywhere
   BELT_EXAM: {
     partnerVenue: [

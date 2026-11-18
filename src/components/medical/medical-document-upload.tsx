@@ -52,12 +52,21 @@ export function MedicalDocumentUpload({ traineeId, onSubmit }: DocUploadProps) {
         </select>
       </div>
       <div>
-        <Label htmlFor="fileUrl">Document URL (https)</Label>
+        <Label htmlFor="file">Upload File (PDF / JPG / PNG / WebP)</Label>
+        <Input
+          id="file"
+          name="file"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <Label htmlFor="fileUrl">Or Document URL (https)</Label>
         <Input
           id="fileUrl"
           name="fileUrl"
           type="url"
-          required
           placeholder="https://..."
           className="mt-1"
         />

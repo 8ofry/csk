@@ -49,7 +49,7 @@ class ResendEmailAdapter implements ChannelAdapter {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "CSK Academy <noreply@csk-academy.com>",
+          from: process.env.EMAIL_FROM ?? "CSK Academy <noreply@csk-academy.com>",
           to: [msg.to.email],
           subject: msg.subject,
           html: msg.body.replace(/\n/g, "<br>"),

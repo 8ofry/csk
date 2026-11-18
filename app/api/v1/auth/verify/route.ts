@@ -23,17 +23,20 @@ export async function GET(request: Request) {
     return new NextResponse("User not found", { status: 404 });
   }
 
+  const locale = user.preferredLocale === "EN" ? "en" : "ar";
+
   if (user.emailVerifiedAt) {
-    return NextResponse.redirect(new URL("/login?verified=already", request.url));
+    return NextResponse.redirect(new URL(`/${locale}/login?verified=already`, request.url));
   }
 
+  // FR-AUTH-03: email verification confirms email ownership only;
+  // account remains PENDING until Head Coach or Admin approves it.
   await prisma.user.update({
     where: { email },
     data: {
       emailVerifiedAt: new Date(),
-      status: "ACTIVE",
     },
   });
 
-  return NextResponse.redirect(new URL("/login?verified=success", request.url));
+  return NextResponse.redirect(new URL(`/${locale}/login?verified=success`, request.url));
 }

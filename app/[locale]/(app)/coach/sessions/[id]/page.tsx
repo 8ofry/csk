@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { SessionInteractionPanel } from "@/components/coach/session-interaction-panel";
 import { EndSessionButton } from "@/components/coach/end-session-button";
 import { ComposeReportButton } from "@/components/coach/compose-report-button";
+import { ExecutedSequencePanel } from "@/components/coach/executed-sequence-panel";
+import { MatSideQuickBar } from "@/components/coach/mat-side-quick-bar";
 import { getDailyReportBySessionId } from "@/application/daily-reports/service";
 import { prisma } from "@/infrastructure/db/prisma";
 import fs from "fs";
@@ -47,10 +49,10 @@ export default async function SessionDetailPage({
   // Read the SVG content
   let svgContent = "";
   try {
-    const svgPath = path.join(process.cwd(), "Muscles_front_and_back.svg");
+    const svgPath = path.join(process.cwd(), "public", "images", "muscles-front-back.svg");
     svgContent = fs.readFileSync(svgPath, "utf-8");
   } catch (err) {
-    console.error("Failed to read Muscles_front_and_back.svg:", err);
+    console.error("Failed to read public/images/muscles-front-back.svg:", err);
   }
 
   // Fetch all active trainees in the system for external attendance search
@@ -131,6 +133,11 @@ export default async function SessionDetailPage({
         </p>
       </div>
 
+      <MatSideQuickBar
+        sessionId={session.id}
+        traineeIds={trainees.map((tr) => tr.id)}
+      />
+
       <SessionInteractionPanel
         sessionId={session.id}
         groupTrainees={rosterTrainees}
@@ -167,6 +174,29 @@ export default async function SessionDetailPage({
           </CardContent>
         </Card>
       )}
+
+      <ExecutedSequencePanel
+        sessionId={session.id}
+        initialUnits={
+          Array.isArray(session.executedSequence) && session.executedSequence.length > 0
+            ? (session.executedSequence as unknown as {
+                unitId?: string;
+                title: string;
+                durationMins?: number;
+                completed: boolean;
+                notes?: string;
+              }[])
+            : planUnits.map((it) => {
+                const u = unitsById.get(it.trainingUnitId);
+                return {
+                  unitId: it.trainingUnitId,
+                  title: u?.nameEn ?? it.trainingUnitId,
+                  completed: false,
+                  notes: it.notes,
+                };
+              })
+        }
+      />
 
       <div className="flex flex-wrap gap-3">
         {session.status === "IN_PROGRESS" && (

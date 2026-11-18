@@ -4,7 +4,7 @@ import { LocationForm } from "@/components/admin/location-form";
 import { createLocationAction } from "@/app/actions/locations";
 
 export default async function NewLocationPage() {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const t = await getTranslations("adminLocations.newPage");
 
   return (

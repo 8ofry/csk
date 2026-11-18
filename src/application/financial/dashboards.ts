@@ -68,14 +68,14 @@ export interface OwnerSnapshot {
 
 export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> {
   const grossRow = await prisma.payment.aggregate({
-    where: { paidAt: { gte: window.from, lte: window.to } },
+    where: { paidAt: { gte: window.from, lte: window.to }, refundedAt: null },
     _sum: { amountNet: true },
   });
   const totalRevenue = Number(grossRow._sum.amountNet ?? 0);
 
   const splitGroups = await prisma.revenueSplit.groupBy({
     by: ["recipientType"],
-    where: { payment: { paidAt: { gte: window.from, lte: window.to } } },
+    where: { payment: { paidAt: { gte: window.from, lte: window.to }, refundedAt: null } },
     _sum: { amount: true },
   });
   const sumFor = (type: string) =>
@@ -89,7 +89,7 @@ export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> 
 
   const byStreamRows = await prisma.payment.groupBy({
     by: ["revenueType"],
-    where: { paidAt: { gte: window.from, lte: window.to } },
+    where: { paidAt: { gte: window.from, lte: window.to }, refundedAt: null },
     _sum: { amountNet: true },
     _count: { _all: true },
   });
@@ -103,7 +103,7 @@ export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> 
   //   gross  = sum of payment.amountNet attributable to a location (subscription/private/merchandise)
   //   cskAtLoc = gross - venue cut for that location (i.e. what stays with CSK after the venue split)
   const paymentsInWindow = await prisma.payment.findMany({
-    where: { paidAt: { gte: window.from, lte: window.to } },
+    where: { paidAt: { gte: window.from, lte: window.to }, refundedAt: null },
     select: {
       amountNet: true,
       subscription: { select: { locationId: true } },
@@ -127,7 +127,7 @@ export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> 
     by: ["recipientLocationId"],
     where: {
       recipientType: "VENUE",
-      payment: { paidAt: { gte: window.from, lte: window.to } },
+      payment: { paidAt: { gte: window.from, lte: window.to }, refundedAt: null },
     },
     _sum: { amount: true },
   });
@@ -157,8 +157,13 @@ export async function ownerSnapshot(window: DateWindow): Promise<OwnerSnapshot> 
     };
   });
 
+  // Exclude COACH_PAYOUT from operating expenses deducted against cskShare
+  // because cskShare is already net of coach revenue splits.
   const expensesRow = await prisma.expense.aggregate({
-    where: { paidAt: { gte: window.from, lte: window.to } },
+    where: {
+      paidAt: { gte: window.from, lte: window.to },
+      category: { not: "COACH_PAYOUT" },
+    },
     _sum: { amount: true },
   });
   const totalExpenses = Number(expensesRow._sum.amount ?? 0);

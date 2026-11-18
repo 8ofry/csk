@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 
 export default async function LocationsPage() {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const [t, tBadges, locations] = await Promise.all([
     getTranslations("adminLocations"),
     getTranslations("badges"),

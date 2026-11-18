@@ -16,6 +16,7 @@ export interface UserFormProps {
     role?: string;
     status?: string;
     parentManaged?: boolean;
+    parentUserId?: string | null;
   };
   onSubmit: (formData: FormData) => Promise<{ ok?: true; id?: string; error?: string }>;
   submitLabel: string;
@@ -138,15 +139,29 @@ export function UserForm({ defaultValues, onSubmit, submitLabel }: UserFormProps
         </div>
       </div>
 
-      <label className="flex cursor-pointer items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          name="parentManaged"
-          defaultChecked={defaultValues?.parentManaged ?? false}
-          className="h-4 w-4 rounded border-input accent-csk-gold"
-        />
-        {t("form.parentManaged")}
-      </label>
+      <div className="space-y-2">
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="parentManaged"
+            defaultChecked={defaultValues?.parentManaged ?? false}
+            className="h-4 w-4 rounded border-input accent-csk-gold"
+          />
+          {t("form.parentManaged")}
+        </label>
+        <div>
+          <Label htmlFor="parentUserId" className="text-xs text-muted-foreground">
+            Parent / Guardian User ID (optional, when parent-managed)
+          </Label>
+          <Input
+            id="parentUserId"
+            name="parentUserId"
+            defaultValue={defaultValues?.parentUserId ?? ""}
+            placeholder="Optional parent user ID"
+            className="mt-1"
+          />
+        </div>
+      </div>
 
       {error && <p className="text-sm text-destructive">❌ {error}</p>}
 

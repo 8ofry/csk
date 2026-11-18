@@ -70,13 +70,20 @@ export async function listScheduledForCoach(
 
   if (occurrences.length === 0) return [];
 
+  // Compute true min/max bounds across all groups before querying existing sessions.
+  const minStart = new Date(Math.min(...occurrences.map((o) => o.scheduledStart.getTime())));
+  const maxEnd = new Date(Math.max(...occurrences.map((o) => o.scheduledEnd.getTime())));
+
   // Match against existing Session rows
   const existing = await prisma.session.findMany({
     where: {
-      coachId,
+      OR: [
+        { coachId },
+        { group: { coaches: { some: { coachId } } } },
+      ],
       scheduledStart: {
-        gte: occurrences[0]!.scheduledStart,
-        lte: occurrences[occurrences.length - 1]!.scheduledEnd,
+        gte: minStart,
+        lte: maxEnd,
       },
     },
     select: { id: true, groupId: true, scheduledStart: true, status: true },
@@ -199,7 +206,13 @@ export async function endSession(opts: { coachId: string; sessionId: string }) {
 
 export async function getSessionForCoach(sessionId: string, coachId: string) {
   return prisma.session.findFirst({
-    where: { id: sessionId, coachId },
+    where: {
+      id: sessionId,
+      OR: [
+        { coachId },
+        { group: { coaches: { some: { coachId } } } },
+      ],
+    },
     include: {
       group: {
         include: {
@@ -220,4 +233,47 @@ export async function getSessionForCoach(sessionId: string, coachId: string) {
       plan: true,
     },
   });
+}
+
+export interface ExecutedSequenceUnit {
+  unitId?: string;
+  title: string;
+  durationMins?: number;
+  completed: boolean;
+  notes?: string;
+}
+
+export async function updateExecutedSequence(opts: {
+  sessionId: string;
+  coachId: string;
+  executedSequence: ExecutedSequenceUnit[];
+}) {
+  const session = await prisma.session.findFirst({
+    where: {
+      id: opts.sessionId,
+      OR: [
+        { coachId: opts.coachId },
+        { group: { coaches: { some: { coachId: opts.coachId } } } },
+      ],
+    },
+    select: { id: true },
+  });
+  if (!session) throw new SessionStartError("Session not found or access denied");
+
+  const updated = await prisma.session.update({
+    where: { id: opts.sessionId },
+    data: { executedSequence: opts.executedSequence as unknown as object[] },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: opts.coachId,
+      action: "session.executed_sequence.update",
+      entityType: "Session",
+      entityId: opts.sessionId,
+      changes: { unitCount: opts.executedSequence.length },
+    },
+  });
+
+  return updated;
 }

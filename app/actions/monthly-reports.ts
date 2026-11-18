@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import { headers } from "next/headers";
 import {
   approveAndDeliver,
@@ -23,7 +23,7 @@ export async function generateMonthlyReportAction(input: {
   try {
     const user = await requireRole("HEAD_COACH");
     const r = await generateForTrainee(input, user.id);
-    revalidatePath("/head-coach/monthly-reports");
+    revalidateLocalized("/head-coach/monthly-reports");
     return { ok: true, reportId: r.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -36,7 +36,7 @@ export async function approveMonthlyReportAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await approveAndDeliver(reportId, user.id, await appUrl());
-    revalidatePath("/head-coach/monthly-reports");
+    revalidateLocalized("/head-coach/monthly-reports");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

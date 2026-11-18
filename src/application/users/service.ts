@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/infrastructure/db/prisma";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import {
   validatePromotion,
   validateStatusTransition,
@@ -186,6 +186,15 @@ export async function promoteInternToCoach(userId: string, actorId: string) {
 }
 
 export async function createUser(data: UserCreateInput, actorId: string) {
+  const actor = await prisma.user.findUnique({
+    where: { id: actorId },
+    select: { role: true },
+  });
+  if (!actor) throw new Error("Actor not found.");
+  if (actor.role !== "ADMIN" && (data.role === "ADMIN" || data.role === "HEAD_COACH")) {
+    throw new Error("Only Admin can create Admin or Head Coach accounts.");
+  }
+
   const email = data.email || `${data.phone.replace(/[^0-9]/g, "")}@phone.csk.local`;
 
   // Check unique constraints
@@ -215,6 +224,7 @@ export async function createUser(data: UserCreateInput, actorId: string) {
       fullNameEn: data.fullNameEn,
       status: data.status,
       parentManaged: data.parentManaged,
+      parentUserId: data.parentManaged && data.parentUserId ? data.parentUserId : null,
       emailVerifiedAt: data.email ? new Date() : null,
     },
   });
@@ -233,6 +243,22 @@ export async function createUser(data: UserCreateInput, actorId: string) {
 }
 
 export async function updateUser(userId: string, data: UserUpdateInput, actorId: string) {
+  const [actor, target] = await Promise.all([
+    prisma.user.findUnique({ where: { id: actorId }, select: { role: true } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { role: true, emailVerifiedAt: true } }),
+  ]);
+  if (!actor) throw new Error("Actor not found.");
+  if (!target) throw new Error("User not found.");
+  if (
+    actor.role !== "ADMIN" &&
+    (target.role === "ADMIN" ||
+      target.role === "HEAD_COACH" ||
+      data.role === "ADMIN" ||
+      data.role === "HEAD_COACH")
+  ) {
+    throw new Error("Only Admin can modify Admin or Head Coach accounts.");
+  }
+
   const email = data.email || `${data.phone.replace(/[^0-9]/g, "")}@phone.csk.local`;
 
   // Check unique constraints for phone
@@ -259,6 +285,10 @@ export async function updateUser(userId: string, data: UserUpdateInput, actorId:
     fullNameEn: data.fullNameEn,
     status: data.status,
     parentManaged: data.parentManaged,
+    parent:
+      data.parentManaged && data.parentUserId
+        ? { connect: { id: data.parentUserId } }
+        : { disconnect: true },
   };
 
   // Auto-verify email if it is changed/supplied

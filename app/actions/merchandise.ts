@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   createMerchandiseItem,
   logMerchandiseSale,
@@ -33,7 +33,7 @@ export async function createMerchandiseAction(
     const user = await requireRole("HEAD_COACH");
     const data = parseItem(formData);
     const created = await createMerchandiseItem(data, user.id);
-    revalidatePath("/head-coach/merchandise");
+    revalidateLocalized("/head-coach/merchandise");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -48,8 +48,8 @@ export async function updateMerchandiseAction(
     const user = await requireRole("HEAD_COACH");
     const data = parseItem(formData);
     await updateMerchandiseItem(id, data, user.id);
-    revalidatePath("/head-coach/merchandise");
-    revalidatePath(`/head-coach/merchandise/${id}`);
+    revalidateLocalized("/head-coach/merchandise");
+    revalidateLocalized(`/head-coach/merchandise/${id}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -71,8 +71,8 @@ export async function logSaleAction(
       paymentMethod: formData.get("paymentMethod") ?? "CASH",
     });
     const result = await logMerchandiseSale(data, user.id);
-    revalidatePath("/head-coach/merchandise");
-    revalidatePath(`/head-coach/merchandise/${data.itemId}`);
+    revalidateLocalized("/head-coach/merchandise");
+    revalidateLocalized(`/head-coach/merchandise/${data.itemId}`);
     return { ok: true, receiptNumber: result.receiptNumber, lowStock: result.lowStock };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

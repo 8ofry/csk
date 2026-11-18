@@ -6,14 +6,21 @@
 // fetch. Other scopes (training-unit, merchandise-photo) are public.
 
 import { auth } from "@/auth";
+import { authenticate } from "@/lib/api-auth";
 import { storage, type StorageScope } from "@/infrastructure/storage/storage";
 import { prisma } from "@/infrastructure/db/prisma";
 import { jsonError } from "@/lib/api";
 
-const PRIVATE_SCOPES: StorageScope[] = ["monthly-report", "certificate", "medical-document"];
+const PRIVATE_SCOPES: StorageScope[] = [
+  "monthly-report",
+  "certificate",
+  "medical-document",
+  "payment-receipt",
+];
 const KNOWN_SCOPES: StorageScope[] = [
   "training-unit",
   "medical-document",
+  "payment-receipt",
   "profile-photo",
   "merchandise-photo",
   "monthly-report",
@@ -21,7 +28,7 @@ const KNOWN_SCOPES: StorageScope[] = [
 ];
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ scope: string; key: string }> },
 ) {
   const { scope, key } = await params;
@@ -30,7 +37,7 @@ export async function GET(
   }
 
   if (PRIVATE_SCOPES.includes(scope as StorageScope)) {
-    const allowed = await canRead(scope as StorageScope, key);
+    const allowed = await canRead(req, scope as StorageScope, key);
     if (!allowed) return jsonError("Forbidden", 403);
   }
 
@@ -46,10 +53,18 @@ export async function GET(
   });
 }
 
-async function canRead(scope: StorageScope, key: string): Promise<boolean> {
+async function resolveAuthUser(req: Request) {
+  const apiUser = await authenticate(req);
+  if (apiUser) return { id: apiUser.id, role: apiUser.role };
   const session = await auth();
-  if (!session?.user) return false;
-  if (session.user.role === "ADMIN" || session.user.role === "HEAD_COACH") return true;
+  if (session?.user) return { id: session.user.id, role: session.user.role };
+  return null;
+}
+
+async function canRead(req: Request, scope: StorageScope, key: string): Promise<boolean> {
+  const user = await resolveAuthUser(req);
+  if (!user) return false;
+  if (user.role === "ADMIN" || user.role === "HEAD_COACH") return true;
 
   // Resource-id is the basename without extension — both monthly-report and
   // certificate use `${id}.pdf`.
@@ -61,10 +76,7 @@ async function canRead(scope: StorageScope, key: string): Promise<boolean> {
       select: { traineeId: true, trainee: { select: { parentUserId: true } } },
     });
     if (!report) return false;
-    return (
-      session.user.id === report.traineeId ||
-      session.user.id === report.trainee.parentUserId
-    );
+    return user.id === report.traineeId || user.id === report.trainee.parentUserId;
   }
 
   if (scope === "certificate") {
@@ -73,7 +85,7 @@ async function canRead(scope: StorageScope, key: string): Promise<boolean> {
       select: { recipientId: true, issuedById: true },
     });
     if (!cert) return false;
-    return session.user.id === cert.recipientId || session.user.id === cert.issuedById;
+    return user.id === cert.recipientId || user.id === cert.issuedById;
   }
 
   if (scope === "medical-document") {
@@ -82,10 +94,40 @@ async function canRead(scope: StorageScope, key: string): Promise<boolean> {
       select: { traineeId: true, trainee: { select: { parentUserId: true } } },
     });
     if (!doc) return false;
-    return (
-      session.user.id === doc.traineeId ||
-      session.user.id === doc.trainee.parentUserId
-    );
+    if (user.id === doc.traineeId || user.id === doc.trainee.parentUserId) return true;
+    if (user.role === "COACH") {
+      // FR-MED-05: Primary coach can view medical documents for trainees in their active groups.
+      const assigned = await prisma.enrollment.findFirst({
+        where: {
+          traineeId: doc.traineeId,
+          status: "ACTIVE",
+          group: { coaches: { some: { coachId: user.id } } },
+        },
+        select: { id: true },
+      });
+      return !!assigned;
+    }
+    return false;
+  }
+
+  if (scope === "payment-receipt") {
+    const reg = await prisma.championshipRegistration.findFirst({
+      where: { paymentReceiptUrl: `/api/v1/files/payment-receipt/${key}` },
+      select: {
+        traineeId: true,
+        trainee: { select: { parentUserId: true, academyId: true } },
+      },
+    });
+    if (!reg) return false;
+    if (user.id === reg.traineeId || user.id === reg.trainee.parentUserId) return true;
+    if (user.role === "COACH" && reg.trainee.academyId) {
+      const coach = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { academyId: true },
+      });
+      return !!coach?.academyId && coach.academyId === reg.trainee.academyId;
+    }
+    return false;
   }
 
   return false;

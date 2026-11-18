@@ -225,3 +225,45 @@ export async function getMonthlyReport(id: string) {
     include: { trainee: true, approvedBy: { select: { fullNameEn: true } } },
   });
 }
+
+export async function runMonthlyReportBatch(opts?: {
+  year?: number;
+  month?: number;
+  actorId?: string;
+}) {
+  const now = new Date();
+  const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const year = opts?.year ?? prevMonthDate.getFullYear();
+  const month = opts?.month ?? prevMonthDate.getMonth() + 1;
+
+  const actor =
+    opts?.actorId ??
+    (
+      await prisma.user.findFirst({
+        where: { role: { in: ["ADMIN", "HEAD_COACH"] }, status: "ACTIVE" },
+        select: { id: true },
+      })
+    )?.id;
+
+  if (!actor) {
+    return { scanned: 0, generated: 0, errors: 0, year, month };
+  }
+
+  const trainees = await prisma.user.findMany({
+    where: { role: "TRAINEE", status: "ACTIVE" },
+    select: { id: true },
+  });
+
+  let generated = 0;
+  let errors = 0;
+  for (const t of trainees) {
+    try {
+      await generateForTrainee({ traineeId: t.id, year, month }, actor);
+      generated++;
+    } catch {
+      errors++;
+    }
+  }
+
+  return { scanned: trainees.length, generated, errors, year, month };
+}

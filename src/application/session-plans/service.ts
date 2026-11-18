@@ -5,6 +5,7 @@
 //  - Templates (isTemplate) are reusable plans not tied to a real session date.
 
 import { prisma } from "@/infrastructure/db/prisma";
+import { dispatchNotification } from "@/application/notifications/service";
 import {
   PlanTransitionError,
   canApprove,
@@ -37,7 +38,7 @@ export async function listPlansForCoach(coachId: string) {
 export async function listPendingApproval() {
   return prisma.sessionPlan.findMany({
     where: { status: "PENDING", isTemplate: false },
-    orderBy: { reviewedAt: "asc" },
+    orderBy: [{ sessionDate: "asc" }, { updatedAt: "asc" }],
     include: {
       group: { select: { id: true, name: true, location: { select: { nameEn: true } } } },
       createdBy: { select: { id: true, fullNameEn: true, fullNameAr: true } },
@@ -125,13 +126,17 @@ export async function updateDraftPlan(id: string, input: SessionPlanInput, coach
 export async function submitPlan(id: string, coachId: string) {
   const before = await assertOwner(id, coachId);
   const newStatus = nextStatus(before.status as PlanStatus, "submit");
-  return transitionTo(id, newStatus, { actorId: coachId, action: "submit" });
+  const updated = await transitionTo(id, newStatus, { actorId: coachId, action: "submit" });
+  await notifyHeadCoachesOfPendingPlan(id);
+  return updated;
 }
 
 export async function resubmitPlan(id: string, coachId: string) {
   const before = await assertOwner(id, coachId);
   const newStatus = nextStatus(before.status as PlanStatus, "resubmit");
-  return transitionTo(id, newStatus, { actorId: coachId, action: "resubmit" });
+  const updated = await transitionTo(id, newStatus, { actorId: coachId, action: "resubmit" });
+  await notifyHeadCoachesOfPendingPlan(id);
+  return updated;
 }
 
 export async function pullBackPlan(id: string, coachId: string) {
@@ -141,28 +146,54 @@ export async function pullBackPlan(id: string, coachId: string) {
 }
 
 export async function approvePlan(id: string, headCoachId: string) {
-  const plan = await prisma.sessionPlan.findUnique({ where: { id }, select: { status: true } });
+  const plan = await prisma.sessionPlan.findUnique({
+    where: { id },
+    select: { status: true, createdById: true, sessionDate: true },
+  });
   if (!plan) throw new PlanAuthorizationError("Plan not found");
   if (!canApprove(plan.status as PlanStatus)) {
     throw new PlanTransitionError(`Plan must be PENDING to approve (got ${plan.status})`);
   }
   const newStatus = nextStatus(plan.status as PlanStatus, "approve");
-  return transitionTo(id, newStatus, {
+  const updated = await transitionTo(id, newStatus, {
     actorId: headCoachId,
     action: "approve",
     extra: { reviewedById: headCoachId, reviewedAt: new Date(), rejectionComment: null },
   });
+  await dispatchNotification({
+    recipientUserId: plan.createdById,
+    eventType: "SESSION_PLAN_DECISION",
+    payload: {
+      decision: "approved",
+      date: plan.sessionDate?.toISOString().slice(0, 10) ?? "",
+      comment: "",
+    },
+  });
+  return updated;
 }
 
 export async function rejectPlan(id: string, headCoachId: string, comment: string) {
-  const plan = await prisma.sessionPlan.findUnique({ where: { id }, select: { status: true } });
+  const plan = await prisma.sessionPlan.findUnique({
+    where: { id },
+    select: { status: true, createdById: true, sessionDate: true },
+  });
   if (!plan) throw new PlanAuthorizationError("Plan not found");
   const newStatus = nextStatus(plan.status as PlanStatus, "reject", { rejectionComment: comment });
-  return transitionTo(id, newStatus, {
+  const updated = await transitionTo(id, newStatus, {
     actorId: headCoachId,
     action: "reject",
     extra: { reviewedById: headCoachId, reviewedAt: new Date(), rejectionComment: comment },
   });
+  await dispatchNotification({
+    recipientUserId: plan.createdById,
+    eventType: "SESSION_PLAN_DECISION",
+    payload: {
+      decision: "rejected",
+      date: plan.sessionDate?.toISOString().slice(0, 10) ?? "",
+      comment,
+    },
+  });
+  return updated;
 }
 
 export async function reviewPlan(
@@ -173,7 +204,10 @@ export async function reviewPlan(
   notes: string | undefined,
   comment: string,
 ) {
-  const plan = await prisma.sessionPlan.findUnique({ where: { id }, select: { status: true } });
+  const plan = await prisma.sessionPlan.findUnique({
+    where: { id },
+    select: { status: true, createdById: true, sessionDate: true },
+  });
   if (!plan) throw new PlanAuthorizationError("Plan not found");
 
   const targetStatus = nextStatus(
@@ -203,7 +237,42 @@ export async function reviewPlan(
       changes: { newStatus: targetStatus, comment },
     },
   });
+
+  await dispatchNotification({
+    recipientUserId: plan.createdById,
+    eventType: "SESSION_PLAN_DECISION",
+    payload: {
+      decision: action === "approve" ? "approved" : "rejected",
+      date: plan.sessionDate?.toISOString().slice(0, 10) ?? "",
+      comment,
+    },
+  });
   return updated;
+}
+
+async function notifyHeadCoachesOfPendingPlan(planId: string) {
+  const [plan, headCoaches] = await Promise.all([
+    prisma.sessionPlan.findUnique({
+      where: { id: planId },
+      select: { sessionDate: true, group: { select: { name: true } } },
+    }),
+    prisma.user.findMany({
+      where: { role: { in: ["HEAD_COACH", "ADMIN"] }, status: "ACTIVE" },
+      select: { id: true },
+    }),
+  ]);
+  for (const hc of headCoaches) {
+    await dispatchNotification({
+      recipientUserId: hc.id,
+      eventType: "SESSION_PLAN_DECISION",
+      payload: {
+        decision: `submitted (${plan?.group?.name ?? ""})`,
+        date: plan?.sessionDate?.toISOString().slice(0, 10) ?? "",
+        comment: "",
+      },
+      channels: ["IN_APP", "EMAIL"],
+    });
+  }
 }
 
 interface TransitionOpts {

@@ -5,6 +5,7 @@
 export type RevenueType =
   | "SUBSCRIPTION"
   | "PRIVATE_SESSION"
+  | "DROP_IN"
   | "BELT_EXAM"
   | "CHAMPIONSHIP"
   | "MERCHANDISE";

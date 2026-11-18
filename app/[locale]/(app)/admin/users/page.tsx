@@ -25,7 +25,7 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ role?: string; status?: string; search?: string }>;
 }) {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const sp = await searchParams;
   const filters = {
     role: ROLES.includes(sp.role as UserRole) ? (sp.role as UserRole) : undefined,

@@ -6,6 +6,7 @@ import {
   Activity, Shield, MapPin, Phone, Mail, CheckCircle,
 } from "lucide-react";
 import { listPublicLocations, publicPricing } from "@/application/public/service";
+import { prisma } from "@/infrastructure/db/prisma";
 import { AnimatedSection, AnimatedItem } from "@/components/public/animated-section";
 import { GoldParticles } from "@/components/public/gold-particles";
 import { AmbientGlow } from "@/components/public/ambient-glow";
@@ -68,10 +69,19 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [locations, pricing] = await Promise.all([
+  const [locations, pricing, athleteCount, championshipCount] = await Promise.all([
     listPublicLocations(),
     publicPricing(),
+    prisma.user.count({ where: { role: "TRAINEE", status: "ACTIVE" } }).catch(() => 200),
+    prisma.championship.count().catch(() => 50),
   ]);
+
+  const liveStats = [
+    { value: `${Math.max(locations.length, 1)}+`, label: "Locations" },
+    { value: `${athleteCount > 0 ? athleteCount : 200}+`, label: "Athletes" },
+    { value: `${championshipCount > 0 ? championshipCount : 50}+`, label: "Championships" },
+    { value: STATS[3]!.value, label: STATS[3]!.label },
+  ];
 
   return (
     <div className="bg-[#050505] text-white selection:bg-csk-gold/30 overflow-x-hidden">
@@ -147,7 +157,7 @@ export default async function HomePage({
           {/* Stats bar */}
           <AnimatedItem delay={0.5}>
             <div className="mx-auto mt-20 grid max-w-3xl grid-cols-2 gap-px rounded-2xl border border-white/10 bg-white/10 overflow-hidden sm:grid-cols-4">
-              {STATS.map((s) => (
+              {liveStats.map((s) => (
                 <div key={s.label} className="bg-[#050505] px-6 py-5 text-center">
                   <div className="text-3xl font-black text-csk-gold">{s.value}</div>
                   <div className="mt-1 text-xs font-medium uppercase tracking-wider text-white/40">{s.label}</div>

@@ -1,7 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { startSession, endSession } from "@/application/sessions/service";
+import { revalidateLocalized } from "@/lib/revalidate";
+import {
+  startSession,
+  endSession,
+  updateExecutedSequence,
+  type ExecutedSequenceUnit,
+} from "@/application/sessions/service";
 import {
   bulkMarkAttendance,
   attendanceStatusSchema,
@@ -24,7 +29,7 @@ export async function startSessionAction(input: {
       groupId: input.groupId,
       scheduledStart: new Date(input.scheduledStart),
     });
-    revalidatePath("/coach/today");
+    revalidateLocalized("/coach/today");
     return { ok: true, sessionId: session.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -37,8 +42,8 @@ export async function endSessionAction(
   try {
     const user = await requireRole("COACH");
     await endSession({ coachId: user.id, sessionId });
-    revalidatePath("/coach/today");
-    revalidatePath(`/coach/sessions/${sessionId}`);
+    revalidateLocalized("/coach/today");
+    revalidateLocalized(`/coach/sessions/${sessionId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -64,7 +69,7 @@ export async function bulkMarkAttendanceAction(
       actorId: user.id,
       actorRole: user.role === "ADMIN" || user.role === "HEAD_COACH" ? user.role : "COACH",
     });
-    revalidatePath(`/coach/sessions/${sessionId}`);
+    revalidateLocalized(`/coach/sessions/${sessionId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -86,7 +91,44 @@ export async function upsertQuickEvalAction(
       flaggedSkill: formData.get("flaggedSkill") || undefined,
     });
     await upsertQuickEvaluation(parsed, user.id);
-    revalidatePath(`/coach/sessions/${sessionId}`);
+    revalidateLocalized(`/coach/sessions/${sessionId}`);
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Unknown error" };
+  }
+}
+
+export async function updateExecutedSequenceAction(
+  sessionId: string,
+  executedSequence: ExecutedSequenceUnit[],
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    const user = await requireRole("COACH");
+    await updateExecutedSequence({
+      sessionId,
+      coachId: user.id,
+      executedSequence,
+    });
+    revalidateLocalized(`/coach/sessions/${sessionId}`);
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Unknown error" };
+  }
+}
+
+export async function markAllPresentAction(
+  sessionId: string,
+  traineeIds: string[],
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    const user = await requireRole("COACH");
+    await bulkMarkAttendance({
+      sessionId,
+      marks: traineeIds.map((traineeId) => ({ traineeId, status: "PRESENT" })),
+      actorId: user.id,
+      actorRole: user.role === "ADMIN" || user.role === "HEAD_COACH" ? user.role : "COACH",
+    });
+    revalidateLocalized(`/coach/sessions/${sessionId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

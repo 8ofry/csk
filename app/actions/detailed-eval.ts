@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   createDetailedEvaluation,
   detailedEvalSchema,
@@ -31,7 +31,7 @@ export async function createDetailedEvalAction(
     });
 
     const created = await createDetailedEvaluation(data, user.id);
-    revalidatePath(`/coach/trainees/${traineeId}`);
+    revalidateLocalized(`/coach/trainees/${traineeId}`);
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

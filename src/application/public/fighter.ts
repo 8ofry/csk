@@ -45,7 +45,6 @@ export interface PublicFighterProfile {
   profilePhotoUrl: string | null;
   homeLocationName: string | null;
   gender: string | null;
-  dob: string | null;
   age: number | null;
   points: number;
   winRate: number;
@@ -209,7 +208,6 @@ export async function getPublicFighterProfile(
     profilePhotoUrl: trainee.profilePhotoUrl,
     homeLocationName: trainee.enrollments[0]?.group.location.nameEn ?? null,
     gender: trainee.gender,
-    dob: trainee.dob ? trainee.dob.toISOString().slice(0, 10) : null,
     age,
     points,
     winRate,

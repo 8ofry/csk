@@ -29,7 +29,7 @@ export default async function AdminExpensesPage({
     description?: string;
   }>;
 }) {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const { locale } = await params;
   const sp = await searchParams;
 

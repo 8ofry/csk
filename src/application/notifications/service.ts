@@ -84,14 +84,17 @@ export async function dispatchNotification(input: DispatchInput) {
           body: message.body,
           notificationId: notif.id,
         });
+        if (!result.delivered) {
+          throw new Error(result.error ?? "Notification delivery failed");
+        }
         await prisma.notification.update({
           where: { id: notif.id },
           data: {
-            status: result.delivered ? "DELIVERED" : "SENT",
+            status: "DELIVERED",
             sentAt: new Date(),
-            deliveredAt: result.delivered ? new Date() : null,
+            deliveredAt: new Date(),
             retryCount: attempt - 1,
-            errorMessage: result.error ?? null,
+            errorMessage: null,
           },
         });
         lastError = undefined;

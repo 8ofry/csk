@@ -1,23 +1,23 @@
 // Arabic font registration for @react-pdf/renderer.
-// Tajawal hosted at jsdelivr CDN — no local file needed. Cached after first use.
-// NFR-USE-02: typographic parity for Arabic. Without explicit registration,
-// react-pdf renders Arabic as boxes.
+// Self-hosted in public/fonts so PDF generation works offline and without CDN latency.
+// NFR-USE-02: typographic parity for Arabic.
 
+import path from "node:path";
 import { Font } from "@react-pdf/renderer";
 
 let registered = false;
 
-const TAJAWAL_BASE = "https://cdn.jsdelivr.net/npm/@fontsource/tajawal/files";
-
 export function ensureFontsRegistered() {
   if (registered) return;
+
+  const fontsDir = path.join(process.cwd(), "public", "fonts");
 
   Font.register({
     family: "Tajawal",
     fonts: [
-      { src: `${TAJAWAL_BASE}/tajawal-arabic-400-normal.woff`, fontWeight: 400 },
-      { src: `${TAJAWAL_BASE}/tajawal-arabic-500-normal.woff`, fontWeight: 500 },
-      { src: `${TAJAWAL_BASE}/tajawal-arabic-700-normal.woff`, fontWeight: 700 },
+      { src: path.join(fontsDir, "tajawal-arabic-400-normal.woff"), fontWeight: 400 },
+      { src: path.join(fontsDir, "tajawal-arabic-500-normal.woff"), fontWeight: 500 },
+      { src: path.join(fontsDir, "tajawal-arabic-700-normal.woff"), fontWeight: 700 },
     ],
   });
 

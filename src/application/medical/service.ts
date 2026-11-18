@@ -24,7 +24,12 @@ export type MedicalRecordInput = z.infer<typeof medicalRecordSchema>;
 
 export const medicalDocumentSchema = z.object({
   documentType: z.enum(["CLEARANCE", "ECG", "BLOOD", "VISION", "OTHER"]),
-  fileUrl: z.string().url(),
+  fileUrl: z
+    .string()
+    .refine(
+      (v) => v.startsWith("/api/v1/files/medical-document/") || /^https:\/\//i.test(v),
+      "Invalid document URL",
+    ),
   issueDate: z.coerce.date(),
   expiryDate: z.coerce.date(),
   issuingDoctor: z.string().max(200).optional().nullable(),
@@ -93,7 +98,9 @@ export async function addMedicalDocument(
   actorId: string,
 ) {
   const data = medicalDocumentSchema.parse(input);
-  await storage.acceptUrl({ scope: "medical-document", url: data.fileUrl });
+  if (!data.fileUrl.startsWith("/api/v1/files/medical-document/")) {
+    await storage.acceptUrl({ scope: "medical-document", url: data.fileUrl });
+  }
 
   const created = await prisma.medicalDocument.create({
     data: {

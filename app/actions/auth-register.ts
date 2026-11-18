@@ -5,6 +5,7 @@ import argon2 from "argon2";
 import { prisma } from "@/infrastructure/db/prisma";
 import { Prisma } from "@prisma/client";
 import { emailAdapter } from "@/infrastructure/notifications/adapter";
+import { dispatchNotification } from "@/application/notifications/service";
 import { generateVerificationToken } from "@/lib/verification-token";
 
 const registerSchema = z.object({
@@ -58,15 +59,30 @@ export async function registerAction(formData: FormData): Promise<{ error?: stri
 
   // FR-AUTH-02: generate verification token and send email
   const token = generateVerificationToken(parsed.data.email);
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl =
+    process.env.AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const verifyLink = `${baseUrl}/api/v1/auth/verify?token=${token}`;
-  
+
   await emailAdapter().send({
     to: { email: parsed.data.email },
     subject: "Verify your CSK Academy Account",
-    body: `Hello ${parsed.data.fullNameEn},\n\nPlease verify your email by clicking the following link:\n${verifyLink}\n\nWelcome to Team Cap Saied!`,
-    notificationId: `verify-${Date.now()}`
+    body: `Hello ${parsed.data.fullNameEn},\n\nPlease verify your email by clicking the following link:\n${verifyLink}\n\nYour account will be activated once reviewed by the Head Coach or Admin.\n\nWelcome to Team Cap Saied!`,
+    notificationId: `verify-${Date.now()}`,
   });
+
+  // Notify active Head Coaches / Admins of pending registration
+  const staff = await prisma.user.findMany({
+    where: { role: { in: ["ADMIN", "HEAD_COACH"] }, status: "ACTIVE" },
+    select: { id: true },
+  });
+  for (const s of staff) {
+    await dispatchNotification({
+      recipientUserId: s.id,
+      eventType: "ACCOUNT_APPROVAL",
+      payload: { decision: `Pending registration: ${parsed.data.fullNameEn} (${parsed.data.role})` },
+      channels: ["IN_APP"],
+    });
+  }
 
   return {};
 }

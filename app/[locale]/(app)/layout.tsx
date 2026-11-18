@@ -11,5 +11,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect({ href: "/login", locale });
   }
 
-  return <AppShell role={session!.user.role} userName={session!.user.name ?? ""}>{children}</AppShell>;
+  return (
+    <AppShell
+      userId={session!.user.id}
+      role={session!.user.role}
+      userName={session!.user.name ?? ""}
+    >
+      {children}
+    </AppShell>
+  );
 }

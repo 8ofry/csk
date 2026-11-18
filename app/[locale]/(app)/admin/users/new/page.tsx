@@ -4,7 +4,7 @@ import { UserForm } from "@/components/admin/user-form";
 import { createUserAction } from "@/app/actions/users";
 
 export default async function NewUserPage() {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const t = await getTranslations("adminUsers.addUserPage");
 
   return (

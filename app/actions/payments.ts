@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { logPayment, logPaymentSchema } from "@/application/payments/service";
+import { revalidateLocalized } from "@/lib/revalidate";
+import { logPayment, logPaymentSchema, refundPayment } from "@/application/payments/service";
 import { requireRole } from "@/lib/auth-guard";
 
 export async function logSubscriptionPaymentAction(
@@ -18,9 +18,9 @@ export async function logSubscriptionPaymentAction(
       notes: formData.get("notes") || undefined,
     });
     const result = await logPayment(data, user.id);
-    revalidatePath("/admin/financial");
-    revalidatePath("/admin/financial/payments");
-    revalidatePath(`/trainee/payments`);
+    revalidateLocalized("/admin/financial");
+    revalidateLocalized("/admin/financial/payments");
+    revalidateLocalized(`/trainee/payments`);
     return {
       ok: true,
       paymentId: result.payment.id,
@@ -29,5 +29,21 @@ export async function logSubscriptionPaymentAction(
     };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
+  }
+}
+
+export async function refundPaymentAction(
+  paymentId: string,
+  reason?: string,
+): Promise<{ ok?: true; error?: string }> {
+  try {
+    const user = await requireRole("ADMIN");
+    await refundPayment(paymentId, user.id, reason);
+    revalidateLocalized("/admin/financial");
+    revalidateLocalized("/admin/financial/payments");
+    revalidateLocalized("/trainee/payments");
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Failed to refund payment" };
   }
 }

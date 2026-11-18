@@ -51,6 +51,7 @@ function pickContractPercent(
       return c.beltExamPercent ?? null;
     case "CHAMPIONSHIP":
       return c.championshipPercent ?? null;
+    case "DROP_IN":
     case "MERCHANDISE":
       return null;
   }

@@ -11,7 +11,7 @@ export default async function EditUserPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const { id } = await params;
 
   const [t, locale, user] = await Promise.all([
@@ -47,6 +47,7 @@ export default async function EditUserPage({
               role: user.role,
               status: user.status,
               parentManaged: user.parentManaged,
+              parentUserId: user.parentUserId,
             }}
             onSubmit={update}
             submitLabel={t("title")}

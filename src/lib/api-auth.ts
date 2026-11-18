@@ -5,6 +5,8 @@
 import { prisma } from "@/infrastructure/db/prisma";
 import { verifyToken } from "@/application/api-tokens/service";
 import { jsonError } from "@/lib/api";
+import { isAtLeast } from "@/lib/rbac";
+import { featureFlags } from "@/lib/feature-flags";
 import type { UserRole } from "@prisma/client";
 
 export interface ApiUser {
@@ -54,6 +56,9 @@ export async function authenticate(req: Request): Promise<ApiUser | null> {
 export async function requireApiUser(
   req: Request,
 ): Promise<{ user: ApiUser } | { response: Response }> {
+  if (!featureFlags.nativeMobileApi()) {
+    return { response: jsonError("Mobile API is disabled", 404) };
+  }
   const user = await authenticate(req);
   if (!user) return { response: jsonError("Unauthenticated", 401) };
   return { user };
@@ -70,16 +75,4 @@ export async function requireApiRole(
     return { response: jsonError(`Requires ${minimum} role`, 403) };
   }
   return { user: auth.user };
-}
-
-const RANK: Record<UserRole, number> = {
-  ADMIN: 5,
-  HEAD_COACH: 4,
-  COACH: 3,
-  INTERN: 2,
-  TRAINEE: 1,
-};
-
-function isAtLeast(role: UserRole, minimum: UserRole): boolean {
-  return RANK[role] >= RANK[minimum];
 }

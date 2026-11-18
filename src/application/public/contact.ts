@@ -4,6 +4,8 @@
 import { z } from "zod";
 import { prisma } from "@/infrastructure/db/prisma";
 import { dispatchNotification } from "@/application/notifications/service";
+import { renderTemplate } from "@/domain/notifications/events";
+import { emailAdapter } from "@/infrastructure/notifications/adapter";
 
 export const contactInputSchema = z.object({
   name: z.string().min(2).max(120),
@@ -37,19 +39,28 @@ export async function submitContact(input: ContactInput) {
   for (const s of staff) {
     await dispatchNotification({
       recipientUserId: s.id,
-      eventType: "ACCOUNT_APPROVAL",
+      eventType: "CONTACT_INQUIRY",
       payload: {
-        decision: `Public inquiry — ${data.subject ?? "no subject"}`,
-        // The dispatcher renders subject/body from the template; the human content
-        // is summarized inline so it shows up in the in-app inbox preview.
+        subject: data.subject ?? "No subject",
         name: data.name,
         email: data.email,
         phone: data.phone ?? "",
-        message: data.message.slice(0, 200),
+        message: data.message.slice(0, 500),
       },
       channels: ["EMAIL", "IN_APP"],
     });
   }
+
+  // Send acknowledgment email to the submitter.
+  const ack = renderTemplate("CONTACT_ACK", "en", { name: data.name });
+  await emailAdapter()
+    .send({
+      to: { email: data.email },
+      subject: ack.subject,
+      body: ack.body,
+      notificationId: `contact-ack-${Date.now()}`,
+    })
+    .catch(() => undefined);
 
   return { ok: true as const };
 }

@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth-guard";
 import { listPayments } from "@/application/payments/service";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { RefundPaymentButton } from "@/components/admin/refund-payment-button";
 import {
   Table,
   TableBody,
@@ -17,7 +18,7 @@ export default async function PaymentsListPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string; revenueType?: string }>;
 }) {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const sp = await searchParams;
 
   const [t, payments] = await Promise.all([
@@ -48,6 +49,7 @@ export default async function PaymentsListPage({
                 <TableHead>{t("table.method")}</TableHead>
                 <TableHead className="text-end">{t("table.gross")}</TableHead>
                 <TableHead>{t("table.splits")}</TableHead>
+                <TableHead className="text-end">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -75,11 +77,18 @@ export default async function PaymentsListPage({
                       </div>
                     ))}
                   </TableCell>
+                  <TableCell className="text-end">
+                    {p.refundedAt ? (
+                      <Badge variant="destructive">Refunded</Badge>
+                    ) : (
+                      <RefundPaymentButton paymentId={p.id} />
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
               {payments.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     {t("empty")}
                   </TableCell>
                 </TableRow>

@@ -17,6 +17,7 @@ export const logPaymentSchema = z.object({
   revenueType: z.enum([
     "SUBSCRIPTION",
     "PRIVATE_SESSION",
+    "DROP_IN",
     "BELT_EXAM",
     "CHAMPIONSHIP",
     "MERCHANDISE",
@@ -89,6 +90,15 @@ async function resolveContext(input: LogPaymentInput): Promise<PaymentContext> {
       if (!ps) throw new PaymentValidationError("Private session not found");
       return { locationId: ps.locationId, disciplineId: null, coachUserId: ps.coachId };
     }
+    case "DROP_IN": {
+      if (!input.locationId)
+        throw new PaymentValidationError("locationId required for drop-in payment");
+      return {
+        locationId: input.locationId,
+        disciplineId: input.disciplineId ?? null,
+        coachUserId: input.coachUserId ?? null,
+      };
+    }
     case "BELT_EXAM": {
       if (!input.beltExamResultId)
         throw new PaymentValidationError("beltExamResultId required");
@@ -135,30 +145,42 @@ async function resolveContext(input: LogPaymentInput): Promise<PaymentContext> {
   }
 }
 
-async function generateReceiptNumber() {
-  // Simple monotonic per-day counter: CSK-YYYYMMDD-NNNN
+async function generateReceiptNumber(tx: Prisma.TransactionClient): Promise<string> {
+  // Advisory transaction lock prevents concurrent receipt-number collisions.
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('csk_receipt_number'))`;
   const today = new Date();
   const yyyymmdd = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(
     today.getDate(),
   ).padStart(2, "0")}`;
-  const start = new Date(today);
-  start.setHours(0, 0, 0, 0);
-  const count = await prisma.payment.count({ where: { paidAt: { gte: start } } });
-  return `CSK-${yyyymmdd}-${String(count + 1).padStart(4, "0")}`;
+  const prefix = `CSK-${yyyymmdd}-`;
+  const latest = await tx.payment.findFirst({
+    where: { receiptNumber: { startsWith: prefix } },
+    orderBy: { receiptNumber: "desc" },
+    select: { receiptNumber: true },
+  });
+  const lastSeq = latest ? Number.parseInt(latest.receiptNumber.slice(prefix.length), 10) || 0 : 0;
+  return `${prefix}${String(lastSeq + 1).padStart(4, "0")}`;
 }
 
-export async function logPayment(input: LogPaymentInput, actorId: string) {
+export async function logPayment(
+  input: LogPaymentInput,
+  actorId: string,
+  outerTx?: Prisma.TransactionClient,
+) {
   const data = logPaymentSchema.parse(input);
   const ctx = await resolveContext(data);
 
-  // Find the location's split rule for this revenue type
-  const locationRule = await prisma.locationSplitRule.findFirst({
+  // Find the location's split rule for this revenue type (preferring discipline-specific override)
+  const locationRule = await (outerTx ?? prisma).locationSplitRule.findFirst({
     where: {
       locationId: ctx.locationId,
       revenueType: data.revenueType,
-      OR: [{ effectiveTo: null }, { effectiveTo: { gte: new Date() } }],
+      OR: ctx.disciplineId
+        ? [{ disciplineId: ctx.disciplineId }, { disciplineId: null }]
+        : [{ disciplineId: null }],
+      AND: [{ OR: [{ effectiveTo: null }, { effectiveTo: { gte: new Date() } }] }],
     },
-    orderBy: { effectiveFrom: "desc" },
+    orderBy: [{ disciplineId: "desc" }, { effectiveFrom: "desc" }],
   });
   if (!locationRule) {
     throw new PaymentValidationError(
@@ -166,15 +188,20 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
     );
   }
 
-  // Coach contract for this stream + location
+  // Coach contract for this stream + location + discipline
   const coachContract = ctx.coachUserId
-    ? await prisma.coachContract.findFirst({
+    ? await (outerTx ?? prisma).coachContract.findFirst({
         where: {
           coachId: ctx.coachUserId,
           active: true,
-          OR: [{ locationId: ctx.locationId }, { locationId: null }],
+          AND: [
+            { OR: [{ locationId: ctx.locationId }, { locationId: null }] },
+            ctx.disciplineId
+              ? { OR: [{ disciplineId: ctx.disciplineId }, { disciplineId: null }] }
+              : { disciplineId: null },
+          ],
         },
-        orderBy: [{ locationId: "desc" }],
+        orderBy: [{ locationId: "desc" }, { disciplineId: "desc" }, { effectiveFrom: "desc" }],
       })
     : null;
 
@@ -206,9 +233,8 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
     rules,
   });
 
-  const receiptNumber = await generateReceiptNumber();
-
-  return prisma.$transaction(async (tx) => {
+  const run = async (tx: Prisma.TransactionClient) => {
+    const receiptNumber = await generateReceiptNumber(tx);
     const payment = await tx.payment.create({
       data: {
         revenueType: data.revenueType,
@@ -242,13 +268,14 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
       });
     }
 
-    // Update subscription payment status if relevant
+    // Update subscription payment status if relevant (respecting discountPercent & excluding refunds)
     let subscriptionStatus: string | undefined = undefined;
     if (data.revenueType === "SUBSCRIPTION" && data.subscriptionId) {
       const sub = await tx.subscription.findUnique({
         where: { id: data.subscriptionId },
         select: {
           monthlyFee: true,
+          discountPercent: true,
           currentPeriodStart: true,
           currentPeriodEnd: true,
         },
@@ -257,13 +284,16 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
         const paidInPeriod = await tx.payment.aggregate({
           where: {
             subscriptionId: data.subscriptionId,
+            refundedAt: null,
             paidAt: { gte: sub.currentPeriodStart, lte: sub.currentPeriodEnd },
           },
           _sum: { amountNet: true },
         });
         const totalPaid = Number(paidInPeriod._sum.amountNet ?? 0);
+        const effectiveFee =
+          Number(sub.monthlyFee) * (1 - Number(sub.discountPercent ?? 0) / 100);
         const newStatus = deriveStatus({
-          monthlyFee: Number(sub.monthlyFee),
+          monthlyFee: Math.max(0, effectiveFee),
           amountPaidInPeriod: totalPaid,
           periodEnd: sub.currentPeriodEnd,
         });
@@ -290,7 +320,9 @@ export async function logPayment(input: LogPaymentInput, actorId: string) {
     });
 
     return { payment, splits: splitResult, subscriptionStatus };
-  });
+  };
+
+  return outerTx ? run(outerTx) : prisma.$transaction(run);
 }
 
 export async function listPayments(filters: {
@@ -305,6 +337,7 @@ export async function listPayments(filters: {
         ? (filters.revenueType as
             | "SUBSCRIPTION"
             | "PRIVATE_SESSION"
+            | "DROP_IN"
             | "BELT_EXAM"
             | "CHAMPIONSHIP"
             | "MERCHANDISE")
@@ -337,4 +370,65 @@ export async function getPayment(id: string) {
 
 function numOrNull(d: { toNumber: () => number } | null | undefined): number | null {
   return d == null ? null : d.toNumber();
+}
+
+export async function refundPayment(
+  paymentId: string,
+  actorId: string,
+  reason?: string,
+) {
+  return prisma.$transaction(async (tx) => {
+    const payment = await tx.payment.findUnique({
+      where: { id: paymentId },
+      include: { subscription: true },
+    });
+    if (!payment) throw new PaymentValidationError("Payment not found");
+    if (payment.refundedAt) throw new PaymentValidationError("Payment is already refunded");
+
+    const updated = await tx.payment.update({
+      where: { id: paymentId },
+      data: {
+        refundedAt: new Date(),
+        notes: reason?.trim()
+          ? `${payment.notes ? `${payment.notes} | ` : ""}Refund: ${reason.trim()}`
+          : payment.notes,
+      },
+    });
+
+    if (payment.subscriptionId && payment.subscription) {
+      const agg = await tx.payment.aggregate({
+        where: { subscriptionId: payment.subscriptionId, refundedAt: null },
+        _sum: { amountGross: true },
+      });
+      const paidAfter = agg._sum.amountGross?.toNumber() ?? 0;
+      const discountedFee =
+        payment.subscription.monthlyFee.toNumber() *
+        (1 - (payment.subscription.discountPercent?.toNumber() ?? 0) / 100);
+      const nextStatus = deriveStatus({
+        monthlyFee: discountedFee,
+        amountPaidInPeriod: paidAfter,
+        periodEnd: payment.subscription.currentPeriodEnd,
+      });
+      await tx.subscription.update({
+        where: { id: payment.subscriptionId },
+        data: { paymentStatus: nextStatus },
+      });
+    }
+
+    await tx.auditLog.create({
+      data: {
+        actorId,
+        action: "payment.refund",
+        entityType: "Payment",
+        entityId: paymentId,
+        changes: {
+          receiptNumber: payment.receiptNumber,
+          amountGross: payment.amountGross.toNumber(),
+          reason: reason ?? null,
+        },
+      },
+    });
+
+    return updated;
+  });
 }

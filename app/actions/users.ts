@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import { headers } from "next/headers";
 import {
   approveUser,
@@ -25,9 +25,9 @@ export async function approveUserAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await approveUser(userId, user.id, await appUrl());
-    revalidatePath("/admin/users");
-    revalidatePath("/head-coach/users");
-    revalidatePath("/head-coach/approvals");
+    revalidateLocalized("/admin/users");
+    revalidateLocalized("/head-coach/users");
+    revalidateLocalized("/head-coach/approvals");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -40,8 +40,8 @@ export async function suspendUserAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await setUserStatus(userId, "SUSPENDED", user.id);
-    revalidatePath("/admin/users");
-    revalidatePath("/head-coach/users");
+    revalidateLocalized("/admin/users");
+    revalidateLocalized("/head-coach/users");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -54,8 +54,8 @@ export async function reactivateUserAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await setUserStatus(userId, "ACTIVE", user.id);
-    revalidatePath("/admin/users");
-    revalidatePath("/head-coach/users");
+    revalidateLocalized("/admin/users");
+    revalidateLocalized("/head-coach/users");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -68,8 +68,8 @@ export async function promoteInternAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await promoteInternToCoach(userId, user.id);
-    revalidatePath("/admin/users");
-    revalidatePath("/head-coach/users");
+    revalidateLocalized("/admin/users");
+    revalidateLocalized("/head-coach/users");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -80,7 +80,7 @@ export async function createUserAction(
   formData: FormData,
 ): Promise<{ ok?: true; id?: string; error?: string }> {
   try {
-    const actor = await requireRole("HEAD_COACH");
+    const actor = await requireRole("ADMIN");
 
     const parsed = userCreateInputSchema.safeParse({
       fullNameAr: formData.get("fullNameAr"),
@@ -91,6 +91,7 @@ export async function createUserAction(
       role: formData.get("role"),
       status: formData.get("status") || "ACTIVE",
       parentManaged: formData.get("parentManaged") === "on",
+      parentUserId: formData.get("parentUserId") ? String(formData.get("parentUserId")) : undefined,
     });
 
     if (!parsed.success) {
@@ -98,7 +99,7 @@ export async function createUserAction(
     }
 
     const created = await createUser(parsed.data, actor.id);
-    revalidatePath("/admin/users");
+    revalidateLocalized("/admin/users");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -110,7 +111,7 @@ export async function updateUserAction(
   formData: FormData,
 ): Promise<{ ok?: true; error?: string }> {
   try {
-    const actor = await requireRole("HEAD_COACH");
+    const actor = await requireRole("ADMIN");
 
     const parsed = userUpdateInputSchema.safeParse({
       fullNameAr: formData.get("fullNameAr"),
@@ -121,6 +122,7 @@ export async function updateUserAction(
       role: formData.get("role"),
       status: formData.get("status"),
       parentManaged: formData.get("parentManaged") === "on",
+      parentUserId: formData.get("parentUserId") ? String(formData.get("parentUserId")) : undefined,
     });
 
     if (!parsed.success) {
@@ -128,8 +130,8 @@ export async function updateUserAction(
     }
 
     await updateUser(userId, parsed.data, actor.id);
-    revalidatePath("/admin/users");
-    revalidatePath(`/admin/users/${userId}`);
+    revalidateLocalized("/admin/users");
+    revalidateLocalized(`/admin/users/${userId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

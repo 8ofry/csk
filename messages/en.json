@@ -17,7 +17,9 @@
     "merchandise": "Merchandise",
     "blog": "Blog",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "championships": "Championships",
+    "fighters": "Fighters"
   },
   "auth": {
     "login": {
@@ -360,7 +362,11 @@
     "reports": "Reports",
     "payments": "Payments",
     "subscriptions": "Subscriptions",
-    "merchandise": "Merchandise"
+    "merchandise": "Merchandise",
+    "beltExams": "Belt exams",
+    "monthlyReports": "Monthly reports",
+    "certificates": "Certificates",
+    "family": "Family hub"
   },
   "publicSite": {
     "footer": {

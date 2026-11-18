@@ -108,7 +108,7 @@ export async function recordBeltResult(input: BeltResultInput, actorId: string) 
 
   const exam = await prisma.beltExam.findUnique({
     where: { id: data.examId },
-    select: { id: true, disciplineId: true },
+    select: { id: true, disciplineId: true, discipline: { select: { nameEn: true } } },
   });
   if (!exam) throw new Error("Exam not found");
 
@@ -149,8 +149,8 @@ export async function recordBeltResult(input: BeltResultInput, actorId: string) 
   if (data.result === "PASSED" && newLevel) {
     await dispatchNotification({
       recipientUserId: data.traineeId,
-      eventType: "BELT_EXAM_SCHEDULED", // generic belt event for now; v2 add BELT_PROMOTED
-      payload: { decision: `passed → ${newLevel}` },
+      eventType: "BELT_PROMOTED",
+      payload: { newLevel, discipline: exam.discipline.nameEn },
     });
   }
 

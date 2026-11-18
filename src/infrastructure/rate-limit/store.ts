@@ -53,13 +53,62 @@ declare global {
 export const rateLimitStore: RateLimitStore =
   globalThis.__rateLimitStore__ ?? new InMemoryRateLimitStore();
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__rateLimitStore__ = rateLimitStore;
+globalThis.__rateLimitStore__ = rateLimitStore;
+
+export interface AsyncRateLimitStore {
+  checkAsync(key: string, cfg: RateLimitConfig): Promise<RateLimitDecision>;
+}
+
+class UpstashRedisRateLimitStore implements AsyncRateLimitStore {
+  constructor(
+    private readonly url: string,
+    private readonly token: string,
+  ) {}
+
+  async checkAsync(key: string, cfg: RateLimitConfig): Promise<RateLimitDecision> {
+    const windowSec = Math.max(1, Math.ceil(cfg.capacity / cfg.refillPerSecond));
+    const redisKey = `rl:${key}`;
+    try {
+      const res = await fetch(`${this.url.replace(/\/$/, "")}/pipeline`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([
+          ["INCR", redisKey],
+          ["EXPIRE", redisKey, windowSec, "NX"],
+        ]),
+      });
+      if (!res.ok) return rateLimitStore.check(key, cfg);
+      const json = (await res.json()) as Array<{ result?: number }>;
+      const count = Number(json[0]?.result ?? 1);
+      const tokensRemaining = Math.max(0, cfg.capacity - count);
+      return {
+        allowed: count <= cfg.capacity,
+        tokensRemaining,
+        retryAfterSeconds: count <= cfg.capacity ? 0 : windowSec,
+        newState: { tokens: tokensRemaining, lastRefillAt: Date.now() },
+      };
+    } catch {
+      return rateLimitStore.check(key, cfg);
+    }
+  }
+}
+
+export function getDistributedRateLimiter(): AsyncRateLimitStore {
+  const url = process.env.REDIS_REST_URL;
+  const token = process.env.REDIS_REST_TOKEN;
+  if (url && token) return new UpstashRedisRateLimitStore(url, token);
+  return {
+    checkAsync: async (key, cfg) => rateLimitStore.check(key, cfg),
+  };
 }
 
 // Pre-tuned configs for the public surfaces.
 export const RATE_LIMITS = {
   publicContact: { capacity: 5, refillPerSecond: 5 / 3600 } satisfies RateLimitConfig, // 5/hour
   publicRegister: { capacity: 3, refillPerSecond: 3 / 3600 } satisfies RateLimitConfig, // 3/hour
+  authLogin: { capacity: 10, refillPerSecond: 10 / 900 } satisfies RateLimitConfig, // 10 / 15 min
   publicReadDefault: { capacity: 60, refillPerSecond: 1 } satisfies RateLimitConfig, // 60/min
 } as const;

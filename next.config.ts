@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -45,6 +46,10 @@ const securityHeaders: { key: string; value: string }[] = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
+  outputFileTracingRoot: path.join(__dirname),
   images: {
     remotePatterns: [
       // Configure once R2/S3 bucket domain is known

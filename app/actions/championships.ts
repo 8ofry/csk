@@ -1,8 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { revalidateLocalized } from "@/lib/revalidate";
 import { z } from "zod";
 import { prisma } from "@/infrastructure/db/prisma";
+import { rateLimitStore, RATE_LIMITS } from "@/infrastructure/rate-limit/store";
 import {
   championshipInputSchema,
   coachConfirmRegistration,
@@ -28,7 +30,7 @@ import {
 } from "@/application/championships/schemas";
 import { requireRole } from "@/lib/auth-guard";
 import { auth, signIn } from "@/auth";
-import { storage } from "@/infrastructure/storage/storage";
+import { storage, validateUploadedFile } from "@/infrastructure/storage/storage";
 
 /** Void-returning shim for use as a server `<form action>`. */
 export async function createChampionshipFormAction(formData: FormData): Promise<void> {
@@ -56,7 +58,7 @@ export async function createChampionshipAction(
       notes: formData.get("notes") || null,
     });
     const created = await createChampionship(data, user.id);
-    revalidatePath("/head-coach/championships");
+    revalidateLocalized("/head-coach/championships");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -96,8 +98,8 @@ export async function optInChampionshipAction(
       isAmateur: data.isAmateur,
       actorId: session.user.id,
     });
-    revalidatePath("/trainee/championships");
-    revalidatePath(`/head-coach/championships/${data.championshipId}`);
+    revalidateLocalized("/trainee/championships");
+    revalidateLocalized(`/head-coach/championships/${data.championshipId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -110,7 +112,7 @@ export async function confirmRegistrationAction(
   try {
     const user = await requireRole("COACH");
     await coachConfirmRegistration({ registrationId, actorId: user.id });
-    revalidatePath("/head-coach/championships");
+    revalidateLocalized("/head-coach/championships");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -124,8 +126,8 @@ export async function withdrawRegistrationAction(
     const session = await auth();
     if (!session?.user) throw new Error("Not signed in");
     await withdrawRegistration({ registrationId, actorId: session.user.id });
-    revalidatePath("/trainee/championships");
-    revalidatePath("/head-coach/championships");
+    revalidateLocalized("/trainee/championships");
+    revalidateLocalized("/head-coach/championships");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -148,7 +150,7 @@ export async function recordFightResultAction(
       notes: formData.get("notes") || null,
     });
     await recordFightResult(data, user.id);
-    revalidatePath("/head-coach/championships");
+    revalidateLocalized("/head-coach/championships");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -159,6 +161,19 @@ export async function registerExternalAcademyAction(
   formData: FormData,
 ): Promise<{ ok?: true; error?: string }> {
   try {
+    const h = await headers();
+    const ip =
+      h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      h.get("x-real-ip") ||
+      "unknown";
+    const limit = await rateLimitStore.check(
+      `public:championship-academy:${ip}`,
+      RATE_LIMITS.publicRegister,
+    );
+    if (!limit.allowed) {
+      return { error: "Too many registration attempts. Please try again later." };
+    }
+
     const data = externalSignupSchema.parse({
       fullNameAr: formData.get("fullNameAr"),
       fullNameEn: formData.get("fullNameEn"),
@@ -178,7 +193,7 @@ export async function registerExternalAcademyAction(
       redirect: false,
     });
 
-    revalidatePath("/coach");
+    revalidateLocalized("/coach");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -195,18 +210,15 @@ export async function registerFighterAction(
     const photoFile = formData.get("photo") as File | null;
     let photoUrl: string | null = null;
     if (photoFile && photoFile.size > 0) {
-      const bytes = await photoFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const extension = photoFile.name.split(".").pop() || "";
-      const cleanName = photoFile.name
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[^A-Za-z0-9_-]/g, "");
-      const key = `${Date.now()}-${cleanName}.${extension}`.replace(/[^A-Za-z0-9._-]/g, "");
+      const validated = await validateUploadedFile(photoFile, {
+        maxBytes: 5 * 1024 * 1024,
+      });
+      const key = `${Date.now()}-fighter.${validated.ext}`;
       const stored = await storage.put({
         scope: "profile-photo",
         key,
-        contentType: photoFile.type,
-        data: buffer,
+        contentType: validated.contentType,
+        data: validated.buffer,
       });
       photoUrl = stored.url;
     }
@@ -224,8 +236,8 @@ export async function registerFighterAction(
     });
 
     await registerExternalFighter(data, user.id);
-    revalidatePath("/coach");
-    revalidatePath(`/coach/championships/${data.championshipId}`);
+    revalidateLocalized("/coach");
+    revalidateLocalized(`/coach/championships/${data.championshipId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -236,22 +248,32 @@ export async function registerIndividualFighterAction(
   formData: FormData,
 ): Promise<{ ok?: true; error?: string }> {
   try {
+    const h = await headers();
+    const ip =
+      h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      h.get("x-real-ip") ||
+      "unknown";
+    const limit = await rateLimitStore.check(
+      `public:championship-individual:${ip}`,
+      RATE_LIMITS.publicRegister,
+    );
+    if (!limit.allowed) {
+      return { error: "Too many registration attempts. Please try again later." };
+    }
+
     // 1. Upload photo if present
     const photoFile = formData.get("photo") as File | null;
     let photoUrl: string | null = null;
     if (photoFile && photoFile.size > 0) {
-      const bytes = await photoFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const extension = photoFile.name.split(".").pop() || "";
-      const cleanName = photoFile.name
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[^A-Za-z0-9_-]/g, "");
-      const key = `${Date.now()}-photo-${cleanName}.${extension}`.replace(/[^A-Za-z0-9._-]/g, "");
+      const validated = await validateUploadedFile(photoFile, {
+        maxBytes: 5 * 1024 * 1024,
+      });
+      const key = `${Date.now()}-photo.${validated.ext}`;
       const stored = await storage.put({
         scope: "profile-photo",
         key,
-        contentType: photoFile.type,
-        data: buffer,
+        contentType: validated.contentType,
+        data: validated.buffer,
       });
       photoUrl = stored.url;
     }
@@ -260,18 +282,16 @@ export async function registerIndividualFighterAction(
     const receiptFile = formData.get("receipt") as File | null;
     let paymentReceiptUrl: string | null = null;
     if (receiptFile && receiptFile.size > 0) {
-      const bytes = await receiptFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const extension = receiptFile.name.split(".").pop() || "";
-      const cleanName = receiptFile.name
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[^A-Za-z0-9_-]/g, "");
-      const key = `${Date.now()}-receipt-${cleanName}.${extension}`.replace(/[^A-Za-z0-9._-]/g, "");
+      const validated = await validateUploadedFile(receiptFile, {
+        maxBytes: 8 * 1024 * 1024,
+        allowPdf: true,
+      });
+      const key = `${Date.now()}-receipt.${validated.ext}`;
       const stored = await storage.put({
-        scope: "medical-document",
+        scope: "payment-receipt",
         key,
-        contentType: receiptFile.type,
-        data: buffer,
+        contentType: validated.contentType,
+        data: validated.buffer,
       });
       paymentReceiptUrl = stored.url;
     }
@@ -301,7 +321,7 @@ export async function registerIndividualFighterAction(
       redirect: false,
     });
 
-    revalidatePath("/trainee/championships");
+    revalidateLocalized("/trainee/championships");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -319,18 +339,16 @@ export async function submitInstapayPaymentAction(
     const receiptFile = formData.get("receipt") as File | null;
     let paymentReceiptUrl: string | null = null;
     if (receiptFile && receiptFile.size > 0) {
-      const bytes = await receiptFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const extension = receiptFile.name.split(".").pop() || "";
-      const cleanName = receiptFile.name
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[^A-Za-z0-9_-]/g, "");
-      const key = `${Date.now()}-${cleanName}.${extension}`.replace(/[^A-Za-z0-9._-]/g, "");
+      const validated = await validateUploadedFile(receiptFile, {
+        maxBytes: 8 * 1024 * 1024,
+        allowPdf: true,
+      });
+      const key = `${Date.now()}-instapay.${validated.ext}`;
       const stored = await storage.put({
-        scope: "medical-document", // using medical-document scope for confirmation papers
+        scope: "payment-receipt",
         key,
-        contentType: receiptFile.type,
-        data: buffer,
+        contentType: validated.contentType,
+        data: validated.buffer,
       });
       paymentReceiptUrl = stored.url;
     }
@@ -342,7 +360,7 @@ export async function submitInstapayPaymentAction(
     });
 
     await submitInstapayPayment(data, session.user.id);
-    revalidatePath("/coach");
+    revalidateLocalized("/coach");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -355,8 +373,8 @@ export async function verifyPaymentAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await verifyInstapayPayment(registrationId, user.id);
-    revalidatePath("/head-coach/championships");
-    revalidatePath("/admin/championships");
+    revalidateLocalized("/head-coach/championships");
+    revalidateLocalized("/admin/championships");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -369,8 +387,8 @@ export async function runMatchmakingAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await runAutomatedMatchmaking(championshipId, user.id);
-    revalidatePath("/head-coach/championships");
-    revalidatePath(`/championships/${championshipId}`);
+    revalidateLocalized("/head-coach/championships");
+    revalidateLocalized(`/championships/${championshipId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -393,8 +411,8 @@ export async function recordMatchResultAction(
       winnerId: formData.get("winnerId") || null,
     });
     await recordMatchResult(data, user.id);
-    revalidatePath("/head-coach/championships");
-    revalidatePath(`/championships/${formData.get("championshipId")}`);
+    revalidateLocalized("/head-coach/championships");
+    revalidateLocalized(`/championships/${formData.get("championshipId")}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -430,9 +448,9 @@ export async function toggleProfilePublicAction(
       data: { isProfilePublic: isPublic },
     });
 
-    revalidatePath("/trainee/championships");
-    revalidatePath("/champions");
-    revalidatePath(`/champions/${session.user.id}`);
+    revalidateLocalized("/trainee/championships");
+    revalidateLocalized("/champions");
+    revalidateLocalized(`/champions/${session.user.id}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

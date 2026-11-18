@@ -17,7 +17,9 @@
     "merchandise": "المتجر",
     "blog": "المدونة",
     "login": "تسجيل الدخول",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "championships": "البطولات",
+    "fighters": "المقاتلون"
   },
   "auth": {
     "login": {
@@ -360,7 +362,11 @@
     "reports": "التقارير",
     "payments": "المدفوعات",
     "subscriptions": "الاشتراكات",
-    "merchandise": "البضائع"
+    "merchandise": "البضائع",
+    "beltExams": "اختبارات الأحزمة",
+    "monthlyReports": "التقارير الشهرية",
+    "certificates": "الشهادات",
+    "family": "ملف العائلة"
   },
   "publicSite": {
     "footer": {

@@ -6,8 +6,12 @@ import { listPayments } from "@/application/payments/service";
 
 function csvEscape(v: unknown): string {
   if (v == null) return "";
-  const s = String(v);
-  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  let s = String(v);
+  // Guard against Excel/Sheets formula injection (CWE-1236)
+  if (/^[=+\-@\t\r]/.test(s)) {
+    s = `'${s}`;
+  }
+  if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }
 
@@ -67,10 +71,10 @@ export async function GET(req: Request) {
     rows.push(
       [
         p.paidAt.toISOString(),
-        p.receiptNumber,
+        csvEscape(p.receiptNumber),
         p.revenueType,
         p.method,
-        p.payerUser.fullNameEn,
+        csvEscape(p.payerUser.fullNameEn),
         Number(p.amountGross).toFixed(2),
         Number(p.amountNet).toFixed(2),
         splits.csk.toFixed(2),

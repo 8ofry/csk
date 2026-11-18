@@ -10,6 +10,7 @@ export const userCreateInputSchema = z.object({
   role: z.nativeEnum(UserRole),
   status: z.nativeEnum(AccountStatus).default("ACTIVE"),
   parentManaged: z.boolean().default(false),
+  parentUserId: z.string().optional().nullable().or(z.literal("")),
 });
 
 export type UserCreateInput = z.infer<typeof userCreateInputSchema>;
@@ -23,6 +24,7 @@ export const userUpdateInputSchema = z.object({
   role: z.nativeEnum(UserRole),
   status: z.nativeEnum(AccountStatus),
   parentManaged: z.boolean().default(false),
+  parentUserId: z.string().optional().nullable().or(z.literal("")),
 });
 
 export type UserUpdateInput = z.infer<typeof userUpdateInputSchema>;

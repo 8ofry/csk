@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   archiveSubscription,
   createSubscription,
@@ -23,7 +23,7 @@ export async function createSubscriptionAction(
       startMonth: formData.get("startMonth"),
     });
     const created = await createSubscription(data, user.id);
-    revalidatePath("/head-coach/subscriptions");
+    revalidateLocalized("/head-coach/subscriptions");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -36,7 +36,7 @@ export async function archiveSubscriptionAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await archiveSubscription(id, user.id);
-    revalidatePath("/head-coach/subscriptions");
+    revalidateLocalized("/head-coach/subscriptions");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

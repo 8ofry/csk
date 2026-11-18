@@ -448,6 +448,28 @@ export async function registerIndividualExternalFighter(input: IndividualFighter
 }
 
 export async function submitInstapayPayment(input: InstapayPaymentInput, actorId: string) {
+  const [reg, actor] = await Promise.all([
+    prisma.championshipRegistration.findUnique({
+      where: { id: input.registrationId },
+      select: { id: true, traineeId: true, trainee: { select: { academyId: true } } },
+    }),
+    prisma.user.findUnique({
+      where: { id: actorId },
+      select: { id: true, role: true, academyId: true },
+    }),
+  ]);
+  if (!reg) throw new Error("Registration not found");
+  if (!actor) throw new Error("Actor not found");
+
+  const isStaff = actor.role === "ADMIN" || actor.role === "HEAD_COACH";
+  const isOwner = reg.traineeId === actor.id;
+  const isAcademyCoach =
+    actor.role === "COACH" && !!actor.academyId && actor.academyId === reg.trainee.academyId;
+
+  if (!isStaff && !isOwner && !isAcademyCoach) {
+    throw new Error("Forbidden: cannot submit payment for this registration");
+  }
+
   const updated = await prisma.championshipRegistration.update({
     where: { id: input.registrationId },
     data: {
@@ -558,10 +580,18 @@ export async function runAutomatedMatchmaking(championshipId: string, actorId: s
 export async function recordMatchResult(input: MatchResultInput, actorId: string) {
   const match = await prisma.match.findUnique({
     where: { id: input.matchId },
-    select: { fighter1Id: true, fighter2Id: true, championshipId: true },
+    select: {
+      fighter1Id: true,
+      fighter2Id: true,
+      championshipId: true,
+      fighter1: { select: { trainee: { select: { fullNameEn: true } } } },
+      fighter2: { select: { trainee: { select: { fullNameEn: true } } } },
+    },
   });
   if (!match) throw new Error("Match not found");
 
+  const f1Name = match.fighter1.trainee.fullNameEn;
+  const f2Name = match.fighter2.trainee.fullNameEn;
   const winnerId = input.winnerId || null;
 
   return prisma.$transaction(async (tx) => {
@@ -579,71 +609,59 @@ export async function recordMatchResult(input: MatchResultInput, actorId: string
       },
     });
 
-    // Delete any existing FightResult linked to these registrations for this championship
+    // Delete only existing FightResult rows belonging to this specific match.
     await tx.fightResult.deleteMany({
-      where: {
-        registrationId: { in: [match.fighter1Id, match.fighter2Id] },
-      },
+      where: { matchId: input.matchId },
     });
+
+    const commonData = {
+      matchId: input.matchId,
+      method: input.method ?? null,
+      round: input.round ?? null,
+      timeInRound: input.timeInRound ?? null,
+      videoUrl: input.videoUrl || null,
+      notes: input.notes ?? null,
+      recordedById: actorId,
+    };
 
     // 2. Generate scorecard/FightResult entries
     if (input.outcome === "WIN" && winnerId) {
       const loserId = winnerId === match.fighter1Id ? match.fighter2Id : match.fighter1Id;
-      const winnerName = winnerId === match.fighter1Id ? "Fighter 1" : "Fighter 2";
-      const loserName = winnerId === match.fighter1Id ? "Fighter 2" : "Fighter 1";
+      const winnerName = winnerId === match.fighter1Id ? f1Name : f2Name;
+      const loserName = winnerId === match.fighter1Id ? f2Name : f1Name;
 
       await tx.fightResult.create({
         data: {
+          ...commonData,
           registrationId: winnerId,
           opponentName: loserName,
           outcome: "WIN",
-          method: input.method ?? null,
-          round: input.round ?? null,
-          timeInRound: input.timeInRound ?? null,
-          videoUrl: input.videoUrl || null,
-          notes: input.notes ?? null,
-          recordedById: actorId,
         },
       });
 
       await tx.fightResult.create({
         data: {
+          ...commonData,
           registrationId: loserId,
           opponentName: winnerName,
           outcome: "LOSS",
-          method: input.method ?? null,
-          round: input.round ?? null,
-          timeInRound: input.timeInRound ?? null,
-          videoUrl: input.videoUrl || null,
-          notes: input.notes ?? null,
-          recordedById: actorId,
         },
       });
     } else if (input.outcome === "DRAW") {
       await tx.fightResult.create({
         data: {
+          ...commonData,
           registrationId: match.fighter1Id,
-          opponentName: "Fighter 2",
+          opponentName: f2Name,
           outcome: "DRAW",
-          method: input.method ?? null,
-          round: input.round ?? null,
-          timeInRound: input.timeInRound ?? null,
-          videoUrl: input.videoUrl || null,
-          notes: input.notes ?? null,
-          recordedById: actorId,
         },
       });
       await tx.fightResult.create({
         data: {
+          ...commonData,
           registrationId: match.fighter2Id,
-          opponentName: "Fighter 1",
+          opponentName: f1Name,
           outcome: "DRAW",
-          method: input.method ?? null,
-          round: input.round ?? null,
-          timeInRound: input.timeInRound ?? null,
-          videoUrl: input.videoUrl || null,
-          notes: input.notes ?? null,
-          recordedById: actorId,
         },
       });
     }

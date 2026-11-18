@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   GroupCapacityError,
   createGroup,
@@ -44,7 +44,7 @@ export async function createGroupAction(
     const user = await requireRole("HEAD_COACH");
     const data = parseFormData(formData);
     const created = await createGroup(data, user.id);
-    revalidatePath("/head-coach/groups");
+    revalidateLocalized("/head-coach/groups");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -59,8 +59,8 @@ export async function updateGroupAction(
     const user = await requireRole("HEAD_COACH");
     const data = parseFormData(formData);
     await updateGroup(id, data, user.id);
-    revalidatePath("/head-coach/groups");
-    revalidatePath(`/head-coach/groups/${id}`);
+    revalidateLocalized("/head-coach/groups");
+    revalidateLocalized(`/head-coach/groups/${id}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -77,7 +77,7 @@ export async function enrollTraineeAction(
     const overrideCapacity = formData.get("overrideCapacity") === "on";
     if (!traineeId) return { error: "Pick a trainee" };
     await enrollTrainee({ groupId, traineeId, actorId: user.id, overrideCapacity });
-    revalidatePath(`/head-coach/groups/${groupId}`);
+    revalidateLocalized(`/head-coach/groups/${groupId}`);
     return { ok: true };
   } catch (e) {
     if (e instanceof GroupCapacityError) {
@@ -94,7 +94,7 @@ export async function endEnrollmentAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await endEnrollment({ enrollmentId, actorId: user.id });
-    revalidatePath(`/head-coach/groups/${groupId}`);
+    revalidateLocalized(`/head-coach/groups/${groupId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

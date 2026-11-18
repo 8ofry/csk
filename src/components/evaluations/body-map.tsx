@@ -5,28 +5,8 @@
 // Now supports a fully interactive raw anatomical SVG in "Muscles_front_and_back.svg".
 
 import { useState, useEffect, useRef } from "react";
-
-export type BodyPartKey =
-  | "head_neck"
-  | "shoulders_l"
-  | "shoulders_r"
-  | "upper_arms_l"
-  | "upper_arms_r"
-  | "forearms_l"
-  | "forearms_r"
-  | "chest"
-  | "core_abs"
-  | "upper_back"
-  | "lower_back"
-  | "hips"
-  | "thighs_l"
-  | "thighs_r"
-  | "knees_l"
-  | "knees_r"
-  | "shins_l"
-  | "shins_r"
-  | "feet_l"
-  | "feet_r";
+import { type BodyPartKey } from "@/lib/body-parts";
+export type { BodyPartKey };
 
 interface Region {
   key: BodyPartKey;

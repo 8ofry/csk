@@ -161,11 +161,7 @@ export async function logMerchandiseSale(
       data: { stockLevel: nextState.stockLevel },
     });
 
-    // Create the corresponding payment via the engine (split engine resolves 100% CSK).
-    // The engine itself uses prisma directly, but since we're inside a transaction we need
-    // a connected operation — we accept the small isolation gap here (sale is created
-    // first; payment is logged immediately after). This matches how subscription payments
-    // already work for v1.
+    // Create the corresponding payment inside the same Prisma transaction.
     const result = await logPayment(
       {
         revenueType: "MERCHANDISE",
@@ -176,6 +172,7 @@ export async function logMerchandiseSale(
         locationId: data.locationId,
       },
       actorId,
+      tx,
     );
 
     await tx.auditLog.create({

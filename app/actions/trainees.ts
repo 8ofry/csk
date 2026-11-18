@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/infrastructure/db/prisma";
 import { Prisma } from "@prisma/client";
 import { requireRole } from "@/lib/auth-guard";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 
 const quickAddTraineeSchema = z.object({
   fullNameAr: z.string().min(2, "الاسم بالعربي مطلوب"),
@@ -54,7 +54,7 @@ export async function quickAddTraineeAction(
       },
     });
 
-    revalidatePath("/head-coach/trainees");
+    revalidateLocalized("/head-coach/trainees");
     return { ok: true, id: trainee.id };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {

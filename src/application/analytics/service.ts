@@ -49,11 +49,12 @@ export async function cohortRetention(monthsBack = 12) {
     orderBy: { currentPeriodStart: "asc" },
   });
 
-  // Active months per trainee = months they made any payment for a subscription.
+  // Active months per trainee = months they made any non-refunded payment for a subscription.
   const payments = await prisma.payment.findMany({
     where: {
       revenueType: "SUBSCRIPTION",
       paidAt: { gte: since },
+      refundedAt: null,
     },
     select: { payerUserId: true, paidAt: true },
   });
@@ -82,7 +83,7 @@ export async function cohortRetention(monthsBack = 12) {
 /** Lifetime value across all trainees who have any payment in the window. */
 export async function lifetimeValue(window: AnalyticsWindow) {
   const payments = await prisma.payment.findMany({
-    where: { paidAt: { gte: window.from, lte: window.to } },
+    where: { paidAt: { gte: window.from, lte: window.to }, refundedAt: null },
     select: {
       payerUserId: true,
       amountNet: true,

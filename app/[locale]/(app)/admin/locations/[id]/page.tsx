@@ -19,7 +19,7 @@ export default async function EditLocationPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const { id } = await params;
   const [t, location] = await Promise.all([
     getTranslations("adminLocations.detail"),

@@ -17,7 +17,11 @@ export type EventType =
   | "MEDICAL_DOC_EXPIRING"
   | "ACCOUNT_APPROVAL"
   | "DAILY_REPORT_NEEDS_REVISION"
-  | "BEST_TRAINEE_AWARD";
+  | "BEST_TRAINEE_AWARD"
+  | "BELT_PROMOTED"
+  | "CONTACT_INQUIRY"
+  | "CONTACT_ACK"
+  | "PASSWORD_RESET";
 
 export interface EventSpec {
   defaultChannels: NotificationChannel[];
@@ -40,6 +44,10 @@ export const EVENT_CATALOG: Record<EventType, EventSpec> = {
   ACCOUNT_APPROVAL: { defaultChannels: ["EMAIL", "IN_APP"], critical: false },
   DAILY_REPORT_NEEDS_REVISION: { defaultChannels: ["EMAIL", "IN_APP"], critical: false },
   BEST_TRAINEE_AWARD: { defaultChannels: ["WHATSAPP", "EMAIL", "IN_APP"], critical: false },
+  BELT_PROMOTED: { defaultChannels: ["WHATSAPP", "EMAIL", "IN_APP"], critical: false },
+  CONTACT_INQUIRY: { defaultChannels: ["EMAIL", "IN_APP"], critical: false },
+  CONTACT_ACK: { defaultChannels: ["EMAIL"], critical: false },
+  PASSWORD_RESET: { defaultChannels: ["EMAIL"], critical: true },
 };
 
 export interface RenderedMessage {
@@ -185,6 +193,46 @@ const TEMPLATES: Record<EventType, Record<Locale, Template>> = {
     ar: (p) => ({
       subject: `جائزة: ${p.awardName ?? ""}`,
       body: `تهانينا — حصلت على: ${p.awardName ?? ""}.`,
+    }),
+  },
+  BELT_PROMOTED: {
+    en: (p) => ({
+      subject: `Belt Promotion: ${p.newLevel ?? ""}`,
+      body: `Congratulations! You passed the ${p.discipline ?? ""} belt exam and achieved level ${p.newLevel ?? ""}.`,
+    }),
+    ar: (p) => ({
+      subject: `ترقية حزام: ${p.newLevel ?? ""}`,
+      body: `تهانينا! لقد اجتزت اختبار الحزام (${p.discipline ?? ""}) وحصلت على المستوى ${p.newLevel ?? ""}.`,
+    }),
+  },
+  CONTACT_INQUIRY: {
+    en: (p) => ({
+      subject: `Public inquiry: ${p.subject ?? "No subject"}`,
+      body: `From: ${p.name ?? ""} (${p.email ?? ""}, ${p.phone ?? ""})\n\n${p.message ?? ""}`,
+    }),
+    ar: (p) => ({
+      subject: `استفسار جديد: ${p.subject ?? "بدون عنوان"}`,
+      body: `من: ${p.name ?? ""} (${p.email ?? ""}، ${p.phone ?? ""})\n\n${p.message ?? ""}`,
+    }),
+  },
+  CONTACT_ACK: {
+    en: (p) => ({
+      subject: `We received your inquiry — CSK Academy`,
+      body: `Hello ${p.name ?? ""},\n\nThank you for contacting CSK Academy. Our team will get back to you shortly.`,
+    }),
+    ar: (p) => ({
+      subject: `تم استلام رسالتك — أكاديمية CSK`,
+      body: `مرحباً ${p.name ?? ""}،\n\nشكراً لتواصلك مع أكاديمية CSK. سيتواصل معك فريقنا قريباً.`,
+    }),
+  },
+  PASSWORD_RESET: {
+    en: (p) => ({
+      subject: `Reset your CSK Academy password`,
+      body: `Click the link below to reset your password (valid for 1 hour):\n${p.url ?? ""}`,
+    }),
+    ar: (p) => ({
+      subject: `إعادة تعيين كلمة المرور — أكاديمية CSK`,
+      body: `اضغط على الرابط التالي لإعادة تعيين كلمة المرور (صالح لمدة ساعة):\n${p.url ?? ""}`,
     }),
   },
 };

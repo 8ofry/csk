@@ -3,6 +3,10 @@ import "next-auth/jwt";
 import type { UserRole, Locale } from "@prisma/client";
 
 declare module "next-auth" {
+  interface User {
+    role: UserRole;
+    locale: Locale;
+  }
   interface Session {
     user: {
       id: string;

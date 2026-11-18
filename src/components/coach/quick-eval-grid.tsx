@@ -312,18 +312,42 @@ function QuickEvalForm({
   const inlineSvgRef = useRef<HTMLDivElement>(null);
   const [retryTrigger, setRetryTrigger] = useState(0);
 
+  const handleSvgContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const svgElement = inlineSvgRef.current?.querySelector("svg");
+    if (!svgElement) return;
+
+    let relX = 0;
+    let relY = 0;
+    const ctm = svgElement.getScreenCTM();
+    if (ctm && typeof DOMPoint !== "undefined") {
+      const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+      relX = pt.x;
+      relY = pt.y;
+    } else {
+      const rect = svgElement.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      relX = ((e.clientX - rect.left) / rect.width) * 406.99026;
+      relY = ((e.clientY - rect.top) / rect.height) * 354.43411;
+    }
+
+    const key = getPartKey(relX, relY);
+    if (key) {
+      handleBodyPartChange(key);
+    }
+  };
+
   useEffect(() => {
     if (!svgContent || !inlineSvgRef.current) return;
 
     const svgElement = inlineSvgRef.current.querySelector("svg");
     if (!svgElement) return;
 
-    // Force SVG to fill container width; height is controlled by the CSS container.
-    // We only set attributes here — size constraints live on the CSS wrapper div.
     svgElement.setAttribute("width", "100%");
-    svgElement.removeAttribute("height"); // let aspect ratio flow from viewBox
+    svgElement.removeAttribute("height");
+    svgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
     svgElement.style.display = "block";
     svgElement.style.cursor = "pointer";
+    svgElement.style.pointerEvents = "all";
 
     const svgRect = svgElement.getBoundingClientRect();
     if (svgRect.width === 0) {
@@ -331,34 +355,35 @@ function QuickEvalForm({
       return () => clearTimeout(timer);
     }
 
-    // Single SVG-level click handler — use mouse coordinates to find body part.
-    const handleSvgClick = (e: MouseEvent) => {
-      const freshRect = svgElement.getBoundingClientRect();
-      const relX = ((e.clientX - freshRect.left) / freshRect.width) * 407;
-      const relY = ((e.clientY - freshRect.top) / freshRect.height) * 354.4;
-      const key = getPartKey(relX, relY);
-      if (key) handleBodyPartChange(key);
-    };
-    svgElement.addEventListener("click", handleSvgClick);
-
     // Build key map for visible leaf elements
     const leafElements = inlineSvgRef.current.querySelectorAll<SVGGraphicsElement>(
       "svg > g path, svg > g use"
     );
     const pathKeysMap = new Map<SVGGraphicsElement, BodyPartKey>();
+    const ctm = svgElement.getScreenCTM();
+    const invCtm = ctm ? ctm.inverse() : null;
+
     leafElements.forEach((el) => {
       try {
         const elRect = el.getBoundingClientRect();
         if (elRect.width === 0 && elRect.height === 0) return;
-        const cx = ((elRect.left + elRect.width / 2 - svgRect.left) / svgRect.width) * 407;
-        const cy = ((elRect.top + elRect.height / 2 - svgRect.top) / svgRect.height) * 354.4;
+        const centerX = elRect.left + elRect.width / 2;
+        const centerY = elRect.top + elRect.height / 2;
+        let cx: number;
+        let cy: number;
+        if (invCtm && typeof DOMPoint !== "undefined") {
+          const pt = new DOMPoint(centerX, centerY).matrixTransform(invCtm);
+          cx = pt.x;
+          cy = pt.y;
+        } else {
+          cx = ((centerX - svgRect.left) / svgRect.width) * 406.99026;
+          cy = ((centerY - svgRect.top) / svgRect.height) * 354.43411;
+        }
         const key = getPartKey(cx, cy);
         if (key) pathKeysMap.set(el, key);
       } catch { /* skip */ }
     });
 
-    // Use individual style properties so we NEVER wipe the original SVG fill/stroke styles.
-    // Setting a property to "" removes our override and restores the original value.
     const applyHighlight = (el: SVGGraphicsElement, active: boolean) => {
       if (active) {
         el.style.fill = "#ef4444";
@@ -380,8 +405,6 @@ function QuickEvalForm({
     });
 
     return () => {
-      svgElement.removeEventListener("click", handleSvgClick);
-      // Reset only our highlight properties — preserves original SVG inline styles
       pathKeysMap.forEach((_, el) => applyHighlight(el, false));
     };
   }, [svgContent, retryTrigger, flaggedPart]);
@@ -558,9 +581,41 @@ function QuickEvalForm({
               <div className="w-full h-[220px] overflow-hidden flex items-center justify-center">
                 <div
                   ref={inlineSvgRef}
-                  className="w-full max-w-[280px] h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
+                  onClick={handleSvgContainerClick}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={locale === "ar" ? "اختر العضو من الرسم" : "Select body part on diagram"}
+                  className="w-full max-w-[300px] h-full cursor-pointer [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
                   dangerouslySetInnerHTML={{ __html: svgContent }}
                 />
+              </div>
+              <div className="mt-2 flex flex-wrap justify-center gap-1">
+                {(
+                  [
+                    "head_neck",
+                    "shoulders_r",
+                    "shoulders_l",
+                    "chest",
+                    "core_abs",
+                    "upper_back",
+                    "lower_back",
+                    "thighs_r",
+                    "thighs_l",
+                  ] as BodyPartKey[]
+                ).map((part) => (
+                  <button
+                    key={part}
+                    type="button"
+                    onClick={() => handleBodyPartChange(flaggedPart === part ? null : part)}
+                    className={`rounded-md border px-2 py-0.5 text-[10px] font-medium transition ${
+                      flaggedPart === part
+                        ? "border-red-500 bg-red-500/15 text-red-600"
+                        : "border-border bg-background text-muted-foreground hover:border-csk-gold/50 hover:text-foreground"
+                    }`}
+                  >
+                    {_getBodyPartLabel(part, locale)}
+                  </button>
+                ))}
               </div>
             </div>
           )}

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import { headers } from "next/headers";
 import {
   approveDailyReport,
@@ -27,7 +27,7 @@ export async function ensureDailyReportAction(
   try {
     const user = await requireRole("COACH");
     const report = await ensureDailyReport(sessionId, user.id);
-    revalidatePath(`/coach/sessions/${sessionId}`);
+    revalidateLocalized(`/coach/sessions/${sessionId}`);
     return { ok: true, reportId: report.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -45,7 +45,7 @@ export async function updateDailyReportAction(
       incidents: String(formData.get("incidents") ?? "") || undefined,
     });
     await updateDailyReport(reportId, data, user.id);
-    revalidatePath(`/coach/daily-reports/${reportId}`);
+    revalidateLocalized(`/coach/daily-reports/${reportId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -58,8 +58,8 @@ export async function submitDailyReportAction(
   try {
     const user = await requireRole("COACH");
     await submitDailyReport(reportId, user.id);
-    revalidatePath(`/coach/daily-reports/${reportId}`);
-    revalidatePath("/head-coach/approvals");
+    revalidateLocalized(`/coach/daily-reports/${reportId}`);
+    revalidateLocalized("/head-coach/approvals");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -72,8 +72,8 @@ export async function resubmitDailyReportAction(
   try {
     const user = await requireRole("COACH");
     await resubmitDailyReport(reportId, user.id);
-    revalidatePath(`/coach/daily-reports/${reportId}`);
-    revalidatePath("/head-coach/approvals");
+    revalidateLocalized(`/coach/daily-reports/${reportId}`);
+    revalidateLocalized("/head-coach/approvals");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -86,7 +86,7 @@ export async function pullBackDailyReportAction(
   try {
     const user = await requireRole("COACH");
     await pullBackDailyReport(reportId, user.id);
-    revalidatePath(`/coach/daily-reports/${reportId}`);
+    revalidateLocalized(`/coach/daily-reports/${reportId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -99,8 +99,8 @@ export async function approveDailyReportAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await approveDailyReport(reportId, user.id, await appUrl());
-    revalidatePath("/head-coach/approvals");
-    revalidatePath(`/head-coach/daily-reports/${reportId}`);
+    revalidateLocalized("/head-coach/approvals");
+    revalidateLocalized(`/head-coach/daily-reports/${reportId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -114,8 +114,8 @@ export async function rejectDailyReportAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await rejectDailyReport(reportId, user.id, comment);
-    revalidatePath("/head-coach/approvals");
-    revalidatePath(`/head-coach/daily-reports/${reportId}`);
+    revalidateLocalized("/head-coach/approvals");
+    revalidateLocalized(`/head-coach/daily-reports/${reportId}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

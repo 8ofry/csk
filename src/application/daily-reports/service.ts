@@ -112,21 +112,50 @@ export async function updateDailyReport(
 export async function submitDailyReport(reportId: string, coachId: string) {
   const before = await assertCoachOwns(reportId, coachId);
   const status = nextDailyReportStatus(before.status as DailyReportStatus, "submit");
-  return transition(reportId, status, {
+  const updated = await transition(reportId, status, {
     actorId: coachId,
     action: "submit",
     extra: { submittedAt: new Date() },
   });
+  await notifyHeadCoachesOfPendingReport(reportId);
+  return updated;
 }
 
 export async function resubmitDailyReport(reportId: string, coachId: string) {
   const before = await assertCoachOwns(reportId, coachId);
   const status = nextDailyReportStatus(before.status as DailyReportStatus, "resubmit");
-  return transition(reportId, status, {
+  const updated = await transition(reportId, status, {
     actorId: coachId,
     action: "resubmit",
     extra: { submittedAt: new Date() },
   });
+  await notifyHeadCoachesOfPendingReport(reportId);
+  return updated;
+}
+
+async function notifyHeadCoachesOfPendingReport(reportId: string) {
+  const [report, headCoaches] = await Promise.all([
+    prisma.dailyReport.findUnique({
+      where: { id: reportId },
+      select: { group: { select: { name: true } } },
+    }),
+    prisma.user.findMany({
+      where: { role: { in: ["HEAD_COACH", "ADMIN"] }, status: "ACTIVE" },
+      select: { id: true },
+    }),
+  ]);
+  for (const hc of headCoaches) {
+    await dispatchNotification({
+      recipientUserId: hc.id,
+      eventType: "DAILY_REPORT_READY",
+      payload: {
+        groupName: report?.group.name ?? "",
+        traineeName: "",
+        url: "/ar/head-coach/approvals",
+      },
+      channels: ["IN_APP", "EMAIL"],
+    });
+  }
 }
 
 export async function pullBackDailyReport(reportId: string, coachId: string) {
@@ -141,7 +170,13 @@ export async function approveDailyReport(reportId: string, headCoachId: string, 
     include: {
       session: {
         include: {
-          attendances: { include: { trainee: { select: { id: true } } } },
+          attendances: {
+            include: {
+              trainee: {
+                select: { id: true, fullNameEn: true, fullNameAr: true, preferredLocale: true },
+              },
+            },
+          },
           group: { select: { name: true } },
         },
       },
@@ -166,13 +201,16 @@ export async function approveDailyReport(reportId: string, headCoachId: string, 
     (a) => a.status === "PRESENT" || a.status === "LATE",
   );
   for (const a of eligible) {
+    const loc = a.trainee.preferredLocale === "EN" ? "en" : "ar";
+    const traineeName =
+      a.trainee.preferredLocale === "EN" ? a.trainee.fullNameEn : a.trainee.fullNameAr;
     await dispatchNotification({
       recipientUserId: a.trainee.id,
       eventType: "DAILY_REPORT_READY",
       payload: {
         groupName: report.session.group.name,
-        traineeName: "", // Could be enriched per recipient
-        url: `${appUrl}/trainee/reports`,
+        traineeName,
+        url: `${appUrl}/${loc}/trainee/reports`,
       },
     });
   }

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth-guard";
 import { Link } from "@/i18n/navigation";
 import { ownerSnapshot } from "@/application/financial/dashboards";
+import { getGtmKpis } from "@/application/analytics/gtm-kpis";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,17 +20,18 @@ export default async function AdminFinancialPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
-  await requireRole("HEAD_COACH");
+  await requireRole("ADMIN");
   const sp = await searchParams;
   const now = new Date();
   const defaultFrom = new Date(now.getFullYear(), now.getMonth(), 1);
   const from = sp.from ? new Date(sp.from) : defaultFrom;
   const to = sp.to ? new Date(sp.to) : now;
 
-  const [t, tCommon, snapshot] = await Promise.all([
+  const [t, tCommon, snapshot, gtm] = await Promise.all([
     getTranslations("adminFinancial"),
     getTranslations("common"),
     ownerSnapshot({ from, to }),
+    getGtmKpis(),
   ]);
 
   return (
@@ -77,6 +79,35 @@ export default async function AdminFinancialPage({
       </div>
 
       {/* Period filter */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">Active Athletes</div>
+            <div className="text-2xl font-bold">{gtm.activeTrainees}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">On-Time Paid Rate</div>
+            <div className="text-2xl font-bold text-csk-gold">{gtm.onTimePaidRate}%</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">Trial-to-Member</div>
+            <div className="text-2xl font-bold">{gtm.trialConversionRate}%</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-xs text-muted-foreground">Avg Coach Rating</div>
+            <div className="text-2xl font-bold">
+              {gtm.avgCoachRating ?? "—"} {gtm.coachRatingCount > 0 ? `(${gtm.coachRatingCount})` : ""}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <form className="flex items-end gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">

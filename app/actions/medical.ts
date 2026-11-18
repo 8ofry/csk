@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   addMedicalDocument,
   archiveMedicalDocument,
@@ -10,6 +10,7 @@ import {
 } from "@/application/medical/service";
 import { requireRole } from "@/lib/auth-guard";
 import { auth } from "@/auth";
+import { storage, validateUploadedFile } from "@/infrastructure/storage/storage";
 
 async function requireAuthed() {
   const session = await auth();
@@ -41,8 +42,8 @@ export async function saveMedicalRecordAction(
       emergencyContactRelation: formData.get("emergencyContactRelation") || null,
     });
     await upsertTraineeMedicalRecord(traineeId, data, user.id);
-    revalidatePath("/trainee/medical");
-    revalidatePath("/head-coach/medical");
+    revalidateLocalized("/trainee/medical");
+    revalidateLocalized("/head-coach/medical");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -59,17 +60,33 @@ export async function addMedicalDocumentAction(
     const isStaff = user.role === "ADMIN" || user.role === "HEAD_COACH";
     if (!isOwner && !isStaff) throw new Error("Forbidden");
 
+    let fileUrl = String(formData.get("fileUrl") ?? "").trim();
+    const file = formData.get("file");
+    if (file instanceof File && file.size > 0) {
+      const validated = await validateUploadedFile(file, {
+        maxBytes: 10 * 1024 * 1024,
+        allowPdf: true,
+      });
+      const stored = await storage.put({
+        scope: "medical-document",
+        key: `${traineeId}-${Date.now()}.${validated.ext}`,
+        contentType: validated.contentType,
+        data: validated.buffer,
+      });
+      fileUrl = stored.url;
+    }
+
     const data = medicalDocumentSchema.parse({
       documentType: formData.get("documentType"),
-      fileUrl: formData.get("fileUrl"),
+      fileUrl,
       issueDate: formData.get("issueDate"),
       expiryDate: formData.get("expiryDate"),
       issuingDoctor: formData.get("issuingDoctor") || null,
       notes: formData.get("notes") || null,
     });
     const created = await addMedicalDocument(traineeId, data, user.id);
-    revalidatePath("/trainee/medical");
-    revalidatePath("/head-coach/medical");
+    revalidateLocalized("/trainee/medical");
+    revalidateLocalized("/head-coach/medical");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -82,7 +99,7 @@ export async function archiveMedicalDocumentAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await archiveMedicalDocument(documentId, user.id);
-    revalidatePath("/head-coach/medical");
+    revalidateLocalized("/head-coach/medical");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };

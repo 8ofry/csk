@@ -130,9 +130,7 @@ export async function getRecurringDuesForMonth(year: number, month: number) {
 
   return recurring.map((rec) => {
     const matchedExpense = loggedExpenses.find(
-      (exp) =>
-        exp.recurringExpenseId === rec.id ||
-        (exp.recurringExpenseId === null && exp.category === rec.category)
+      (exp) => exp.recurringExpenseId === rec.id,
     );
 
     return {

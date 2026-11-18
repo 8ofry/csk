@@ -1,7 +1,7 @@
 // We can't unit-test full requireApiUser without a DB, but the bearer
 // extraction logic is observable through the unauthenticated path.
 
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the API token service so authenticate() returns a deterministic result.
 vi.mock("@/application/api-tokens/service", () => ({
@@ -36,6 +36,14 @@ function req(headers: Record<string, string>) {
 }
 
 describe("api-auth bearer + role guard", () => {
+  const ORIGINAL_FLAG = process.env.FEATURE_NATIVE_MOBILE_API;
+  beforeEach(() => {
+    process.env.FEATURE_NATIVE_MOBILE_API = "true";
+  });
+  afterEach(() => {
+    process.env.FEATURE_NATIVE_MOBILE_API = ORIGINAL_FLAG;
+  });
+
   it("authenticate returns null with no Authorization header", async () => {
     expect(await authenticate(req({}))).toBeNull();
   });

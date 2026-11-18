@@ -9,15 +9,31 @@ export default async function PublicChampionshipsPage({
   const { locale } = await params;
   const isRtl = locale === "ar";
 
-  // Fetch championships
-  const championships = await prisma.championship.findMany({
-    include: {
-      registrations: {
-        where: { status: { in: ["COACH_CONFIRMED", "PAID", "PENDING_VERIFICATION"] } },
-      },
-    },
-    orderBy: { startDate: "desc" },
-  });
+  // Fetch championships & recent live match-day results
+  const [championships, recentMatches] = await Promise.all([
+    prisma.championship
+      .findMany({
+        include: {
+          registrations: {
+            where: { status: { in: ["COACH_CONFIRMED", "PAID", "PENDING_VERIFICATION"] } },
+          },
+        },
+        orderBy: { startDate: "desc" },
+      })
+      .catch(() => []),
+    prisma.match
+      .findMany({
+        where: { outcome: { not: null } },
+        include: {
+          championship: { select: { name: true } },
+          fighter1: { select: { trainee: { select: { fullNameEn: true, fullNameAr: true } } } },
+          fighter2: { select: { trainee: { select: { fullNameEn: true, fullNameAr: true } } } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      })
+      .catch(() => []),
+  ]);
 
   // Serialize championships for client component
   const serializedChampionships = championships.map((c) => ({
@@ -53,6 +69,33 @@ export default async function PublicChampionshipsPage({
 
         {/* Championships List with Filter Tabs */}
         <ChampionshipsList championships={serializedChampionships} locale={locale} />
+
+        {recentMatches.length > 0 && (
+          <div className="mt-16 space-y-4">
+            <h2 className="text-2xl font-bold text-csk-gold">
+              {isRtl ? "نتائج النزالات الأخيرة" : "Recent Match-Day Results"}
+            </h2>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {recentMatches.map((m) => (
+                <div
+                  key={m.id}
+                  className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm space-y-1"
+                >
+                  <div className="text-xs text-csk-gold">{m.championship.name}</div>
+                  <div className="font-semibold">
+                    {isRtl ? m.fighter1.trainee.fullNameAr : m.fighter1.trainee.fullNameEn}{" "}
+                    <span className="text-white/40">vs</span>{" "}
+                    {isRtl ? m.fighter2.trainee.fullNameAr : m.fighter2.trainee.fullNameEn}
+                  </div>
+                  <div className="text-xs text-white/60">
+                    {m.outcome} {m.method ? `· ${m.method}` : ""}{" "}
+                    {m.round ? `· R${m.round}` : ""}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

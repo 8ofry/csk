@@ -10,8 +10,8 @@ interface SerializedFighter {
   fullNameAr: string;
   profilePhotoUrl: string | null;
   gender: string | null;
-  dob: string | null;
-  homeAddress: string | null;
+  age: number | null;
+  country: string;
   homeLocationEn: string | null;
   homeLocationAr: string | null;
   latestWeightKg: number | null;
@@ -38,27 +38,9 @@ export function FightersClient({ fighters, locale }: FightersClientProps) {
   const [selectedClass, setSelectedClass] = useState("ALL");
   const [selectedAge, setSelectedAge] = useState("ALL");
 
-  // Helper to parse country from address
-  const getFighterCountry = (f: SerializedFighter) => {
-    if (!f.homeAddress) return "Egypt";
-    const addr = f.homeAddress.toLowerCase();
-    if (addr.includes("jordan")) return "Jordan";
-    if (addr.includes("saudi") || addr.includes("ksa")) return "Saudi Arabia";
-    if (addr.includes("kuwait")) return "Kuwait";
-    if (addr.includes("emirates") || addr.includes("uae") || addr.includes("dubai")) return "UAE";
-    return "Egypt"; // default fallback
-  };
-
-  const getFighterAge = (dobStr: string | null) => {
-    if (!dobStr) return null;
-    const dob = new Date(dobStr);
-    const age = new Date().getFullYear() - dob.getFullYear();
-    return age;
-  };
-
   // Get unique countries in the dataset
   const countries = Array.from(
-    new Set(fighters.map((f) => getFighterCountry(f)))
+    new Set(fighters.map((f) => f.country))
   ).filter(Boolean);
 
   // Filter fighters based on selections
@@ -70,8 +52,7 @@ export function FightersClient({ fighters, locale }: FightersClientProps) {
     }
 
     // 2. Country
-    const country = getFighterCountry(f);
-    if (selectedCountry !== "ALL" && country !== selectedCountry) {
+    if (selectedCountry !== "ALL" && f.country !== selectedCountry) {
       return false;
     }
 
@@ -99,7 +80,7 @@ export function FightersClient({ fighters, locale }: FightersClientProps) {
 
     // 6. Age
     if (selectedAge !== "ALL") {
-      const age = getFighterAge(f.dob);
+      const age = f.age;
       if (!age) return false;
       if (selectedAge === "UNDER_18" && age >= 18) return false;
       if (selectedAge === "18_25" && (age < 18 || age > 25)) return false;
@@ -232,9 +213,9 @@ export function FightersClient({ fighters, locale }: FightersClientProps) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFighters.map((f) => {
-            const country = getFighterCountry(f);
+            const country = f.country;
             const flag = country === "Egypt" ? "🇪🇬" : "🥋";
-            const age = getFighterAge(f.dob);
+            const age = f.age;
 
             return (
               <div

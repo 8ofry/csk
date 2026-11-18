@@ -1,22 +1,17 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { prisma } from "@/infrastructure/db/prisma";
 
 export async function GET() {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+  }
+
   try {
-    // Attempt a simple database query
     const count = await prisma.location.count();
     return NextResponse.json({ ok: true, locationCount: count });
-  } catch (err: unknown) {
-    const error = err as Error & { code?: string; clientVersion?: string };
-    return NextResponse.json(
-      {
-        ok: false,
-        error: error?.message || "Unknown error",
-        stack: error?.stack || null,
-        code: error?.code || null,
-        clientVersion: error?.clientVersion || null,
-      },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ ok: false, error: "Database check failed" }, { status: 500 });
   }
 }

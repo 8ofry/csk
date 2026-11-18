@@ -1,16 +1,13 @@
 "use server";
 
-import { headers } from "next/headers";
+import { getLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { createPaymentIntent } from "@/application/payment-intents/service";
 import { featureFlags } from "@/lib/feature-flags";
 import { prisma } from "@/infrastructure/db/prisma";
 
-async function appUrl() {
-  const h = await headers();
-  const host = h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  return `${proto}://${host}`;
+function getConfiguredAppUrl(): string {
+  return process.env.AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
 /** Trainee starts an online payment for one of their own subscriptions. */
@@ -26,7 +23,13 @@ export async function startSubscriptionPaymentAction(
 
   const sub = await prisma.subscription.findUnique({
     where: { id: subscriptionId },
-    select: { id: true, traineeId: true, monthlyFee: true, paymentStatus: true },
+    select: {
+      id: true,
+      traineeId: true,
+      monthlyFee: true,
+      discountPercent: true,
+      paymentStatus: true,
+    },
   });
   if (!sub) return { error: "Subscription not found" };
 
@@ -39,14 +42,18 @@ export async function startSubscriptionPaymentAction(
     return { error: "Subscription is already fully paid for the current period." };
   }
 
+  const discount = Number(sub.discountPercent ?? 0);
+  const payableAmount = Math.max(0, Number(sub.monthlyFee) * (1 - discount / 100));
+  const locale = await getLocale();
+
   try {
     const result = await createPaymentIntent(
       {
         revenueType: "SUBSCRIPTION",
         payerUserId: sub.traineeId,
-        amount: Number(sub.monthlyFee),
+        amount: Math.round(payableAmount * 100) / 100,
         subscriptionId: sub.id,
-        returnUrl: `${await appUrl()}/trainee/payments?intent_returned=1`,
+        returnUrl: `${getConfiguredAppUrl()}/${locale}/trainee/payments?intent_returned=1`,
       },
       session.user.id,
     );

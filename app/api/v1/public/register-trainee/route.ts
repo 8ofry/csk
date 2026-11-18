@@ -9,6 +9,9 @@ import { prisma } from "@/infrastructure/db/prisma";
 import { jsonError, jsonResponse } from "@/lib/api";
 import { checkRateLimit } from "@/lib/api-rate-limit";
 import { RATE_LIMITS } from "@/infrastructure/rate-limit/store";
+import { emailAdapter } from "@/infrastructure/notifications/adapter";
+import { dispatchNotification } from "@/application/notifications/service";
+import { generateVerificationToken } from "@/lib/verification-token";
 
 const inputSchema = z.object({
   fullNameAr: z.string().min(2),
@@ -59,6 +62,30 @@ export async function POST(req: Request) {
       return jsonError("An account with this email or phone already exists.", 409);
     }
     return jsonError("Could not create account", 500);
+  }
+
+  const token = generateVerificationToken(parsed.data.email);
+  const baseUrl =
+    process.env.AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const verifyLink = `${baseUrl}/api/v1/auth/verify?token=${token}`;
+  await emailAdapter().send({
+    to: { email: parsed.data.email },
+    subject: "Verify your CSK Academy Account",
+    body: `Hello ${parsed.data.fullNameEn},\n\nPlease verify your email:\n${verifyLink}\n\nYour account will become active after staff approval.`,
+    notificationId: `verify-api-${Date.now()}`,
+  });
+
+  const staff = await prisma.user.findMany({
+    where: { role: { in: ["ADMIN", "HEAD_COACH"] }, status: "ACTIVE" },
+    select: { id: true },
+  });
+  for (const s of staff) {
+    await dispatchNotification({
+      recipientUserId: s.id,
+      eventType: "ACCOUNT_APPROVAL",
+      payload: { decision: `Pending trainee registration: ${parsed.data.fullNameEn}` },
+      channels: ["IN_APP"],
+    });
   }
 
   return jsonResponse({ ok: true, status: "PENDING" }, { status: 202 });

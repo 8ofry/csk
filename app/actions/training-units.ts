@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/revalidate";
 import {
   archiveTrainingUnit,
   createTrainingUnit,
@@ -44,7 +44,7 @@ export async function createTrainingUnitAction(
     const user = await requireRole("HEAD_COACH");
     const data = parseFormData(formData);
     const created = await createTrainingUnit(data, user.id);
-    revalidatePath("/head-coach/training-units");
+    revalidateLocalized("/head-coach/training-units");
     return { ok: true, id: created.id };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -60,8 +60,8 @@ export async function updateTrainingUnitAction(
     const data = parseFormData(formData);
     const changeNote = String(formData.get("changeNote") ?? "") || undefined;
     await updateTrainingUnit(id, data, user.id, changeNote);
-    revalidatePath("/head-coach/training-units");
-    revalidatePath(`/head-coach/training-units/${id}`);
+    revalidateLocalized("/head-coach/training-units");
+    revalidateLocalized(`/head-coach/training-units/${id}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
@@ -74,7 +74,7 @@ export async function archiveTrainingUnitAction(
   try {
     const user = await requireRole("HEAD_COACH");
     await archiveTrainingUnit(id, user.id);
-    revalidatePath("/head-coach/training-units");
+    revalidateLocalized("/head-coach/training-units");
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Unknown error" };
